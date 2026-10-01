@@ -1,0 +1,197 @@
+"""One decision engine used by CLI hooks, the optional HTTP API and LiteLLM."""
+from __future__ import annotations
+
+import fnmatch
+import pathlib
+import shutil
+import uuid
+from typing import Any
+from .config import EVENTS, get_path, home_path, initialize, project_root, resolve
+from .providers import Classifier, HttpAuthority
+from .store import Store
+from .util import canonical, digest, finite, redact
+
+RANK = {"allow": 0, "advise": 1, "approve": 2, "deny": 3}
+
+
+def matches(event: dict, conditions: dict) -> bool:
+    """Conjunctive, literal/glob matching; never eval arbitrary policy code."""
+    for path, pattern in conditions.items():
+        value = canonical(redact(event)) if path == "text" else get_path(event, path)
+        if isinstance(pattern, list):
+            if value not in pattern:
+                return False
+        elif isinstance(pattern, str):
+            if not isinstance(value, str) or not fnmatch.fnmatchcase(value, pattern):
+                return False
+        elif value != pattern:
+            return False
+    return True
+
+
+def validate_event(event: dict) -> dict:
+    if not isinstance(event, dict) or event.get("type") not in EVENTS:
+        raise ValueError("Unknown supervisor event")
+    out = dict(event)
+    for key in ("client", "session", "project"):
+        if not isinstance(out.get(key), str) or not out[key].strip() or len(out[key]) > 4096:
+            raise ValueError(f"Event needs a nonempty {key}")
+    out["project"] = str(project_root(out["project"]))
+    out.setdefault("id", str(uuid.uuid4()))
+    if not isinstance(out["id"], str) or not out["id"] or len(out["id"]) > 4096:
+        raise ValueError("Invalid event id")
+    if out["type"].startswith("tool."):
+        if not isinstance(out.get("tool"), str) or not out["tool"]:
+            raise ValueError("Tool event has no tool name")
+        if not isinstance(out.get("input", {}), dict):
+            raise ValueError("Tool input must be an object")
+    if "success" in out and out["success"] is not None and not isinstance(out["success"], bool):
+        raise ValueError("success must be true, false, or null")
+    canonical(out)  # Reject unsupported/non-finite data before scoring or persisting.
+    return out
+
+
+class Supervisor:
+    def __init__(self, home: str | pathlib.Path | None = None, classifier=None, authority=None):
+        self.home = home_path(str(home) if home is not None else None)
+        initialize(self.home)
+        self.store = Store(self.home)
+        self.classifier = classifier
+        self.authority = authority
+
+    def close(self):
+        self.store.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+
+    def evaluate(self, source: dict) -> dict:
+        event = validate_event(source)
+        current, config_status = resolve(self.home, pathlib.Path(event["project"]), event["client"])
+        session = self.store.session(event, current)
+        previous = self.store.cached_event(session["id"], event)
+        if previous:
+            return {**previous, "duplicate": True}
+        config = session["config"]
+        policy_hash = digest(config)
+        # Fingerprints are only for repetition, NEVER reusable consent.
+        action_hash = digest([event.get("tool", ""), redact(event.get("input", {}))])
+        counts = self.store.counts(session["id"], action_hash, session["project"])
+        metrics = {**counts, "drift": session["drift"], "observations": session["observations"]}
+        result = {"version": 1, "decision": "allow", "reasons": [], "advice": [], "labels": {}, "session_id": session["id"], "policy_hash": policy_hash, "config_status": config_status, "metrics": metrics}
+        drift = None
+        candidate_at = None
+
+        def apply(effect: str, reason: str):
+            reason = str(redact(reason))[:2000]
+            if RANK[effect] > RANK[result["decision"]]:
+                result["decision"] = effect
+            if effect != "allow":
+                result["reasons"].append(reason)
+            if effect == "advise":
+                result["advice"].append(reason)
+
+        for rule_id, rule in config["rules"].items():
+            if rule.get("enabled", True) and event["type"] in rule.get("on", ["tool.before"]) and matches(event, rule["when"]):
+                apply(rule["effect"], f"{rule_id}: {rule.get('reason', 'Configured rule matched')}")
+        active = {key: g for key, g in config["goals"].items() if g.get("enabled", True) and event["type"] in g["on"]}
+        choices = {}
+        for goal_id, goal in active.items():
+            evaluator = goal["evaluator"]
+            if evaluator == "choice":
+                choices[goal_id] = goal
+            elif evaluator == "metric":
+                metric = goal["metric"]
+                if metric not in metrics:
+                    raise ValueError(f"Unknown metric: {metric}")
+                if metrics[metric] >= goal["threshold"] and session["observations"] >= goal.get("min_observations", 0):
+                    apply(goal["effect"], goal.get("message", f"{goal_id}: threshold exceeded"))
+            elif evaluator == "repetition" and event.get("success") is True:
+                candidate_at = int(goal.get("threshold", 3))
+                if counts["successes"] + 1 == candidate_at:
+                    apply("advise", goal.get("message", "Automation candidate identified"))
+                    result["automation_candidate"] = action_hash
+            elif evaluator == "registry":
+                preference = goal.get("preference", [])
+                candidates = []
+                for tool_id, tool in config["registry"].items():
+                    executable = tool.get("executable")
+                    if tool.get("enabled", True) and matches(event, tool.get("when", {})) and executable and shutil.which(executable):
+                        candidates.append((preference.index(tool.get("kind")) if tool.get("kind") in preference else 999, tool_id, tool))
+                if candidates:
+                    _, tool_id, tool = sorted(candidates, key=lambda t: (t[0], t[1]))[0]
+                    apply("advise", f"Consider registered tool {tool_id}: {tool.get('description', '')}. {tool.get('example', '')}")
+                    result["recommended_tool"] = tool_id
+
+        if choices and (config["decision"]["provider"] != "off" or self.classifier):
+            # Root-task-dependent goals abstain if no task was pinned.
+            if not session["task"] and event["type"].startswith("tool."):
+                result["classifier_status"] = "no_pinned_task"
+            else:
+                state = {"task": session["task"], "event": redact({k: v for k, v in event.items() if k not in {"project", "session", "id", "task"}}), "metrics": metrics}
+                cache_key = digest([policy_hash, session["task"], state, choices])
+                try:
+                    labels = self.store.get_cache(cache_key)
+                    if labels is None:
+                        labels = (self.classifier or Classifier(config["decision"])).decide(state, choices)
+                        if not isinstance(labels, dict) or any(labels.get(k) not in g["choices"] for k, g in choices.items()):
+                            raise ValueError("Invalid classification")
+                        self.store.put_cache(cache_key, labels, config["decision"].get("cache_seconds", 60))
+                    else:
+                        result["classifier_cached"] = True
+                    result["labels"] = labels
+                    result["classifier_status"] = "scored"
+                    for goal_id, label in labels.items():
+                        goal = choices[goal_id]
+                        apply(goal.get("effects", {}).get(label, "allow"), f"{goal_id}: {goal['choices'][label]}")
+                        if goal.get("metric") == "drift" and label in goal.get("scores", {}):
+                            drift = finite(goal["scores"][label])
+                        route = goal.get("route", {}).get(label)
+                        if event["type"] == "model.request" and route:
+                            model = config["proxy"].get("models", {}).get(route)
+                            required = event.get("capabilities", [])
+                            if model and all(cap in model.get("capabilities", []) for cap in required):
+                                result["model"] = model["alias"]
+                            else:
+                                result["advice"].append("Requested route unavailable or missing required capabilities; retaining current model")
+                except Exception as exc:
+                    # Do not include third-party exception messages (may contain payloads/secrets).
+                    result["classifier_status"] = "unavailable"
+                    result["classifier_error"] = type(exc).__name__
+                    for goal_id, goal in choices.items():
+                        apply(goal.get("on_error", "advise"), f"{goal_id}: classifier unavailable; no semantic verdict")
+        elif choices:
+            result["classifier_status"] = "disabled"
+
+        would = result["decision"]
+        if config["mode"] == "observe" and would in {"approve", "deny"}:
+            result["would_decision"] = would
+            result["decision"] = "advise"
+            result["advice"].extend(result["reasons"])
+
+        if event["type"] in {"tool.before", "model.request"} and (config["authority"].get("endpoint") or self.authority):
+            try:
+                authority = (self.authority or HttpAuthority(config["authority"])).authorize({"session": session["id"], "task": session["task"], "policy_hash": policy_hash, "event": redact(event)})
+                if authority.get("decision") not in {"allow", "deny", "approve"}:
+                    raise ValueError("Invalid authority decision")
+                result["authority"] = redact(authority)
+                # External allow can never relax a local deny, nor vice versa.
+                apply(authority["decision"], authority.get("reason", "External authority"))
+            except Exception as exc:
+                apply("deny", f"Authority unavailable ({type(exc).__name__}); refusing to proceed")
+
+        # Post-action decisions are advice, never a claim to undo an action.
+        if event["type"] in {"tool.after", "model.response"} and result["decision"] in {"deny", "approve"}:
+            result["would_decision"] = result["decision"]
+            result["decision"] = "advise"
+            result["advice"].extend(result["reasons"])
+        result["reason"] = "; ".join(dict.fromkeys(result["reasons"])) or "No supervisor objection; native permissions still apply"
+        return self.store.record(session, event, action_hash, result, drift, candidate_at)
+
+    def session_context(self, event: dict) -> dict:
+        event = validate_event(event)
+        config, _ = resolve(self.home, pathlib.Path(event["project"]), event["client"])
+        return self.store.session(event, config)
