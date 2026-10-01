@@ -90,3 +90,33 @@ jobs:
       - run: python -m pip install . litellm
       - run: python -c "import importlib.metadata; print('LiteLLM', importlib.metadata.version('litellm'))"
       - run: python -m unittest discover -s tests -p test_litellm.py -v
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test, installer, litellm]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip wheel --no-deps --wheel-dir dist .
+      - name: Publish initial version without replacing an existing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="v$(python -c 'from gw_supervisor import __version__; print(__version__)')"
+          if gh release view "$version" >/dev/null 2>&1; then
+            echo "Release $version already exists; leaving it unchanged."
+            exit 0
+          fi
+          git archive --format=zip HEAD -o "dist/gw-${version}-source.zip"
+          (cd dist && sha256sum *.whl *.zip > SHA256SUMS)
+          cp docs/RELEASE_NOTES.md release-notes.md
+          printf '\nValidation run: https://github.com/%s/actions/runs/%s\n' "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" >> release-notes.md
+          gh release create "$version" dist/* --target "$GITHUB_SHA" \
+            --title "gw $version — initial supervisor" --prerelease --notes-file release-notes.md
