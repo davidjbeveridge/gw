@@ -4,14 +4,14 @@
 
 One decision engine. Native agent hooks. An optional LiteLLM callback and HTTP API. SQLite state. No runtime dependencies in the core. No new orchestration framework.
 
-This is a **v0.2 prerelease**, not an enterprise security boundary or a claim that every agent runtime has been integration-tested. It implements deterministic policy, opt-in Jev/HTTP classification, cumulative drift, retry limits, repetition candidates and protocol-aware proxy transforms. It does not automatically generate/install tools or resolve passwords.
+This is a **v0.3 prerelease**, not an enterprise security boundary or a claim that every agent runtime has been integration-tested. It implements deterministic policy, opt-in System One/JSON/HTTP classification, cumulative drift, retry limits, repetition candidates and protocol-aware proxy transforms. It does not automatically generate/install tools or resolve passwords.
 
 ## Install and bootstrap
 
 macOS / Linux, **Python 3.10+**:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.2.0/install.sh | bash -s -- --all
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.3.0/install.sh | bash -s -- --all
 ```
 
 This installs an isolated virtual environment under `~/.local/share/gw`, links `~/.local/bin/gw`, and registers user-level hooks for Claude Code, Codex, Gemini CLI, Cursor, Copilot/VS Code and OpenCode's classic plugin API. It preserves unrelated configuration, backs up changed files, and does not use sudo or modify shell profiles, login credentials, model selection, billing or permissions. Python must already be installed. The installer prints the PATH command when `~/.local/bin` is not on PATH.
@@ -21,7 +21,7 @@ This installs an isolated virtual environment under `~/.local/share/gw`, links `
 Windows / PowerShell, with Python 3.10+ on PATH:
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.2.0/install.ps1))) -All
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.3.0/install.ps1))) -All
 ```
 
 Windows installs under `%LOCALAPPDATA%\gw\venv`; the script prints the full `gw.exe` path. It does not change execution policy or machine PATH.
@@ -48,12 +48,23 @@ The first native user-prompt hook can also pin a task when none was explicitly s
 No API key is needed for local policy rules, retry tracking, repetition candidates, or proxy JSON minification. **Semantic goals are disabled until you opt in:**
 
 ```bash
-export TYPESAFE_API_KEY='your-key'
-gw enable-jev
-# Start new sessions. Ensure GUI-launched agents also receive this environment variable.
+gw setup                                       # interactive provider/model guide
+gw setup --preset openrouter --check --yes      # OPENROUTER_API_KEY already provisioned
+gw decision status
+gw decision check
 ```
 
-`enable-jev` stores the environment variable's name, never the key. It opts in to sending redacted task/action context to the configured Jev endpoint. Redaction is best effort, not complete DLP; use opaque credential references instead of putting passwords in prompts. A vendor-neutral HTTP decision provider can replace Jev, including a local classifier.
+Configure TypeSafe direct, OpenRouter, local Kev/Laya, a System One-compatible
+proxy, an OpenAI-compatible JSON classifier, or your evaluated custom bridge.
+Setup stores credential references, never raw tokens; `--check` sends one
+synthetic request before saving. Local runtimes/weights are installed separately.
+CUA nano/forms are specialist models, not turnkey general supervisor substitutes.
+For GUI agents, use an existing private key file or ensure the process receives
+the configured environment. Redaction is best effort, not complete DLP.
+
+**[Full setup guide](docs/DECISION_SETUP.md)** ·
+**[Agent setup skill](skills/gw-setup/SKILL.md)** · `gw setup --describe` (JSON).
+`gw enable-jev` remains a compatibility shortcut for direct TypeSafe setup.
 
 ## What runs where
 

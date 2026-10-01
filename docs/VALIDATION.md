@@ -1,3 +1,18 @@
+# v0.3 validation
+
+The suite contains **152 tests**: 144 dependency-free tests plus eight optional
+real-LiteLLM callback tests. New coverage includes System One/OpenRouter wire
+format, unauthenticated local servers, strict JSON chat decisions, truncation,
+request/choice limits, credential references/private file checks, non-destructive
+setup, failed smoke rollback, client overrides and real loopback HTTP roundtrips.
+The unchanged CI matrix tests Linux/macOS/Windows and Python 3.10/3.13, fresh
+installers and a separate actual-LiteLLM job before release publication.
+
+No hosted decision inference, downloaded model weights, CUA bridge, or live
+licensed-agent session was used. Probe tests use deterministic fixture servers;
+they validate transport/setup, not model accuracy. Windows credential ACLs are
+operator-managed, not validated by the POSIX mode test.
+
 # v0.2 validation
 
 The suite now contains **121 tests**: 113 dependency-free tests and eight optional

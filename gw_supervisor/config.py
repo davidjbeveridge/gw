@@ -12,6 +12,7 @@ import secrets
 from typing import Any
 from .util import digest, read_json, write_json, safe_endpoint
 from .models import validate_registry
+from .decision_transport import validate_decision
 
 DEFAULTS = {
     "version": 1,
@@ -118,12 +119,7 @@ def validate(config: dict) -> None:
         if not isinstance(rule, dict) or rule.get("effect") not in EFFECTS or not isinstance(rule.get("when"), dict):
             raise ValueError(f"Invalid rule: {rule_id}")
     decision = config["decision"]
-    if decision.get("provider") not in {"off", "jev", "http"}:
-        raise ValueError("Decision provider must be off, jev, or http")
-    if decision.get("provider") != "off":
-        safe_endpoint(decision["endpoint"])
-    if not 0 < decision.get("timeout_seconds", 2) <= 5:
-        raise ValueError("Decision timeout must be >0 and <=5 seconds")
+    validate_decision(decision)
     if config["authority"].get("endpoint"):
         safe_endpoint(config["authority"]["endpoint"])
     validate_registry(config["inference"])

@@ -195,7 +195,7 @@ catalog does not install those routes or alter native subscription authenticatio
 
 To use a registry entry for the supervisor's own classifier, set global
 `decision.model_ref` to an enabled, available `decision` model whose adapter target
-is `jev` or `http`, matching `decision.provider`. Endpoints/keys remain in the global
+matches `decision.provider`: `systemone`, `openai`, `http`, or legacy `jev`. Endpoints/keys remain in the global
 `decision` configuration. This is a pinned direct invocation, not recursive model
 routing. The Jev System One-compatible endpoint can be TypeSafe's or OpenRouter's;
 use the provider's matching model ID and API key environment variable.
@@ -217,3 +217,5 @@ Primary contracts checked October 1, 2026:
 - Claude authentication: https://code.claude.com/docs/en/authentication
 - xAI media APIs: https://docs.x.ai/developers/model-capabilities/imagine
 - LiteLLM callbacks: https://docs.litellm.ai/docs/proxy/call_hooks
+
+For core classifier onboarding, use [Decision setup](DECISION_SETUP.md). The `gw models` registry alone does not configure its transport or credentials.

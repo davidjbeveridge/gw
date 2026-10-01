@@ -40,7 +40,8 @@ Supported formats: `chat`, `anthropic`, `responses`, `image`, `video`, `speech`,
 
 Python protocol is in `gw_supervisor.providers`. Built-ins:
 
-- `jev`: the configured TypeSafe System One endpoint, typed choice questions in a single call.
+- `systemone` (legacy `jev` alias): TypeSafe-compatible typed choice endpoint, including OpenRouter, Kev and Laya.
+- `openai`: a Chat Completions endpoint using explicit JSON-schema/JSON mode and exact local label validation.
 - `http`: vendor-neutral `POST {version:1,model,state,goals}` → `{decisions:{goal_id:choice_key}}`.
 - `off`: no semantic classification; deterministic policy remains available.
 
@@ -78,3 +79,5 @@ request)` is the Python extension contract for non-proxy hosts. No executor is
 automatically launched. Native authentication, response/artifact types, media job
 polling, cancellation, idempotency and authorization remain the executor's job.
 The selection result is not a capability token or authorization to execute tools.
+
+See [Decision setup](DECISION_SETUP.md) for endpoint/credential onboarding and protocol limits.

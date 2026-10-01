@@ -204,7 +204,7 @@ def decision_config(config):
         return out
     model = config.get("inference", {}).get("models", {}).get(ref)
     if model is None or model["execution"] != {"kind": "adapter", "target": out["provider"]}:
-        raise ValueError("decision.model_ref must reference its configured jev/http adapter")
+        raise ValueError("decision.model_ref must reference its configured decision protocol adapter")
     req = {"operation": "decision", "input_modalities": ["text"], "output_modalities": ["decisions"]}
     if rejected_reason(ref, model, req, {}, dt.datetime.now(dt.timezone.utc).timestamp()):
         raise ValueError("Configured decision model is unavailable or incompatible")

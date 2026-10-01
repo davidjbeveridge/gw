@@ -77,6 +77,8 @@ def parser():
     importing = commands.add_parser("import-openrouter", help="Print a disabled catalog fragment for explicit model IDs")
     importing.add_argument("--models", required=True, help="Comma-separated OpenRouter IDs, never an implicit entire catalog")
     importing.add_argument("--file", help="Read a saved catalog instead of making a public HTTP GET")
+    from .decision_setup import add_arguments
+    add_arguments(sub)
     return p
 
 
@@ -103,7 +105,27 @@ def main(argv=None):
     if args.cmd == "hook":
         return run_hook(args, home)
     try:
+        if args.cmd == "setup" and args.describe:
+            from .decision_setup import manifest
+            output(manifest())
+            return
         initialize(home)
+        if args.cmd == "setup":
+            from .decision_setup import run_setup
+            return run_setup(args, home, output)
+        if args.cmd == "decision":
+            from .decision_setup import description, probe
+            from .models import decision_config
+            config, status = resolve(home, project_root(args.project), args.client)
+            c = decision_config(config)
+            result = {"config_status": status, "decision": description(c)}
+            if args.decision_cmd == "check":
+                result["check"] = probe(c)
+                result["decision"]["live_verified"] = result["check"]["ok"]
+            output(result)
+            if args.decision_cmd == "check" and not result["check"]["ok"]:
+                raise SystemExit(2)
+            return
         if args.cmd in {"bootstrap", "uninstall"}:
             if args.all and args.agents:
                 raise ValueError("Use --all or --agents, not both")
@@ -115,7 +137,7 @@ def main(argv=None):
             result = bootstrap(home, agents, project, install=args.cmd == "bootstrap", dry_run=args.dry_run)
             if not args.dry_run and args.cmd == "bootstrap" and not (home / "config.json").exists():
                 write_json(home / "config.json", {"version": 1, "clients": {}})
-            output({"changes": result, "notes": ["Restart agents after changing hooks.", "Codex requires review/trust through /hooks; gw does not bypass it.", "Native allow means no objection, not a permission grant.", "Jev is opt-in: gw enable-jev. Existing OAuth/subscription billing is unchanged.", "OpenCode uses the classic v1 plugin API; a v2 plugin adapter is not claimed.", "Run gw doctor, then verify a deny canary inside each installed agent."]})
+            output({"changes": result, "notes": ["Restart agents after changing hooks.", "Codex requires review/trust through /hooks; gw does not bypass it.", "Native allow means no objection, not a permission grant.", "Configure the supervisor decision backend: gw setup (interactive) or gw setup --describe (agent guide). Existing OAuth/subscription billing is unchanged.", "OpenCode uses the classic v1 plugin API; a v2 plugin adapter is not claimed.", "Run gw doctor, then verify a deny canary inside each installed agent."]})
         elif args.cmd == "models":
             if args.models_cmd == "import-openrouter":
                 from .catalog import fetch_openrouter, import_openrouter
@@ -159,10 +181,11 @@ def main(argv=None):
                 output({"status": status, "config": config})
         elif args.cmd == "enable-jev":
             config = read_json(home / "config.json", {"version": 1})
-            config.setdefault("decision", {}).update({"provider": "jev", "key_env": args.key_env})
+            from .decision_setup import PRESETS
+            config["decision"] = {**DEFAULTS["decision"], **PRESETS["typesafe"], "key_env": args.key_env}
             validate(merge(DEFAULTS, {k: v for k, v in config.items() if k != "clients"}))
             write_json(home / "config.json", config)
-            output({"provider": "jev", "key_env": args.key_env, "key_available": bool(os.environ.get(args.key_env)), "notice": "Redacted task/action context will be sent to Jev in new sessions. Redaction is best effort, not complete DLP."})
+            output({"provider": "systemone", "key_env": args.key_env, "key_available": bool(os.environ.get(args.key_env)), "notice": "Redacted task/action context will be sent to Jev in new sessions. Redaction is best effort, not complete DLP."})
         elif args.cmd == "doctor":
             config, status = resolve(home, project_root(args.project), "generic")
             profiles = []
@@ -170,7 +193,7 @@ def main(argv=None):
                 path = profile_path(agent, pathlib.Path.home(), None)
                 profiles.append({"agent": agent, "executable": shutil.which(spec["command"]), "user_hook_config_present": path.exists(), "approval": spec["approval"], "runtime_verified": False})
             provider = config["decision"]["provider"]
-            output({"version": __version__, "python": sys.version.split()[0], "home": str(home), "config_status": status, "decision_provider": provider, "decision_key_available": bool(os.environ.get(config["decision"]["key_env"])) if provider != "off" else None, "litellm_installed": importlib.util.find_spec("litellm") is not None, "adapters": profiles, "warnings": ["Configuration presence does not prove a runtime loaded the hook; run the README deny canary.", "Semantic goals are disabled until explicitly configured; deterministic rules and repeat tracking work without an API key.", "Hooks cannot constrain tools not exposed by a harness, same-user tampering, vendor policy or timeouts that fail open."]})
+            output({"version": __version__, "python": sys.version.split()[0], "home": str(home), "config_status": status, "decision_provider": provider, "decision_setup": "gw setup; gw decision check", "decision_key_available": bool(os.environ.get(config["decision"]["key_env"])) if provider != "off" else None, "litellm_installed": importlib.util.find_spec("litellm") is not None, "adapters": profiles, "warnings": ["Configuration presence does not prove a runtime loaded the hook; run the README deny canary.", "Semantic goals are disabled until explicitly configured; deterministic rules and repeat tracking work without an API key.", "Hooks cannot constrain tools not exposed by a harness, same-user tampering, vendor policy or timeouts that fail open."]})
         elif args.cmd == "status":
             with Supervisor(home) as supervisor:
                 output(supervisor.store.report())

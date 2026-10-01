@@ -80,3 +80,7 @@ A session is keyed by client, canonical project root and native session ID. Even
 Failure count tracks consecutive failures of the same action in a session, reset by a success/unknown outcome. The drift EWMA is `0.7 * previous + 0.3 * observation`, with the first observation used directly. Only real classifier alignment observations advance this measure. An inbound warning is not a fabricated zero-drift observation.
 
 At three successful repeats, a candidate record is proposed. No source code is generated, no tools are registered, no cross-project capabilities are silently promoted. A later synthesis pipeline should collect consented fixtures, generate a candidate, test it in isolation, shadow/replay, promote a reviewed immutable version and keep rollback. See ROADMAP.md.
+
+## Core decision-provider setup
+
+Use `gw setup` or `gw setup --describe`; see [DECISION_SETUP.md](DECISION_SETUP.md). Transport settings live in global/global-client `decision` configuration, not project files. `provider` selects `systemone`, `openai`, `http`, legacy `jev`, or `off`. Credentials are references (`key_env`, optional `key_file`), never literal keys. `auth: none` sends none.

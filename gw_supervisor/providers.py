@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 from typing import Any, Protocol
 from .util import canonical, finite, post_json, redact
+from .decision_transport import credential, parse_answers, request_body, validate_decision
 
 
 class DecisionProvider(Protocol):
@@ -43,24 +44,12 @@ class Classifier:
         sanitized = redact(state)
         if len(canonical(sanitized)) > c.get("max_state_chars", 16000):
             raise RuntimeError("decision_context_too_large: abstained instead of truncating")
-        token = os.environ.get(c["key_env"], "")
-        if c["provider"] == "jev":
-            if not token:
-                raise RuntimeError("decision_key_missing")
-            questions = {key: {"type": "choice", "instructions": g["question"], "criteria": g["choices"]} for key, g in goals.items()}
-            raw = post_json(c["endpoint"], {"model": c["model"], "state": canonical(sanitized), "questions": questions}, token, c["timeout_seconds"])
-            answers = raw.get("answers", {})
-            result = {key: answers.get(key, {}).get("choice") for key in goals}
-        else:
-            # Vendor-neutral classifier contract, useful for local SLMs or a service.
-            raw = post_json(c["endpoint"], {"version": 1, "model": c.get("model"), "state": sanitized, "goals": goals}, token, c["timeout_seconds"])
-            result = raw.get("decisions", {})
-        if not isinstance(result, dict):
-            raise ValueError("Malformed classifier response")
-        for key, goal in goals.items():
-            if result.get(key) not in goal["choices"]:
-                raise ValueError(f"Missing/invalid choice for {key}")
-        return {key: result[key] for key in goals}
+        validate_decision(c)
+        body = request_body(c, sanitized, goals)
+        if len(canonical(body)) > c.get("max_request_chars", 64000):
+            raise RuntimeError("decision_request_too_large: abstained instead of truncating")
+        raw = post_json(c["endpoint"], body, credential(c), c["timeout_seconds"])
+        return parse_answers(c, raw, goals)
 
 
 class HttpAuthority:
