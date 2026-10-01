@@ -11,6 +11,7 @@ import pathlib
 import secrets
 from typing import Any
 from .util import digest, read_json, write_json, safe_endpoint
+from .models import validate_registry
 
 DEFAULTS = {
     "version": 1,
@@ -18,6 +19,7 @@ DEFAULTS = {
     "locked": [],
     "rules": {},
     "registry": {},
+    "inference": {"models": {}, "policy": {}},
     "decision": {"provider": "off", "endpoint": "https://api.typesafe.ai/v1/systemone", "model": "jev-latest", "key_env": "TYPESAFE_API_KEY", "timeout_seconds": 2, "max_state_chars": 16000, "cache_seconds": 60},
     "authority": {"endpoint": "", "key_env": "GW_AUTHORITY_TOKEN", "timeout_seconds": 2},
     "proxy": {"compact_tool_json": False, "inject_task": False, "max_output_tokens": 0, "models": {}},
@@ -32,8 +34,8 @@ DEFAULTS = {
     }
 }
 EFFECTS = {"allow", "advise", "approve", "deny"}
-EVENTS = {"session.start", "tool.before", "tool.after", "model.request", "model.response"}
-PROJECT_KEYS = {"version", "mode", "goals", "rules", "registry", "proxy", "clients", "locked"}
+EVENTS = {"session.start", "tool.before", "tool.after", "model.request", "model.response", "inference.select"}
+PROJECT_KEYS = {"version", "mode", "goals", "rules", "registry", "proxy", "clients", "locked", "inference"}
 
 
 def home_path(value: str | None = None) -> pathlib.Path:
@@ -124,6 +126,7 @@ def validate(config: dict) -> None:
         raise ValueError("Decision timeout must be >0 and <=5 seconds")
     if config["authority"].get("endpoint"):
         safe_endpoint(config["authority"]["endpoint"])
+    validate_registry(config["inference"])
     proxy = config["proxy"]
     if not isinstance(proxy.get("max_output_tokens", 0), int) or proxy.get("max_output_tokens", 0) < 0:
         raise ValueError("max_output_tokens must be a nonnegative integer")

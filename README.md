@@ -4,14 +4,14 @@
 
 One decision engine. Native agent hooks. An optional LiteLLM callback and HTTP API. SQLite state. No runtime dependencies in the core. No new orchestration framework.
 
-This is a **v0.1 foundation**, not an enterprise security boundary or a claim that every agent runtime has been integration-tested. It implements deterministic policy, opt-in Jev/HTTP classification, cumulative drift, retry limits, repetition candidates and protocol-aware proxy transforms. It does not automatically generate/install tools or resolve passwords.
+This is a **v0.2 prerelease**, not an enterprise security boundary or a claim that every agent runtime has been integration-tested. It implements deterministic policy, opt-in Jev/HTTP classification, cumulative drift, retry limits, repetition candidates and protocol-aware proxy transforms. It does not automatically generate/install tools or resolve passwords.
 
 ## Install and bootstrap
 
 macOS / Linux, **Python 3.10+**:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.1.0/install.sh | bash -s -- --all
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.2.0/install.sh | bash -s -- --all
 ```
 
 This installs an isolated virtual environment under `~/.local/share/gw`, links `~/.local/bin/gw`, and registers user-level hooks for Claude Code, Codex, Gemini CLI, Cursor, Copilot/VS Code and OpenCode's classic plugin API. It preserves unrelated configuration, backs up changed files, and does not use sudo or modify shell profiles, login credentials, model selection, billing or permissions. Python must already be installed. The installer prints the PATH command when `~/.local/bin` is not on PATH.
@@ -21,7 +21,7 @@ This installs an isolated virtual environment under `~/.local/share/gw`, links `
 Windows / PowerShell, with Python 3.10+ on PATH:
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.1.0/install.ps1))) -All
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.2.0/install.ps1))) -All
 ```
 
 Windows installs under `%LOCALAPPDATA%\gw\venv`; the script prints the full `gw.exe` path. It does not change execution policy or machine PATH.
@@ -73,7 +73,7 @@ Hooks and the LiteLLM callback call the same Python library in their own process
 
 ### Included behavior
 
-| Capability | v0.1 behavior |
+| Capability | Behavior |
 |---|---|
 | Client and project configuration | Defaults → global → client → reviewed project → project client; locked paths cannot be overridden |
 | Task alignment | Optional typed classifier questions; task remains pinned |
@@ -82,7 +82,7 @@ Hooks and the LiteLLM callback call the same Python library in their own process
 | Tool efficiency | Recommend matching registered tools only when their executable is available; configurable preference order |
 | Research first | Classifier-backed advice before speculative implementation; not a claim that gw performs web research itself |
 | Repeated work | Three successful repetitions create a reviewable automation candidate; no arbitrary code is generated or executed |
-| Model economics | Optional classifier-to-configured-alias routing with capability checks, via the proxy only |
+| Model economics | Capability-first registry for arbitrary models and execution backends; compatible proxy routing; typed subscription/adapter plans |
 | Context efficiency | Opt-in whitespace-only minification of JSON tool results; stable pinned-task injection; output-token cap |
 | Telemetry | Idempotent events, session metrics, candidate counts, provider-reported input/output token usage |
 | Governance | Local deterministic rules plus optional external authority contract; external allow never overrides local deny |
@@ -151,6 +151,27 @@ gw trust --project ~/code/myapp
 Project files are not live policy. `gw trust` copies the reviewed configuration outside the worktree; later edits require another trust operation and fresh session. Projects cannot change provider or authority endpoints. Locks are immutable paths in v0.1, not a complex partial-order permission language. This protects against accidental agent edits, **not another process running with your user privileges**.
 
 See [Configuration](docs/CONFIGURATION.md) for custom goals and model routing.
+
+## Any configured model, not a fixed tier
+
+Configure `inference.models` with arbitrary provider/model IDs, operations,
+input/output modalities, capability tags, execution targets and billing sources.
+System One classifiers, text/code models, local inference, images, video, audio,
+embeddings and native subscription-backed agents can coexist in the registry.
+
+```bash
+gw models list
+gw models select --operation decision --input text --output decisions
+gw models select --operation image.generate --input text --output image
+```
+
+Selection filters compatibility before applying configured preferences or a
+Jev decision. Proxy-compatible plans can rewrite the alias; native harness and
+custom adapter plans require their executor. Selection does not launch agents,
+create accounts or turn subscription quota into API credits. Optional OpenRouter
+catalog import accepts an explicit model list and leaves entries disabled until
+reviewed. See [Model registry and routing](docs/MODELS.md) for configuration,
+subscription boundaries, the HTTP API and supported media contracts.
 
 ## Agent support and verification
 
@@ -227,6 +248,7 @@ The API binds only to `127.0.0.1`. Read the local bearer token from `$GW_HOME/ap
 - `POST /v1/events`: normalized session/tool/model event → decision.
 - `POST /v1/model/request`: `{context, payload, format}` → decision and request payload.
 - `POST /v1/model/response`: `{context, payload}` → audit and unchanged response payload.
+- `POST /v1/inference/select`: capability requirements → typed execution plan (no inference execution).
 - `GET /v1/status`: metrics and proposed automation candidates.
 
 `GET /healthz` reveals only service/version. Browser-Origin requests are rejected; this is not a public multi-tenant API. The executor must enforce decisions. API caller identities are assertions, not enterprise workload identities.

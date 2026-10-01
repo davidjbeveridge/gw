@@ -59,6 +59,24 @@ def parser():
     s.add_argument("--model", required=True, help="LiteLLM provider/model identifier")
     s.add_argument("--api-key-env", default="GW_UPSTREAM_API_KEY")
     s.add_argument("--api-base", help="Optional upstream, e.g. a compatible Caveman proxy endpoint")
+    s = sub.add_parser("models", help="List/select arbitrary configured inference capabilities")
+    commands = s.add_subparsers(dest="models_cmd", required=True)
+    listing = commands.add_parser("list")
+    selecting = commands.add_parser("select", help="Return a typed execution plan; do not run or bill a model")
+    for command in (listing, selecting):
+        command.add_argument("--project", default=".")
+        command.add_argument("--client", default="generic")
+    selecting.add_argument("--operation", required=True)
+    selecting.add_argument("--input", dest="inputs", required=True, help="Comma-separated required input modalities")
+    selecting.add_argument("--output", dest="outputs", required=True, help="Comma-separated required output modalities")
+    selecting.add_argument("--capabilities", default="")
+    selecting.add_argument("--execution", default="", help="Allowed kinds: proxy,harness,adapter")
+    selecting.add_argument("--context-tokens", type=int, default=0)
+    selecting.add_argument("--exclude", default="", help="Skip failed/unavailable model IDs; does not mutate config")
+    selecting.add_argument("--session", help="Reuse a pinned selection session; default: new selection")
+    importing = commands.add_parser("import-openrouter", help="Print a disabled catalog fragment for explicit model IDs")
+    importing.add_argument("--models", required=True, help="Comma-separated OpenRouter IDs, never an implicit entire catalog")
+    importing.add_argument("--file", help="Read a saved catalog instead of making a public HTTP GET")
     return p
 
 
@@ -98,6 +116,24 @@ def main(argv=None):
             if not args.dry_run and args.cmd == "bootstrap" and not (home / "config.json").exists():
                 write_json(home / "config.json", {"version": 1, "clients": {}})
             output({"changes": result, "notes": ["Restart agents after changing hooks.", "Codex requires review/trust through /hooks; gw does not bypass it.", "Native allow means no objection, not a permission grant.", "Jev is opt-in: gw enable-jev. Existing OAuth/subscription billing is unchanged.", "OpenCode uses the classic v1 plugin API; a v2 plugin adapter is not claimed.", "Run gw doctor, then verify a deny canary inside each installed agent."]})
+        elif args.cmd == "models":
+            if args.models_cmd == "import-openrouter":
+                from .catalog import fetch_openrouter, import_openrouter
+                snapshot = read_json(pathlib.Path(args.file)) if args.file else fetch_openrouter()
+                output(import_openrouter(snapshot, [x.strip() for x in args.models.split(",")]))
+            else:
+                project = project_root(args.project)
+                if args.models_cmd == "list":
+                    config, status = resolve(home, project, args.client)
+                    output({"config_status": status, **config["inference"]})
+                else:
+                    split = lambda value: [x.strip() for x in value.split(",") if x.strip()]
+                    event = {"type": "inference.select", "client": args.client, "project": str(project), "session": args.session or "selection-" + str(uuid.uuid4()), "requirements": {"operation": args.operation, "input_modalities": split(args.inputs), "output_modalities": split(args.outputs), "capabilities": split(args.capabilities), "execution_kinds": split(args.execution), "context_tokens": args.context_tokens, "exclude": split(args.exclude)}}
+                    with Supervisor(home) as supervisor:
+                        result = supervisor.evaluate(event)
+                    output(result)
+                    if result["decision"] in {"deny", "approve"} or result.get("inference", {}).get("status") != "selected":
+                        raise SystemExit(2)
         elif args.cmd == "init":
             target = pathlib.Path(args.project).expanduser().resolve() / ".gw.json" if args.project else home / "config.json"
             if target.exists():

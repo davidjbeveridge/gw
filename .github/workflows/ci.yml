@@ -102,7 +102,7 @@ jobs:
         with:
           python-version: '3.13'
       - run: python -m pip wheel --no-deps --wheel-dir dist .
-      - name: Publish initial version without replacing an existing release
+      - name: Publish version without replacing an existing release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -119,4 +119,4 @@ jobs:
           cp docs/RELEASE_NOTES.md release-notes.md
           printf '\nValidation run: https://github.com/%s/actions/runs/%s\n' "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" >> release-notes.md
           gh release create "$version" dist/* --target "$GITHUB_SHA" \
-            --title "gw $version — initial supervisor" --prerelease --notes-file release-notes.md
+            --title "gw $version — agent supervisor" --prerelease --notes-file release-notes.md

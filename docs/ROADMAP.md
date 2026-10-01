@@ -13,7 +13,7 @@
 
 1. Runtime canary/conformance runner, tested-version matrix, OpenCode v2 adapter.
 2. Real-workflow evaluations: success rate, total provider-reported tokens, cache hit rate, task latency and classifier overhead. Establish a baseline before claiming savings.
-3. Model routing with measured quality, context-window/feature compatibility, cost budgets and bounded escalation that respects provider policy.
+3. Validate the capability-first registry against live endpoints; measured quality, exact token/feature compatibility, live quota adapters, cost budgets and bounded escalation. Native subscription/media execution adapters remain separate from selection plans.
 4. Multi-agent session lineage, better request-to-session binding and richer bounded progress summaries.
 
 ## Next: learning and deterministic tools

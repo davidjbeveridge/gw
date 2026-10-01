@@ -8,6 +8,7 @@ import uuid
 from typing import Any
 from .config import EVENTS, get_path, home_path, initialize, project_root, resolve
 from .providers import Classifier, HttpAuthority
+from .models import select as select_model, requirements, decision_config
 from .store import Store
 from .util import canonical, digest, finite, redact
 
@@ -47,6 +48,8 @@ def validate_event(event: dict) -> dict:
             raise ValueError("Tool input must be an object")
     if "success" in out and out["success"] is not None and not isinstance(out["success"], bool):
         raise ValueError("success must be true, false, or null")
+    if out["type"] == "inference.select" or "requirements" in out:
+        out["requirements"] = requirements(out.get("requirements"))
     canonical(out)  # Reject unsupported/non-finite data before scoring or persisting.
     return out
 
@@ -76,6 +79,8 @@ class Supervisor:
         if previous:
             return {**previous, "duplicate": True}
         config = session["config"]
+        # Pre-v0.2 sessions keep their original policy; the new registry is empty.
+        config.setdefault("inference", {"models": {}, "policy": {}})
         policy_hash = digest(config)
         # Fingerprints are only for repetition, NEVER reusable consent.
         action_hash = digest([event.get("tool", ""), redact(event.get("input", {}))])
@@ -136,7 +141,7 @@ class Supervisor:
                 try:
                     labels = self.store.get_cache(cache_key)
                     if labels is None:
-                        labels = (self.classifier or Classifier(config["decision"])).decide(state, choices)
+                        labels = (self.classifier or Classifier(decision_config(config))).decide(state, choices)
                         if not isinstance(labels, dict) or any(labels.get(k) not in g["choices"] for k, g in choices.items()):
                             raise ValueError("Invalid classification")
                         self.store.put_cache(cache_key, labels, config["decision"].get("cache_seconds", 60))
@@ -150,7 +155,7 @@ class Supervisor:
                         if goal.get("metric") == "drift" and label in goal.get("scores", {}):
                             drift = finite(goal["scores"][label])
                         route = goal.get("route", {}).get(label)
-                        if event["type"] == "model.request" and route:
+                        if event["type"] == "model.request" and route and not config["inference"]["models"] and event.get("requirements", {}).get("operation", "chat") in {"chat", "responses", "messages"}:
                             model = config["proxy"].get("models", {}).get(route)
                             required = event.get("capabilities", [])
                             if model and all(cap in model.get("capabilities", []) for cap in required):
@@ -166,15 +171,42 @@ class Supervisor:
         elif choices:
             result["classifier_status"] = "disabled"
 
+        # A general selection is a plan, not an execution. A proxy may only
+        # replace an alias when the selected operation/transport is compatible.
+        if event["type"] in {"inference.select", "model.request"} and (config["inference"]["models"] or event["type"] == "inference.select"):
+            if result["decision"] in {"deny", "approve"}:
+                result["inference"] = {"status": "blocked_by_policy", "selection_only": True}
+            else:
+                req = event.get("requirements")
+                if not req:
+                    apply("deny", "Explicit operation and modality requirements are required for model selection")
+                else:
+                    selector = self.classifier
+                    if selector is None and config["decision"]["provider"] != "off":
+                        try:
+                            selector = Classifier(decision_config(config))
+                        except ValueError:
+                            pass  # select() reports classifier_unavailable, never assumes success.
+                    selection = select_model(config["inference"], req, selector, {"task": session["task"], "request": event.get("latest_user_excerpt", ""), "metrics": metrics})
+                    result["inference"] = selection
+                    if selection["status"] != "selected":
+                        apply(config["inference"]["policy"].get("on_unavailable", "approve"), "No admissible model selected: " + selection["status"])
+                    elif event["type"] == "model.request":
+                        plan = selection["plan"]
+                        if plan["execution"]["kind"] != "proxy":
+                            apply("deny", "A harness/adapter plan requires its executor; it cannot rewrite a proxy model alias")
+                        else:
+                            result["model"] = plan["execution"]["target"]
+
         would = result["decision"]
         if config["mode"] == "observe" and would in {"approve", "deny"}:
             result["would_decision"] = would
             result["decision"] = "advise"
             result["advice"].extend(result["reasons"])
 
-        if event["type"] in {"tool.before", "model.request"} and (config["authority"].get("endpoint") or self.authority):
+        if event["type"] in {"tool.before", "model.request", "inference.select"} and (config["authority"].get("endpoint") or self.authority):
             try:
-                authority = (self.authority or HttpAuthority(config["authority"])).authorize({"session": session["id"], "task": session["task"], "policy_hash": policy_hash, "event": redact(event)})
+                authority = (self.authority or HttpAuthority(config["authority"])).authorize({"session": session["id"], "task": session["task"], "policy_hash": policy_hash, "event": redact(event), "inference_plan": result.get("inference", {}).get("plan")})
                 if authority.get("decision") not in {"allow", "deny", "approve"}:
                     raise ValueError("Invalid authority decision")
                 result["authority"] = redact(authority)

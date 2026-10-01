@@ -59,6 +59,28 @@ class LiteLLMTests(unittest.IsolatedAsyncioTestCase):
             with self.assertRaises(ValueError):
                 await self.callback.async_pre_call_hook(None, None, {'model': 'example', 'messages': []}, 'completion')
 
+    async def test_media_request_alias_selection(self):
+        from test_models import model
+        write_json(self.home / 'config.json', {'inference': {'models': {'image': model('image.generate', outputs=['image'])}}, 'proxy': {'inject_task': True, 'max_output_tokens': 12}})
+        data = {'model': 'old', 'prompt': 'a mountain', 'n': 2, 'size': '1024x1024', 'custom_provider_option': True}
+        result = await self.callback.async_pre_call_hook(None, None, data, 'image_generation')
+        self.assertEqual(result['model'], 'example-route')
+        self.assertTrue(result['custom_provider_option'])
+        self.assertNotIn('max_tokens', result)
+        self.assertNotIn('messages', result)
+
+    async def test_embedding_request_alias_selection(self):
+        from test_models import model
+        write_json(self.home / 'config.json', {'inference': {'models': {'embed': model('embedding', outputs=['embeddings'])}}})
+        result = await self.callback.async_pre_call_hook(None, None, {'model': 'old', 'input': ['one', 'two'], 'dimensions': 128}, 'embeddings')
+        self.assertEqual(result['model'], 'example-route')
+        self.assertEqual(result['input'], ['one', 'two'])
+        self.assertEqual(result['dimensions'], 128)
+
+    async def test_unsupported_operations_are_not_silently_unsupervised(self):
+        with self.assertRaises(ValueError):
+            await self.callback.async_pre_call_hook(None, None, {'model': 'old'}, 'unknown_new_api')
+
     async def test_responses_protocol(self):
         write_json(self.home / 'config.json', {'proxy': {'compact_tool_json': True, 'max_output_tokens': 75}})
         data = {'model': 'example', 'input': [{'type': 'function_call_output', 'call_id': 'c', 'output': '{ "n": 1 }'}]}

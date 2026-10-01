@@ -34,14 +34,14 @@ The API is a local development contract, not an enterprise identity attestation.
 }
 ```
 
-Supported formats: `chat`, `anthropic`, `responses`. On allow/advice, the caller may send the returned payload upstream. On deny/approve, stop before inference. The complementary response endpoint accepts the same context and a complete response payload. v0.1 returns it unchanged and records provider-reported usage. Never treat a post-stream audit as pre-delivery enforcement.
+Supported formats: `chat`, `anthropic`, `responses`, `image`, `video`, `speech`, `transcription`, `embedding`, `rerank`, `decision`. Nontext formats are not subjected to text-only transforms. See [Models](MODELS.md) for endpoint compatibility and typed selection plans. On allow/advice, the caller may send the returned payload upstream. On deny/approve, stop before inference. The complementary response endpoint accepts the same context and a complete response payload. v0.1 returns it unchanged and records provider-reported usage. Never treat a post-stream audit as pre-delivery enforcement.
 
 ## DecisionProvider
 
 Python protocol is in `gw_supervisor.providers`. Built-ins:
 
 - `jev`: the configured TypeSafe System One endpoint, typed choice questions in a single call.
-- `http`: vendor-neutral `POST {version:1,state,goals}` → `{decisions:{goal_id:choice_key}}`.
+- `http`: vendor-neutral `POST {version:1,model,state,goals}` → `{decisions:{goal_id:choice_key}}`.
 - `off`: no semantic classification; deterministic policy remains available.
 
 Remote responses must include valid configured choices for every question. A malformed/oversized/failed result is an abstention/error, never an implicit semantic allow. There are bounded timeouts and no recursive frontier-model rescue loop. Global config chooses the endpoint, key environment variable and model; projects cannot redirect these.
@@ -54,7 +54,7 @@ Configure globally:
 {"authority":{"endpoint":"https://authority.example/authorize", "key_env":"GW_AUTHORITY_TOKEN", "timeout_seconds":2}}
 ```
 
-Request: `{version:1,session,task,policy_hash,event}`. The event is redacted. Response:
+Request: `{version:1,session,task,policy_hash,event,inference_plan}`. The event is redacted. Response:
 
 ```json
 {"decision":"approve", "reason":"Approval required for this resource", "receipt":{"reference":"opaque-receipt-id"}}
@@ -69,3 +69,12 @@ A Warden-specific adapter would translate this contract into Warden's real ident
 A Python protocol only. The executor receives an opaque credential reference, origin/field binding, session/task and authorization evidence. It resolves/injects the secret locally and returns a receipt without the secret. Possible future implementations: password-manager integration, native browser credential broker, enterprise vault.
 
 Not implemented: clipboard storage, vault reads, browser password injection, legal-terms acceptance. Clipboard paste is not intrinsically secret-safe; other local processes, history and synchronization can expose it. Do not hide actions or rewrite provider refusals. Authorized deterministic workflows should live in explicit executors, with independent permissions and auditable outcomes.
+
+## InferenceExecutor
+
+`POST /v1/inference/select` and `gw models select` return an operation-specific
+plan for any configured proxy/harness/adapter. `InferenceExecutor.execute(plan,
+request)` is the Python extension contract for non-proxy hosts. No executor is
+automatically launched. Native authentication, response/artifact types, media job
+polling, cancellation, idempotency and authorization remain the executor's job.
+The selection result is not a capability token or authorization to execute tools.

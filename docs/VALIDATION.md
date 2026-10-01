@@ -1,3 +1,17 @@
+# v0.2 validation
+
+The suite now contains **121 tests**: 113 dependency-free tests and eight optional
+LiteLLM callback tests. The added tests cover arbitrary model families, modality
+and operation separation, subscription/proxy boundaries, declarative billing and
+availability, allowlists, classifier abstention, project inheritance, media
+payload preservation, CLI selection and explicit-list catalog import. The
+release workflow runs the same six OS/Python combinations and three installer
+jobs, plus a separate actual-LiteLLM job, before publishing.
+
+No paid inference or native subscription executor was used. Selection plans and
+callback routing are tested separately from provider execution. The following
+section preserves the v0.1 baseline evidence.
+
 # Validation
 
 ## Executed checks

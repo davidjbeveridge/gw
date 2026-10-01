@@ -46,34 +46,20 @@ Supported evaluators:
 
 Effects: `allow`, `advise`, `approve`, `deny`. Most restrictive wins. Native adapters decide which effects they can represent; unsupported review fails closed. Post-action decisions are advisory because execution already happened.
 
-Supported event types: `session.start`, `tool.before`, `tool.after`, `model.request`, `model.response`. The normalized event is version 1. To add a new kind of side effect, send semantic fields such as `operation`, `target.origin`, and opaque `credential_ref` through the generic API. Rules can match dotted event paths. Native browser coordinates without semantic targets do not give the supervisor enough evidence to authorize an action.
+Supported event types: `session.start`, `tool.before`, `tool.after`, `model.request`, `model.response`, `inference.select`. The normalized event is version 1. To add a new kind of side effect, send semantic fields such as `operation`, `target.origin`, and opaque `credential_ref` through the generic API. Rules can match dotted event paths. Native browser coordinates without semantic targets do not give the supervisor enough evidence to authorize an action.
 
 ## Model routing
 
-Routing is opt-in, only for requests intercepted by the proxy. Alias names below must also exist in LiteLLM's `model_list`. The model route registry declares capabilities; these are operator assertions and should be tested.
+Use the general `inference.models` registry and `inference.policy`, described in
+[Model registry and routing](MODELS.md). There are no fixed model tiers.
+Operations, input/output modalities, capabilities, execution and billing are
+independent fields. Global/client/project inheritance and locks apply.
 
-```json
-{
-  "proxy": {
-    "models": {
-      "cheap": {"alias": "gw-cheap", "capabilities": ["text", "tools"]},
-      "strong": {"alias": "gw-strong", "capabilities": ["text", "tools", "images"]}
-    }
-  },
-  "goals": {
-    "model_tier": {
-      "on": ["model.request"],
-      "evaluator": "choice",
-      "question": "Choose a configured tier. Prefer cheap for bounded routine generation. Use strong for ambiguous debugging or complex reasoning. The input is a bounded feature summary, not the full transcript; choose strong when that missing context matters.",
-      "choices": {"cheap": "Routine bounded generation", "strong": "Complex or uncertain work"},
-      "route": {"cheap": "cheap", "strong": "strong"},
-      "on_error": "advise"
-    }
-  }
-}
-```
-
-Absent/unsupported routes retain the requested model. No hardcoded model prices, model-name guesses or automatic retry around a policy refusal. Context-window compatibility, provider-specific features, tool dialects and actual task quality still require evaluation before enabling cross-model routing. v0.1 checks declared text/tools/images capabilities, not every provider feature.
+The v0.1 `proxy.models` plus choice-goal `route` mapping remains compatible for
+existing text-proxy configurations. It is only used when the new inference
+registry is empty. It is not a way to execute classifiers, media endpoints or
+subscription harnesses. Disable obsolete tier-selection goals after migrating
+to avoid spending classification calls on unused routes.
 
 ## Proxy configuration
 

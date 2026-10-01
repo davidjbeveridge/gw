@@ -1,42 +1,32 @@
-# gw v0.1.0
+# gw v0.2.0 — capability-first model selection
 
-Initial pre-release of the local-first configurable agent supervisor.
+The supervisor no longer assumes a cheap/medium/frontier model hierarchy.
 
-## Install
+## Added
 
-Python 3.10+ is required. macOS / Linux:
+- A configurable model registry separating model identity, operation, input/output modalities, capability tags, execution backend, billing and declared availability.
+- Deterministic preference selection or a Jev/HTTP selector over compatible candidates, with explicit abstention and no implicit paid fallback.
+- Typed plans for proxy aliases, subscription-backed native harnesses, and custom adapters. Arbitrary model/provider/capability names are supported.
+- `gw models list`, `gw models select`, and authenticated `POST /v1/inference/select`.
+- Explicit-list OpenRouter catalog import, including nontext modalities; imports stay disabled until reviewed.
+- Protocol-aware media/audio/embedding/rerank/decision request routing. No text-only transforms on media payloads.
+- `decision.model_ref` for the supervisor's own named classifier; external authority receives the proposed inference plan.
+- Opaque provider state remains bound to its current model route.
+
+## Install or update
+
+Python 3.10+, macOS/Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.1.0/install.sh | bash -s -- --all
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.2.0/install.sh | bash -s -- --all
 ```
 
-Windows PowerShell:
+Restart agents after updating. Existing authentication and subscription billing remain unchanged. Start new sessions to use updated configuration. The v0.1 legacy alias router remains available when the new registry is empty.
 
-```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.1.0/install.ps1))) -All
-```
+## Scope and validation
 
-Restart the agents after bootstrap. In Codex, explicitly review/trust hooks with `/hooks`. Existing agent authentication, models and subscription billing are left unchanged.
+121 tests: 113 dependency-free tests plus eight optional real-LiteLLM callback tests. CI exercises Python 3.10/3.13 on Linux/macOS/Windows, fresh installers on all three systems, and the actual LiteLLM package separately. Release publication is gated on those jobs.
 
-## Included
+Selection is implemented; arbitrary native subscription/custom executor launching is not. Subscription quota is not converted into API credit. Availability/remaining quota are operator declarations, not live account monitoring or atomic budget enforcement. No live model keys, media generation, subscription sessions or provider quality/savings benchmarks were used for this release.
 
-- Claude Code, Codex, Gemini CLI, Cursor, Copilot/VS Code Local, and OpenCode classic-v1 bootstrap.
-- Dependency-free Python engine with deterministic rules and opt-in Jev or vendor-neutral HTTP classification.
-- Client/project inheritance, immutable locks, reviewed project snapshots and pinned task/session policy.
-- Cumulative drift, repeated-failure limits, installed-tool recommendations and research-first advice.
-- SQLite action metadata, automation candidates after repeated success, usage accounting and idempotency.
-- Optional LiteLLM callback, authenticated loopback API, JSON tool-output minification and pinned-task injection.
-- Configurable model-alias selection with declared capability checks, and documented optional Caveman upstream setup.
-- External-authority and credential-injection extension contracts for future integrations.
-
-## Validation
-
-The suite contains 78 tests: 73 dependency-free tests across Python 3.10/3.13 on Linux, macOS and Windows, plus five callback tests with the actual LiteLLM package in a separate CI job. Fresh installers and repeated bootstrap are exercised on all three operating systems. The OpenCode test includes a real Node-to-Python pre-tool denial.
-
-These are not licensed-agent end-to-end tests, a live Jev accuracy benchmark, a Caveman savings benchmark or an enterprise security audit. The release job runs only after the test, installer and LiteLLM jobs pass.
-
-## Deliberately not implemented
-
-OpenCode v2 adapter, automatic generation/promotion of deterministic tools, a credential vault/browser-password executor, Warden-specific access enforcement and arbitrary rewriting of model responses. Repetition creates reviewable candidates, not self-installed code. Model/provider safety policies are not bypassed.
-
-Jev is opt-in: set `TYPESAFE_API_KEY`, run `gw enable-jev`, and start a new agent session. LiteLLM/Caveman remain optional and separately configured. See README.md and SECURITY.md for setup, support boundaries and the runtime deny canary.
+See docs/MODELS.md for configuration and precise support boundaries.

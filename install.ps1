@@ -1,6 +1,6 @@
 param([switch]$All, [string]$Agents = '', [string]$Project = '')
 $ErrorActionPreference = 'Stop'
-$ref = if ($env:GW_REF) { $env:GW_REF } else { 'v0.1.0' }
+$ref = if ($env:GW_REF) { $env:GW_REF } else { 'v0.2.0' }
 if ($ref -notmatch '^[A-Za-z0-9._-]+$') { throw 'Invalid GW_REF' }
 $root = if ($env:GW_INSTALL_DIR) { $env:GW_INSTALL_DIR } else { Join-Path $env:LOCALAPPDATA 'gw' }
 $python = (Get-Command python -ErrorAction SilentlyContinue).Source

@@ -23,17 +23,19 @@ def context_for(data: dict) -> dict:
     session = gw.get("session") or os.environ.get("GW_SESSION")
     if not project or not session:
         raise ValueError("gw requires metadata.gw.project/session or GW_PROJECT/GW_SESSION; refusing unscoped proxy traffic")
-    return {"client": gw.get("client", "litellm"), "project": project, "session": session, "id": gw.get("request_id") or str(uuid.uuid4())}
+    return {"client": gw.get("client", "litellm"), "project": project, "session": session, "id": gw.get("request_id") or str(uuid.uuid4()), "requirements": gw.get("requirements", {})}
 
 
 class GWCallback(CustomLogger):
     async def async_pre_call_hook(self, user_api_key_dict, cache, data: dict, call_type: str):
-        if call_type not in {"completion", "acompletion", "responses", "aresponses", "anthropic_messages"}:
-            return data
+        formats = {"completion": "chat", "acompletion": "chat", "responses": "responses", "aresponses": "responses", "anthropic_messages": "anthropic", "image_generation": "image", "aimage_generation": "image", "embeddings": "embedding", "embedding": "embedding", "aembedding": "embedding", "speech": "speech", "aspeech": "speech", "audio_transcription": "transcription", "transcription": "transcription", "atranscription": "transcription", "rerank": "rerank", "arerank": "rerank", "video_generation": "video", "avideo_generation": "video"}
+        wire = formats.get(call_type)
+        if wire is None:
+            # Do not pretend unrecognized gateway operations were supervised.
+            raise ValueError("gw: unsupported LiteLLM call_type " + str(call_type))
         context = context_for(data)
-        wire = "responses" if "responses" in call_type else "anthropic" if call_type == "anthropic_messages" else "chat"
         # Pass only provider request fields, not LiteLLM auth/cache/internal objects.
-        fields = {"model", "messages", "input", "instructions", "system", "tools", "tool_choice", "stream", "max_tokens", "max_completion_tokens", "max_output_tokens", "temperature", "response_format", "reasoning", "thinking"}
+        fields = {"model", "messages", "input", "instructions", "system", "tools", "tool_choice", "stream", "max_tokens", "max_completion_tokens", "max_output_tokens", "temperature", "response_format", "reasoning", "thinking", "modalities", "text", "previous_response_id", "conversation", "prompt", "n", "size", "quality", "seconds", "duration", "voice", "speed", "dimensions", "encoding_format", "query", "documents", "top_n", "image_url", "image_config", "audio", "video_url"}
         payload = {k: v for k, v in data.items() if k in fields}
         def run():
             with Supervisor() as supervisor:

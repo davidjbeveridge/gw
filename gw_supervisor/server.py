@@ -63,6 +63,8 @@ def make_server(home: pathlib.Path, port: int = 7777) -> ThreadingHTTPServer:
                 with Supervisor(home) as supervisor:
                     if self.path == "/v1/events":
                         result = supervisor.evaluate(body)
+                    elif self.path == "/v1/inference/select":
+                        result = supervisor.evaluate({**body["context"], "type": "inference.select", "requirements": body["requirements"]})
                     elif self.path == "/v1/model/request":
                         result = process_request(supervisor, body["context"], body["payload"], body.get("format", "chat"))
                     elif self.path == "/v1/model/response":

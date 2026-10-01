@@ -5,8 +5,85 @@ import copy
 import json
 import uuid
 from .util import canonical, redact, strict_json
+from .models import requirements
 
 MARKER = "[gw pinned task] "
+# These describe wire contracts, not interchangeable models or pricing tiers.
+WIRES = {
+    "chat": ("chat", ["text"], ["text"]),
+    "responses": ("responses", ["text"], ["text"]),
+    "anthropic": ("messages", ["text"], ["text"]),
+    "image": ("image.generate", ["text"], ["image"]),
+    "video": ("video.generate", ["text"], ["video"]),
+    "speech": ("audio.speech", ["text"], ["audio"]),
+    "transcription": ("audio.transcribe", ["audio"], ["text"]),
+    "embedding": ("embedding", ["text"], ["embeddings"]),
+    "rerank": ("rerank", ["text"], ["rerank"]),
+    "decision": ("decision", ["text"], ["decisions"]),
+}
+TEXT_WIRES = {"chat", "responses", "anthropic"}
+
+
+def request_requirements(payload, wire, extra=None):
+    operation, inputs, outputs = WIRES[wire]
+    inputs, outputs, caps = set(inputs), set(outputs), set()
+    if payload.get("tools"):
+        caps.add("tools")
+        for tool in payload["tools"]:
+            if isinstance(tool, dict) and tool.get("type", "function") not in {"function", "custom"}:
+                caps.add("tool:" + str(tool["type"]))
+    if payload.get("stream"):
+        caps.add("streaming")
+    if wire in TEXT_WIRES and payload.get("response_format"):
+        caps.add("structured_output")
+    for field in ("reasoning", "thinking", "previous_response_id", "conversation"):
+        if payload.get(field):
+            caps.add(field)
+    if isinstance(payload.get("text"), dict) and payload["text"].get("format"):
+        caps.add("structured_output")
+    def visit(value):
+        if isinstance(value, list):
+            for item in value:
+                visit(item)
+        elif isinstance(value, dict):
+            kind = value.get("type")
+            if kind in {"image", "image_url", "input_image"}:
+                inputs.add("image")
+            elif kind in {"input_audio", "audio", "audio_url"}:
+                inputs.add("audio")
+            elif kind in {"video", "video_url", "input_video"}:
+                inputs.add("video")
+            elif kind in {"file", "input_file", "document"}:
+                inputs.add("file")
+            if kind in {"thinking", "redacted_thinking", "reasoning"}:
+                caps.add("signed_reasoning")
+            for item in value.values():
+                if isinstance(item, (dict, list)):
+                    visit(item)
+    visit(payload.get("messages", payload.get("input", [])))
+    if wire in {"image", "video"} and any(payload.get(k) for k in ("image", "image_url", "input_reference")):
+        inputs.add("image")
+    if payload.get("modalities"):
+        if not isinstance(payload["modalities"], list) or not all(isinstance(x, str) for x in payload["modalities"]):
+            raise ValueError("Invalid output modalities")
+        outputs = set(payload["modalities"])
+    req = {"operation": operation, "input_modalities": sorted(inputs), "output_modalities": sorted(outputs), "capabilities": sorted(caps), "execution_kinds": ["proxy"]}
+    if caps & {"signed_reasoning", "previous_response_id", "conversation"} and payload.get("model"):
+        req["execution_target"] = payload["model"]
+    # Callers may strengthen requirements; never override the observed operation,
+    # modalities or transport to make an incompatible model look admissible.
+    if extra:
+        if not isinstance(extra, dict) or set(extra) - {"capabilities", "context_tokens", "exclude"}:
+            raise ValueError("Only additional capabilities, context_tokens and exclude may be supplied")
+        for field in ("capabilities", "exclude"):
+            if field in extra:
+                values = extra[field]
+                if not isinstance(values, list) or not all(isinstance(x, str) for x in values):
+                    raise ValueError("Invalid additional inference requirement")
+                req[field] = sorted(set(req.get(field, [])) | set(values))
+        if "context_tokens" in extra:
+            req["context_tokens"] = extra["context_tokens"]
+    return requirements(req)
 
 
 def compact_json(text: str) -> str:
@@ -85,10 +162,10 @@ def inject_task(payload: dict, task: str, wire: str) -> dict:
     return out
 
 
-def model_summary(payload: dict) -> dict:
+def model_summary(payload: dict, wire: str = "chat") -> dict:
     """Bounded feature projection, not a second copy of the entire transcript."""
     messages = payload.get("messages", payload.get("input", []))
-    user = ""
+    user = str(payload.get("prompt", ""))
     if isinstance(messages, str):
         user = messages
     elif isinstance(messages, list):
@@ -106,9 +183,9 @@ def model_summary(payload: dict) -> dict:
 
 
 def process_request(supervisor, context: dict, payload: dict, wire: str = "chat") -> dict:
-    if wire not in {"chat", "anthropic", "responses"} or not isinstance(payload, dict):
+    if wire not in WIRES or not isinstance(payload, dict):
         raise ValueError("Unsupported model request format")
-    event = {**context, "type": "model.request", "id": context.get("id", str(uuid.uuid4())), **model_summary(payload)}
+    event = {**context, "type": "model.request", "id": context.get("id", str(uuid.uuid4())), **model_summary(payload, wire), "requirements": request_requirements(payload, wire, context.get("requirements"))}
     session = supervisor.session_context(event)
     config = session["config"]["proxy"]
     if config.get("block_detected_secrets", False) and canonical(redact(payload)) != canonical(payload):
@@ -116,17 +193,19 @@ def process_request(supervisor, context: dict, payload: dict, wire: str = "chat"
         return {"decision": "deny", "reason": "Potential secret detected in model input", "payload": payload}
     result = supervisor.evaluate(event)
     out = copy.deepcopy(payload)
+    if event["requirements"].get("execution_target") and result.get("model", payload.get("model")) != payload.get("model"):
+        result.update(decision="deny", reason="Opaque provider state is bound to the current model route; refusing cross-model rewrite")
     before = len(canonical(out).encode())
     if result["decision"] not in {"deny", "approve"}:
-        if config.get("compact_tool_json"):
+        if wire in TEXT_WIRES and config.get("compact_tool_json"):
             out = compact_tools(out)
         compacted = len(canonical(out).encode())
-        if config.get("inject_task"):
+        if wire in TEXT_WIRES and config.get("inject_task"):
             out = inject_task(out, session["task"], wire)
         if result.get("model"):
             out["model"] = result["model"]
         cap = config.get("max_output_tokens", 0)
-        if cap:
+        if cap and wire in TEXT_WIRES:
             default_key = {"chat": "max_tokens", "anthropic": "max_tokens", "responses": "max_output_tokens"}[wire]
             key = next((k for k in ("max_completion_tokens", "max_output_tokens", "max_tokens") if k in out), default_key)
             current = out.get(key)
@@ -146,6 +225,6 @@ def extract_usage(response: dict) -> dict:
 def process_response(supervisor, context: dict, response: dict) -> dict:
     # Responses are audited, not paraphrased. Preserve tool-call IDs, arguments,
     # signatures, refusals, structured output and streaming ordering byte-for-byte.
-    event = {**context, "type": "model.response", "id": context.get("id", str(uuid.uuid4())), "model": response.get("model", ""), "usage": extract_usage(response), "response_chars": len(canonical(response)), "status": response.get("status"), "finish_reasons": [x.get("finish_reason") for x in response.get("choices", []) if isinstance(x, dict)]}
+    event = {**{k: v for k, v in context.items() if k != "requirements"}, "type": "model.response", "id": context.get("id", str(uuid.uuid4())), "model": response.get("model", ""), "usage": extract_usage(response), "response_chars": len(canonical(response)), "status": response.get("status"), "finish_reasons": [x.get("finish_reason") for x in response.get("choices", []) if isinstance(x, dict)]}
     result = supervisor.evaluate(event)
     return {**result, "payload": response}

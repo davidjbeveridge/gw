@@ -14,6 +14,15 @@ class AuthorityProvider(Protocol):
     def authorize(self, request: dict) -> dict: ...
 
 
+class InferenceExecutor(Protocol):
+    """Extension seam for non-proxy plans. Selection is not execution authority.
+
+    Implementations own native authentication, protocol validation, lifecycle and
+    artifact results. This release never launches executors or extracts OAuth.
+    """
+    def execute(self, plan: dict, request: dict) -> dict: ...
+
+
 class CredentialInjector(Protocol):
     """Future executor-side seam. No implementation resolves secrets in this release.
 
@@ -44,7 +53,7 @@ class Classifier:
             result = {key: answers.get(key, {}).get("choice") for key in goals}
         else:
             # Vendor-neutral classifier contract, useful for local SLMs or a service.
-            raw = post_json(c["endpoint"], {"version": 1, "state": sanitized, "goals": goals}, token, c["timeout_seconds"])
+            raw = post_json(c["endpoint"], {"version": 1, "model": c.get("model"), "state": sanitized, "goals": goals}, token, c["timeout_seconds"])
             result = raw.get("decisions", {})
         if not isinstance(result, dict):
             raise ValueError("Malformed classifier response")
