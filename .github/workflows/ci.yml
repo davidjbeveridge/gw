@@ -27,3 +27,66 @@ jobs:
       - name: Shell installer syntax
         if: runner.os != 'Windows'
         run: bash -n install.sh
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: git archive --format=zip HEAD -o gw-source.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gw-source
+          path: gw-source.zip
+          retention-days: 7
+  installer:
+    if: github.event_name == 'push'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install and bootstrap on Unix
+        if: runner.os != 'Windows'
+        shell: bash
+        env:
+          GW_REF: ${{ github.sha }}
+        run: |
+          export HOME="$(mktemp -d)"
+          export GW_HOME="$HOME/state"
+          export GW_INSTALL_DIR="$HOME/install"
+          export GW_BIN_DIR="$HOME/bin"
+          bash install.sh --all
+          "$GW_BIN_DIR/gw" --version
+          "$GW_BIN_DIR/gw" bootstrap --all > second.json
+          python -c 'import json; d=json.load(open("second.json")); assert len(d["changes"]) == 6; assert all(not x["changed"] for x in d["changes"])'
+          "$GW_BIN_DIR/gw" doctor
+      - name: Install and bootstrap on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          GW_REF: ${{ github.sha }}
+        run: |
+          $env:GW_HOME = Join-Path $env:RUNNER_TEMP 'gw-state'
+          $env:GW_INSTALL_DIR = Join-Path $env:RUNNER_TEMP 'gw-install'
+          $project = Join-Path $env:RUNNER_TEMP 'gw-project'
+          New-Item -ItemType Directory -Force $project | Out-Null
+          ./install.ps1 -All -Project $project
+          $gw = Join-Path $env:GW_INSTALL_DIR 'venv\Scripts\gw.exe'
+          & $gw --version
+          $result = & $gw bootstrap --all --project $project | ConvertFrom-Json
+          if (($result.changes | Where-Object changed).Count -ne 0) { throw 'Bootstrap was not idempotent' }
+          & $gw doctor --project $project
+  litellm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install . litellm
+      - run: python -c "import importlib.metadata; print('LiteLLM', importlib.metadata.version('litellm'))"
+      - run: python -m unittest discover -s tests -p test_litellm.py -v

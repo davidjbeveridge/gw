@@ -6,6 +6,7 @@ import os
 import pathlib
 import sqlite3
 import time
+from .config import project_root
 from .util import canonical, digest, redact
 
 SCHEMA = """
@@ -47,12 +48,16 @@ class Store:
         self.db.close()
 
     def task(self, project: str) -> str:
+        project = str(project_root(project))
         row = self.db.execute("SELECT task FROM tasks WHERE project=?", (project,)).fetchone()
         return row[0] if row else ""
 
     def set_task(self, project: str, task: str):
         if not task.strip():
             raise ValueError("Task must not be empty")
+        # Normalize in the storage API too, not just the CLI: macOS /var symlinks
+        # and Windows path casing otherwise produce an unreachable task record.
+        project = str(project_root(project))
         with self.db:
             self.db.execute("INSERT OR REPLACE INTO tasks VALUES (?,?)", (project, redact(task.strip())))
 
