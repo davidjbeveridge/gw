@@ -264,3 +264,10 @@ Run `gw setup --describe` for a no-network JSON manifest. See
 [the setup skill](../skills/gw-setup/SKILL.md) for a repeatable agent workflow.
 Use flags plus `--dry-run`, then explicit `--check --yes` after operator consent;
 never start the interactive wizard from an unattended job.
+
+## Fast/slow and managed strategies
+
+See [decision cascades](DECISION_CASCADES.md) for exact-label escalation, bounded
+fallbacks, per-stage usage, and compatible adaptive endpoints. The primary
+`decision check` remains a single synthetic transport smoke; the agent tool can
+check the fallback explicitly.

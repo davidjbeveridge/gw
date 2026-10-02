@@ -5,7 +5,7 @@
 **macOS or Linux · Python 3.10+**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.4.0/install.sh | bash -s -- --all
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.6.0/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
 ```
 
 **Star this repository** using GitHub's **Star** button if the project is useful. **[Fork it](https://github.com/davidjbeveridge/gw/fork)** to try your own policies, adapters, and experiments. Contributions with reproducible results are especially welcome.
@@ -18,13 +18,13 @@ The installer adds user-level hooks for Claude Code, Codex, Gemini CLI, Cursor, 
 Windows PowerShell, with Python 3.10+ on PATH:
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.4.0/install.ps1))) -All
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.6.0/install.ps1))) -All
 ```
 
 Add the independent knowledge package on macOS/Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.4.0/install.sh | bash -s -- --all --knowledge
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.6.0/install.sh | bash -s -- --all --knowledge
 ```
 
 On Windows, add `-Knowledge`. Neither option installs an embedding model or connects to a cloud knowledge service.
@@ -32,7 +32,7 @@ On Windows, add `-Knowledge`. Neither option installs an embedding model or conn
 Prefer to inspect the installer first?
 
 ```bash
-curl -fsSLo gw-install.sh https://raw.githubusercontent.com/davidjbeveridge/gw/v0.4.0/install.sh
+curl -fsSLo gw-install.sh https://raw.githubusercontent.com/davidjbeveridge/gw/v0.6.0/install.sh
 less gw-install.sh
 bash gw-install.sh --all
 ```
@@ -53,7 +53,7 @@ Keep the agent you like. Change the decisions around it.
 
 [Documentation](docs/README.md) · [First run](docs/GETTING_STARTED.md) · [Architecture](docs/ARCHITECTURE.md) · [Examples](examples/README.md) · [FAQ](docs/FAQ.md) · [Releases](https://github.com/davidjbeveridge/gw/releases)
 
-> **Current scope:** gW 0.4 is a prerelease for cooperative, user-controlled workflows. The core works without a model key; semantic supervision is **off until configured**. There is no published gW efficacy or cost benchmark yet. See [what is tested](docs/VALIDATION.md), [what is planned](docs/ROADMAP.md), and the [security model](SECURITY.md).
+> **Current scope:** gW 0.6 is a prerelease for cooperative, user-controlled workflows. The core works without a model key; semantic supervision is **off until configured**. There is no published gW efficacy or cost benchmark yet. See [what is tested](docs/VALIDATION.md), [what is planned](docs/ROADMAP.md), and the [security model](SECURITY.md).
 
 ## Why this exists
 
@@ -225,3 +225,12 @@ The [annotated references](docs/REFERENCES.md) connect each dependency, protocol
 Fork the repository, work on a branch, and open a pull request with a reproducible example and the relevant tests. Especially useful contributions include verified native-harness versions, real workload evaluations, and knowledge adapters that pass the common contract tests. [Contribution guide](CONTRIBUTING.md).
 
 MIT licensed. Local use does not require a gW account or a hosted service. The supervisor makes the call at its boundary. You decide where that boundary belongs.
+
+## Operate GW through your agent
+
+Install with `--agent-tools --plugins --knowledge`, then ask your agent to open
+the dashboard, inspect a run, configure a decision cascade, or compile task context.
+The agent uses GW tools rather than asking you to type commands or JSON. Native
+trust/restart requirements remain explicit.
+
+[Agent interface](docs/AGENT_INTERFACE.md) · [Fast/slow decisions](docs/DECISION_CASCADES.md) · [Context compiler](docs/CONTEXT_COMPILER.md)

@@ -7,8 +7,10 @@ from .contract import (
 from .local import LocalKnowledgeProvider
 from .cache import ContextCache
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __all__ = ["PROTOCOL", "Scope", "SearchRequest", "ReadRequest", "DocumentInput",
            "KnowledgeProvider", "MutableKnowledgeProvider", "EmbeddingProvider",
            "LocalKnowledgeProvider", "ContextCache", "KnowledgeError",
            "InvalidRequest", "NotFound", "Conflict", "Unsupported", "Unavailable"]
+
+from .compiler import ContextItem, ContextCompiler, DeterministicContextCompiler, ContextBudgetExceeded

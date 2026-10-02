@@ -40,7 +40,7 @@ class CLITests(unittest.TestCase):
         self.assertTrue(json.loads(self.cli('search','--mode','structured','--filters','{"type":"docs"}').stdout)['hits'])
     def test_version_independent(self):
         r=subprocess.run([sys.executable,'-m','gw_knowledge','--version'],capture_output=True,text=True,check=True)
-        self.assertEqual(r.stdout.strip(),'0.1.0')
+        self.assertEqual(r.stdout.strip(),'0.2.0')
     def test_sources_are_not_automatically_rescanned(self):
         self.cli('ingest',str(self.file),'--id','doc')
         self.file.write_text('changed outside storage',encoding='utf-8')

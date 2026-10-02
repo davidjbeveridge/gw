@@ -139,3 +139,11 @@ MCP/HTTP serving defaults to read-only; the writable flag cannot widen a GW conn
 Ordinary successful commands return 0. Handled GW configuration/administration errors commonly return 1; argparse usage errors return 2. Failed setup checks and unavailable/review/denied model selections return 2. Standalone knowledge commands report handled knowledge errors as 2; the GW wrapper commonly maps them to 1.
 
 Hook commands are different: handled failures return a protocol-native verdict on stdout. API calls are different again: inspect both HTTP status and returned decision. Neither a clean process exit nor HTTP 200 means a tool action was allowed. Keep diagnostics off protocol stdout in custom adapters.
+
+## Agent tools
+
+`gw agent serve --project PATH --client NAME [--manage]` serves MCP over stdio.
+`gw agent call --project PATH --client NAME [--manage] TOOL --json ARGS` invokes
+the same operation locally. `gw agent-guide` prints the operating skill.
+`bootstrap --agent-tools` and `uninstall --agent-tools` manage native MCP/skill
+registrations. See [the agent guide](AGENT_INTERFACE.md).

@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Source](../gw_supervisor/) · [Standalone knowledge package](../packages/gw-knowledge/README.md)
 
-These documents describe **gW 0.5.0 and gw-knowledge 0.1.0**. Examples marked as runnable use those interfaces. Plans and research are kept separate from implemented behavior. Installation remains pinned to the published release; documentation updates on `main` do not move that tag.
+These documents describe **gW 0.6.0 and gw-knowledge 0.2.0**. Examples marked as runnable use those interfaces. Plans and research are kept separate from implemented behavior. Installation remains pinned to the published release; documentation updates on `main` do not move that tag.
 
 ## Start here
 
@@ -51,3 +51,7 @@ References to an upstream capability do not mean the gW adapter supports every v
 ## Optional operational plugins
 
 [Observability and run comparison](OBSERVABILITY.md) · [Learning](LEARNING.md) · [Sync](SYNC.md) · [Plugin contracts](PLUGINS.md)
+
+## Agent-driven operation and context
+
+[Agent tools and setup](AGENT_INTERFACE.md) · [Decision cascades](DECISION_CASCADES.md) · [Context compiler](CONTEXT_COMPILER.md)

@@ -1,38 +1,24 @@
-# gW v0.5.0 — observability, learning and reviewed sync
+# gW v0.6.0 — agent tools, decision cascades and context compilation
 
-Three independent, free MIT packages accompany the core: gw-observe 0.1.0,
-gw-learning 0.1.0 and gw-sync 0.1.0. The existing knowledge package remains optional.
+The agent can operate GW through a host-bound MCP interface: inspect runs, open
+the local dashboard, prepare/apply requested setup, check decision backends,
+select models and retrieve compiled context. Native approval remains unchanged.
 
-## Install
+Decision strategies now support a bounded primary/fallback cascade or one
+compatible adaptive endpoint. Every stage keeps its latency/usage; no recursive
+reasoning rescue or permission override is introduced.
+
+The independent gw-knowledge 0.2.0 compiler assembles exact project, task, skill,
+outcome and knowledge evidence. Required content is retained whole or fails the
+budget check. Optional omissions and provenance are inspectable. Automatic
+proxy/supervisor delivery is opt-in; baseline and opaque provider state remain
+unchanged. gw-observe 0.2.0 displays compilation activity and source relationships.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.5.0/install.sh | bash -s -- --all --plugins
-gw trace init --baseline
-gw trace serve --open
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.6.0/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
 ```
 
-`--knowledge` adds the independent knowledge package. PowerShell supports
-`-Plugins` and `-Knowledge`. Plugins are not silently enabled by installation.
-
-## Included
-
-- Deterministic per-goal auditing, proposed/directed drill-down and native delivery
-  metadata, with uncertainty about host enforcement stated explicitly.
-- Local source-referencing trace index, immutable run variables, explicit task
-  outcomes, native Claude/Codex usage import, descriptive comparisons and dashboard.
-- Standard OTLP/HTTP JSON export to existing compatible collectors.
-- Measurement-only baseline mode with no classifier, policy or proxy changes.
-- Learning plugins for repeated-tool and guidance proposals; explicitly configured
-  research/expansion workers, lookback/modes, review and artifact history.
-- Content-addressed harness bundles with local/HTTP providers, CAS channels,
-  reviewed plans, conflict rejection and no automatic live activation.
-
-Logging and visualization make no inference calls. Learning workers are separate,
-explicit workloads and can incur their own provider costs. No causal savings,
-automatic quality judgment, hidden activity reconstruction, subscription-dollar
-allocation, enterprise access certification or benchmark orchestration is claimed.
-
-CI gates publication on cross-platform/core/package checks, fresh installers,
-independent package extraction, actual LiteLLM/MCP/schema checks, and browser E2E.
-See docs/OBSERVABILITY.md, docs/LEARNING.md, docs/SYNC.md and docs/PLUGINS.md for
-configuration, data ownership and support boundaries.
+No specific Glide endpoint, universal vendor-runtime coverage, paid-provider
+accuracy, or cost/quality improvement is claimed. Tests use fixtures, real MCP
+stdio, local HTTP services, isolated packaging and the existing cross-platform
+suite. See the agent, decision cascade, and context compiler guides.

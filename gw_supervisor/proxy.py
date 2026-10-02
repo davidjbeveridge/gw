@@ -206,6 +206,18 @@ def _process_request(supervisor, context: dict, payload: dict, wire: str = "chat
         compacted = len(canonical(out).encode())
         if wire in TEXT_WIRES and config.get("inject_task"):
             out = inject_task(out, session["task"], wire)
+        compiler = session["config"].get("context_compiler", {})
+        if compiler.get("enabled") and compiler.get("delivery") == "proxy":
+            if wire not in TEXT_WIRES or event["requirements"].get("execution_target"):
+                result["context_compiler"] = {"status": "skipped_incompatible_or_opaque_state"}
+            else:
+                from .context import compile_context, inject_context
+                packet = compile_context(supervisor.home, event["project"], event["client"], task=session["task"],
+                                         query=event.get("latest_user_excerpt", "")[:4096], session_id=session["id"],
+                                         config=session["config"], store=supervisor.store)
+                out, inserted = inject_context(out, wire, packet)
+                result["context_compiler"] = {"status": "inserted" if inserted else "already_present",
+                                              "packet_id": packet["id"], "compiled_chars": packet["compiled_chars"]}
         if result.get("model"):
             out["model"] = result["model"]
         cap = config.get("max_output_tokens", 0)
@@ -268,7 +280,7 @@ def process_request(supervisor, context: dict, payload: dict, wire: str = "chat"
                     roles[role]=roles.get(role,0)+len(canonical(m))
         attrs={"request_id":context["id"],"wire":wire,"decision":result["decision"],
                "original_model":payload.get("model"),"effective_model":result["payload"].get("model"),
-               "transform":result.get("transform",{}),"context_chars_by_role":roles,
+               "transform":result.get("transform",{}),"context_compiler":result.get("context_compiler"),"context_chars_by_role":roles,
                "tool_schema_chars":len(canonical(payload.get("tools",[]))),
                "measurement":"serialized characters/bytes, not model tokens"}
         publish_component(supervisor.home,session["config"],{**context,"session_id":session["id"]},

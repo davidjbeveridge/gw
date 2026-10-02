@@ -33,6 +33,7 @@ def parser():
         s.add_argument("--agents", help="Comma-separated agent names; default: detected agents")
         s.add_argument("--project", help="Install project-local hooks instead of user-wide hooks")
         s.add_argument("--dry-run", action="store_true")
+        s.add_argument("--agent-tools", action="store_true", help="Also register MCP tools and the GW skill; native permissions unchanged")
     s = sub.add_parser("init")
     s.add_argument("--project")
     s = sub.add_parser("trust", help="Review/import the current .gw.json as a trusted project snapshot")
@@ -83,6 +84,8 @@ def parser():
     add_knowledge_arguments(sub)
     from .extension_cli import add_arguments as add_extension_arguments
     add_extension_arguments(sub)
+    from .agent import add_arguments as add_agent_arguments
+    add_agent_arguments(sub)
     return p
 
 
@@ -138,6 +141,13 @@ def main(argv=None):
             output(manifest())
             return
         initialize(home)
+        if args.cmd == "agent-guide":
+            import importlib.resources
+            print(importlib.resources.files("gw_supervisor").joinpath("templates/agent-skill.md").read_text(encoding="utf-8"))
+            return
+        if args.cmd == "agent":
+            from .agent import run
+            return run(args, home, output)
         if args.cmd in {"trace","learn","sync","plugins"}:
             from .extension_cli import run
             return run(args,home,output)
@@ -171,6 +181,9 @@ def main(argv=None):
             result = bootstrap(home, agents, project, install=args.cmd == "bootstrap", dry_run=args.dry_run)
             if not args.dry_run and args.cmd == "bootstrap" and not (home / "config.json").exists():
                 write_json(home / "config.json", {"version": 1, "clients": {}})
+            if args.agent_tools:
+                from .agent_bootstrap import bootstrap_agent_tools
+                result.extend(bootstrap_agent_tools(home, agents, project, install=args.cmd == "bootstrap", dry_run=args.dry_run))
             output({"changes": result, "notes": ["Restart agents after changing hooks.", "Codex requires review/trust through /hooks; gw does not bypass it.", "Native allow means no objection, not a permission grant.", "Configure the supervisor decision backend: gw setup (interactive) or gw setup --describe (agent guide). Existing OAuth/subscription billing is unchanged.", "OpenCode uses the classic v1 plugin API; a v2 plugin adapter is not claimed.", "Run gw doctor, then verify a deny canary inside each installed agent."]})
         elif args.cmd == "models":
             if args.models_cmd == "import-openrouter":
@@ -247,7 +260,7 @@ def main(argv=None):
             lines += ["litellm_settings:", "  callbacks:", "    - gw_supervisor.litellm.gw_callback", "general_settings:", "  master_key: os.environ/GW_PROXY_KEY", ""]
             atomic_write(target, "\n".join(lines))
             output({"created": str(target), "next": "Install gw and litellm[proxy] in the same Python environment; set GW_PROJECT, GW_SESSION, GW_PROXY_KEY, and the upstream key, then run litellm --config FILE --host 127.0.0.1", "billing": "API usage, not a conversion of ChatGPT/Claude subscription quota"})
-    except (ValueError, OSError, KeyError, TypeError) as exc:
+    except (ValueError, OSError, KeyError, TypeError, RuntimeError) as exc:
         print(f"gw: {exc}", file=sys.stderr)
         raise SystemExit(1)
 

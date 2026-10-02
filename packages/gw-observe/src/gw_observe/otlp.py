@@ -54,7 +54,7 @@ def export(repo,run_ids):
                       'endTimeUnixNano':str(end),'attributes':[{'key':k,'value':value(v)} for k,v in attrs.items()],'status':{'code':0}})
     return {'resourceSpans':[{'resource':{'attributes':[{'key':'service.name','value':{'stringValue':'gw'}},
                 {'key':'telemetry.sdk.language','value':{'stringValue':'python'}}]},
-                'scopeSpans':[{'scope':{'name':'gw-observe','version':'0.1.0'},'spans':spans}]}]}
+                'scopeSpans':[{'scope':{'name':'gw-observe','version':'0.2.0'},'spans':spans}]}]}
 
 
 def send(payload,endpoint,*,key_env=None,headers_env=None,timeout=5):

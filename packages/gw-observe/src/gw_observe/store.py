@@ -211,7 +211,7 @@ class LocalTraceRepository:
 
     def report(self,run_id):
         run=self.run(run_id); kinds=Counter();tools=Counter();goals=defaultdict(Counter);states=Counter();models=Counter();learn=Counter()
-        drift=[];usage_lanes=defaultdict(lambda:defaultdict(list));overhead=0.0;cache=Counter();missing_sources=0;turn_ids=set();user_ids=set();edges=[]
+        drift=[];usage_lanes=defaultdict(lambda:defaultdict(list));overhead=0.0;cache=Counter();compilation=Counter();missing_sources=0;turn_ids=set();user_ids=set();edges=[]
         rows=self.db.execute('SELECT * FROM observations WHERE run_id=? ORDER BY start_ns,id',(run_id,))
         first=None;last=None;intercepts=0;effects=Counter();coverage=Counter();parents=set()
         goal_outcomes=[]
@@ -264,6 +264,14 @@ class LocalTraceRepository:
                 cache['error' if attrs.get('status')=='error' else 'hit' if attrs.get('cache_hit') else 'miss']+=1
                 for doc in attrs.get('documents',[]):
                     edges.append({'from':'knowledge:'+doc['id']+':'+doc['revision'],'to':row['id'],'relation':'source_passage'})
+            if kind=='context.compile':
+                compilation['completed']+=1
+                compilation['selected_items']+=len(attrs.get('selected',[]))
+                compilation['omitted_items']+=len(attrs.get('omitted',[]))
+                compilation['compiled_characters']+=attrs.get('compiled_chars',0)
+                for item in attrs.get('selected',[]):
+                    edges.append({'from':item['source']+':'+item['revision'],'to':row['id'],'relation':'compiled_evidence'})
+            if kind=='context.error':compilation['failed']+=1
             if kind=='goal.outcome':goal_outcomes.append({'event_id':row['id'],**attrs})
             if kind.startswith('learning.'):learn[kind]+=1
             if kind in {'model.usage','model.response'} and attrs.get('usage'):
@@ -293,7 +301,7 @@ class LocalTraceRepository:
         snapshot=self.db.execute('SELECT body FROM snapshots WHERE hash=?',(run['manifest'].get('config_snapshot'),)).fetchone()
         return {'run':run,'configuration':json.loads(snapshot[0]) if snapshot else None,'intercepts':intercepts,'verdicts':dict(effects),'events':sum(kinds.values()),'kinds':dict(kinds),
                 'goal_evaluations':{k:dict(v) for k,v in goals.items()},'goal_outcomes':goal_outcomes,'drift':drift,
-                'tools':dict(tools),'tool_outcomes':dict(tool_outcomes),'denied_then_observed_executing':len(tool_denials & tool_executions),'observed_agent_ids':sorted(agent_ids),'models':dict(models),'learning':dict(learn),'context_cache':dict(cache),
+                'tools':dict(tools),'tool_outcomes':dict(tool_outcomes),'denied_then_observed_executing':len(tool_denials & tool_executions),'observed_agent_ids':sorted(agent_ids),'models':dict(models),'learning':dict(learn),'context_cache':dict(cache),'context_compilation':dict(compilation),
                 'observed_model_turns':len(turn_ids) or None,'observed_user_turns':len(user_ids) or None,
                 'elapsed_seconds':(run['finished_ns']-run['started_ns'])/1e9 if run['finished_ns'] else None,
                 'observed_span_seconds':(last-first)/1e9 if first is not None else None,

@@ -14,6 +14,7 @@ from .util import digest, read_json, write_json, safe_endpoint
 from .models import validate_registry
 from .knowledge import DEFAULT_KNOWLEDGE, validate_knowledge
 from .plugins import DEFAULT_PLUGINS, validate_plugins
+from .context import DEFAULT_CONTEXT, validate_context
 from .decision_transport import validate_decision
 
 DEFAULTS = {
@@ -25,6 +26,7 @@ DEFAULTS = {
     "inference": {"models": {}, "policy": {}},
     "knowledge": DEFAULT_KNOWLEDGE,
     "plugins": DEFAULT_PLUGINS,
+    "context_compiler": DEFAULT_CONTEXT,
     "decision": {"provider": "off", "endpoint": "https://api.typesafe.ai/v1/systemone", "model": "jev-latest", "key_env": "TYPESAFE_API_KEY", "timeout_seconds": 2, "max_state_chars": 16000, "cache_seconds": 60},
     "authority": {"endpoint": "", "key_env": "GW_AUTHORITY_TOKEN", "timeout_seconds": 2},
     "proxy": {"compact_tool_json": False, "inject_task": False, "max_output_tokens": 0, "models": {}},
@@ -40,7 +42,7 @@ DEFAULTS = {
 }
 EFFECTS = {"allow", "advise", "approve", "deny"}
 EVENTS = {"session.start", "tool.before", "tool.after", "model.request", "model.response", "inference.select"}
-PROJECT_KEYS = {"version", "mode", "goals", "rules", "registry", "proxy", "clients", "locked", "inference"}
+PROJECT_KEYS = {"version", "mode", "goals", "rules", "registry", "proxy", "clients", "locked", "inference", "context_compiler"}
 
 
 def home_path(value: str | None = None) -> pathlib.Path:
@@ -129,6 +131,7 @@ def validate(config: dict) -> None:
     validate_registry(config["inference"])
     validate_knowledge(config["knowledge"])
     validate_plugins(config["plugins"])
+    validate_context(config["context_compiler"])
     if config["mode"] == "baseline" and config["authority"].get("endpoint"):
         raise ValueError("Baseline mode cannot bypass a configured external authority")
     proxy = config["proxy"]

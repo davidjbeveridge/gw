@@ -91,3 +91,9 @@ an HTTP adapter and optional official MCP SDK transport. Plugin factories use
 `gw_knowledge.providers` entry points. See [KNOWLEDGE.md](KNOWLEDGE.md) and the
 [standalone adapter guide](../packages/gw-knowledge/ADAPTERS.md). Cached knowledge
 is source evidence, not authority or a substitute for policy evaluation.
+
+## Agent and context interfaces
+
+The optional [agent MCP interface](AGENT_INTERFACE.md) exposes host-bound operations.
+[Decision cascades](DECISION_CASCADES.md) retain the typed decision contract.
+[ContextCompiler](CONTEXT_COMPILER.md) is independently usable through gw-knowledge.

@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # Pinned, user-local installation. No sudo, shell-profile edits, API keys or daemon.
 set -euo pipefail
-REF="${GW_REF:-v0.5.0}"
+REF="${GW_REF:-v0.6.0}"
 KNOWLEDGE=0
 PLUGINS=0
+AGENT_TOOLS=0
 ARGS=()
 for arg in "$@"; do
-  if [ "$arg" = "--knowledge" ]; then KNOWLEDGE=1; elif [ "$arg" = "--plugins" ]; then PLUGINS=1; else ARGS+=("$arg"); fi
+  if [ "$arg" = "--knowledge" ]; then KNOWLEDGE=1; elif [ "$arg" = "--plugins" ]; then PLUGINS=1; elif [ "$arg" = "--agent-tools" ]; then AGENT_TOOLS=1; ARGS+=("--agent-tools"); else ARGS+=("$arg"); fi
 done
 case "$REF" in *[!A-Za-z0-9._-]*) echo 'Invalid GW_REF' >&2; exit 1;; esac
 ROOT="${GW_INSTALL_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/gw}"
@@ -40,6 +41,10 @@ if [ "$PLUGINS" = 1 ]; then
     "$ROOT/venv/bin/python" -m pip install --disable-pip-version-check --no-input --upgrade \
       "https://github.com/davidjbeveridge/gw/archive/${REF}.zip#subdirectory=packages/${package}"
   done
+fi
+if [ "$AGENT_TOOLS" = 1 ]; then
+  "$ROOT/venv/bin/python" -m pip install --disable-pip-version-check --no-input --upgrade \
+    "gw-supervisor[agent] @ https://github.com/davidjbeveridge/gw/archive/${REF}.zip"
 fi
 ln -sfn "$ROOT/venv/bin/gw" "$BIN/gw"
 "$ROOT/venv/bin/gw" bootstrap "${ARGS[@]}"

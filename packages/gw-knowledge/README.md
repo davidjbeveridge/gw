@@ -4,7 +4,7 @@
 of GW, any agent harness, model provider, or commercial service. MIT licensed.
 
 Python 3.10+, standard library only for the core. SQLite must include FTS5.
-Package version: **0.1.0**. Adapter protocol: **`gw.knowledge/1`**.
+Package version: **0.2.0**. Adapter protocol: **`gw.knowledge/1`**.
 
 ## Install independently
 
@@ -18,11 +18,11 @@ gw-knowledge --version
 From the GW release (no GW supervisor installation required):
 
 ```bash
-python -m pip install 'https://github.com/davidjbeveridge/gw/archive/v0.4.0.zip#subdirectory=packages/gw-knowledge'
+python -m pip install 'https://github.com/davidjbeveridge/gw/archive/v0.6.0.zip#subdirectory=packages/gw-knowledge'
 ```
 
-A separate `gw_knowledge-0.1.0-py3-none-any.whl` and standalone source ZIP are
-published with GW v0.4.0. No PyPI publication is implied. Copy this directory to
+A separate `gw_knowledge-0.2.0-py3-none-any.whl` and standalone source ZIP are
+published with GW v0.6.0. No PyPI publication is implied. Copy this directory to
 another repository and build it unchanged: it has its own package metadata,
 license, documentation, tests, CLI, schemas, and conformance helpers. It imports
 nothing from `gw_supervisor`. Both packages can evolve independently.
@@ -236,3 +236,12 @@ CI additionally copies this directory out of the GW repository, builds/installs
 its wheel without GW, and executes the tests from outside the repository. Adapter
 authors can reuse `gw_knowledge.conformance.ReadConformanceMixin` and the read-only
 `check_provider()` smoke; passing is not a retrieval or security audit.
+
+## Context compiler (0.2)
+
+`gw_knowledge.compiler.ContextCompiler` is a standalone protocol. The bundled
+`DeterministicContextCompiler` ranks exact `ContextItem` values, preserves required
+items whole, rejects conflicting source revisions, and returns a bounded
+`gw.context/1` packet with provenance and omissions. No model call, generated
+summary or tool-schema pruning is performed. See the compiler module and
+`tests/test_compiler.py` for independently runnable examples.

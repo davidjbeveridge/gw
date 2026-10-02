@@ -1,6 +1,6 @@
 # gW
 
-> Configurable local agent supervision. Current runtime: gW 0.4.0; optional independent gw-knowledge 0.1.0. Read the implemented contract, not an earlier design sketch.
+> Configurable local agent supervision. Current runtime: gW 0.6.0; optional independent gw-knowledge 0.2.0. Read the implemented contract, not an earlier design sketch.
 
 ## Start and scope
 
@@ -39,3 +39,9 @@
 - [References](docs/REFERENCES.md): annotated primary technologies, standards and research.
 - [Roadmap](docs/ROADMAP.md): explicitly unimplemented future work.
 - [Contributing](CONTRIBUTING.md): tests, documentation and evidence requirements.
+
+## Agent operation and context
+
+- [Agent interface](docs/AGENT_INTERFACE.md): native MCP, setup plans, dashboard and run tools.
+- [Decision cascades](docs/DECISION_CASCADES.md): bounded primary/fallback and managed endpoints.
+- [Context compiler](docs/CONTEXT_COMPILER.md): exact source assembly, required retention and delivery.

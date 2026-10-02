@@ -1,7 +1,7 @@
 # gw-observe
 
 Deterministic local run observability. Independent of the GW supervisor; MIT,
-Python 3.10+, no runtime dependencies. Version 0.1.0. Metadata envelope
+Python 3.10+, no runtime dependencies. Version 0.2.0. Metadata envelope
 `gw.observation/1`; cloud interoperability uses standard OTLP/HTTP JSON.
 
 Install this directory with `python -m pip install .`. The release includes a
@@ -65,3 +65,7 @@ tests -v`. Tests require no model credentials or managed observability account.
 SQLite and source files are user-owned, not tamper-proof audit storage. Prompt
 capture is opt-in, source previews are bounded, and redaction is best effort—not
 DLP or secure erasure. Back up and retain the source stores deliberately.
+
+Context compilation events also produce source-to-packet relationships and
+compilation totals in the local Context view. They do not store another copy of
+the compiled text.

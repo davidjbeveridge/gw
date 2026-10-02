@@ -9,6 +9,7 @@ import time
 from typing import Any
 from .config import EVENTS, get_path, home_path, initialize, project_root, resolve
 from .providers import Classifier, HttpAuthority
+from .decisions import make_decider, append_calls
 from .models import select as select_model, requirements, decision_config
 from .store import Store
 from .util import canonical, digest, finite, redact
@@ -186,18 +187,21 @@ class Supervisor:
                 result["classifier_status"] = "no_pinned_task"
             else:
                 state = {"task": session["task"], "event": redact({k: v for k, v in event.items() if k not in {"project", "session", "id", "task", "native_trace_hint"}}), "metrics": metrics}
-                cache_key = digest([policy_hash, session["task"], state, choices])
                 try:
+                    from .context import supervisor_context
+                    state, context_id = supervisor_context(self.home, session, event, state, self.store)
+                    if context_id:
+                        result["compiled_context_id"] = context_id
+                    cache_key = digest([policy_hash, session["task"], state, choices])
                     labels = self.store.get_cache(cache_key)
                     if labels is None:
-                        provider = self.classifier or Classifier(decision_config(config))
+                        provider = self.classifier or make_decider(decision_config(config))
                         call_start = time.perf_counter()
                         try:
                             labels = provider.decide(state, choices)
                         finally:
                             if tracking:
-                                audit["classifier_calls"].append({"purpose":"goals","elapsed_ms":round((time.perf_counter()-call_start)*1000,3),
-                                    "model":config["decision"].get("model"),"usage":usage_metadata(getattr(provider,"last_usage",None))})
+                                append_calls(audit, provider, "goals", round((time.perf_counter()-call_start)*1000,3), config["decision"].get("model"))
                         if not isinstance(labels, dict) or any(labels.get(k) not in g["choices"] for k, g in choices.items()):
                             raise ValueError("Invalid classification")
                         self.store.put_cache(cache_key, labels, config["decision"].get("cache_seconds", 60))
@@ -247,7 +251,7 @@ class Supervisor:
                     selector = self.classifier
                     if selector is None and config["decision"]["provider"] != "off":
                         try:
-                            selector = Classifier(decision_config(config))
+                            selector = make_decider(decision_config(config))
                         except ValueError:
                             pass  # select() reports classifier_unavailable, never assumes success.
                     if tracking and selector is not None:
@@ -258,8 +262,7 @@ class Supervisor:
                                 try:
                                     return inner_selector.decide(state, questions)
                                 finally:
-                                    audit["classifier_calls"].append({"purpose":"model_selection", "elapsed_ms":round((time.perf_counter()-t)*1000,3),
-                                        "model":config["decision"].get("model"), "usage":usage_metadata(getattr(inner_selector,"last_usage",None))})
+                                    append_calls(audit, inner_selector, "model_selection", round((time.perf_counter()-t)*1000,3), config["decision"].get("model"))
                         selector = MeasuredSelector()
                     selection = select_model(config["inference"], req, selector, {"task": session["task"], "request": event.get("latest_user_excerpt", ""), "metrics": metrics})
                     result["inference"] = selection

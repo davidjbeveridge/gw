@@ -50,7 +50,7 @@ class Classifier:
         body = request_body(c, sanitized, goals)
         if len(canonical(body)) > c.get("max_request_chars", 64000):
             raise RuntimeError("decision_request_too_large: abstained instead of truncating")
-        raw = post_json(c["endpoint"], body, credential(c), c["timeout_seconds"])
+        raw = post_json(c["endpoint"], body, credential(c), c.get("timeout_seconds", 2))
         self.last_usage = raw.get("usage") if isinstance(raw.get("usage"),dict) else None
         return parse_answers(c, raw, goals)
 
