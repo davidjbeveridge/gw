@@ -93,10 +93,12 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         raise ValueError("Redirect refused: do not forward credentials to a different endpoint")
 
 
-def post_json(url: str, body: dict, token: str = "", timeout: float = 3, max_bytes: int = 4_194_304) -> dict:
+def post_json(url: str, body: dict, token: str = "", timeout: float = 3, max_bytes: int = 4_194_304, *, key_header: str = "Authorization") -> dict:
+    if key_header not in {"Authorization", "X-API-Key"}:
+        raise ValueError("Unsupported credential header")
     headers = {"Content-Type": "application/json"}
     if token:
-        headers["Authorization"] = f"Bearer {token}"
+        headers[key_header] = f"Bearer {token}" if key_header == "Authorization" else token
     req = urllib.request.Request(safe_endpoint(url), canonical(body).encode(), headers)
     with urllib.request.build_opener(NoRedirect).open(req, timeout=timeout) as response:
         raw = response.read(max_bytes + 1)

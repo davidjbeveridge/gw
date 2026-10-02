@@ -14,6 +14,7 @@ from .providers import Classifier
 from .util import digest, read_json, write_json
 
 PRESETS = {
+    "glide": {"provider": "systemone", "endpoint": "https://api.fastino.ai/v1/systemone", "model": "fastino/GLiDE", "auth": "api_key", "key_env": "FASTINO_API_KEY", "strategy": "managed", "timeout_seconds": 5},
     "typesafe": {"provider": "systemone", "endpoint": "https://api.typesafe.ai/v1/systemone", "model": "jev-latest", "auth": "bearer", "key_env": "TYPESAFE_API_KEY"},
     "openrouter": {"provider": "systemone", "endpoint": "https://openrouter.ai/api/v1/systemone", "model": "jev-latest", "auth": "bearer", "key_env": "OPENROUTER_API_KEY"},
     "kev": {"provider": "systemone", "endpoint": "http://127.0.0.1:8009/v1/systemone", "model": "kev-latest", "auth": "none", "key_env": ""},
@@ -24,6 +25,7 @@ PRESETS = {
     "cua": {"provider": "http", "endpoint": "", "model": "", "auth": "bearer", "key_env": "GW_DECISION_API_KEY"},
 }
 NOTES = {
+    "glide": "Fastino GLiDE uses its documented System One endpoint with X-API-Key authentication and manages adaptive thinking internally. No additional GW fallback is configured; account access and quality need a live check.",
     "openrouter": "Uses OpenRouter's System One endpoint and key, not chat/completions or subscription tokens.",
     "kev": "Start and warm a Kev server separately. Setup does not install or download weights.",
     "laya": "Targets NandhaKishorM/laya's HTTP server, not the laya-mlx CLI. Small context limits require workload evaluation; reported truncation is rejected.",
@@ -136,7 +138,7 @@ def candidate(args, existing):
     if args.endpoint and c["auth"] == "none" and urllib.parse.urlsplit(c["endpoint"]).hostname not in {"localhost", "127.0.0.1", "::1"}:
         c["auth"], c["key_env"] = "bearer", args.key_env or "GW_DECISION_API_KEY"
     if args.key_env or args.key_file:
-        c["auth"] = "bearer"
+        c["auth"] = "api_key" if c["auth"] == "api_key" else "bearer"
     if args.no_auth:
         c.update(auth="none", key_env="", key_file="")
     if not c["endpoint"] or not c["model"]:

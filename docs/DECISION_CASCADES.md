@@ -22,9 +22,27 @@ or adaptive reasoning. GW does not second-guess its internal router. It must sti
 return the supported System One, JSON-chat, or custom HTTP decision contract.
 
 This reproduces the fast-path/escalation *pattern*, not another hybrid model's
-training or calibration. No named Glide integration or equivalence in accuracy,
-latency, or cost is claimed. Supply a real compatible endpoint and model ID; GW
-has no fabricated vendor preset for it.
+training or calibration. It does not establish equivalent accuracy, latency,
+or cost. Those require measurements on your actual decisions.
+
+### Fastino GLiDE
+
+The `glide` setup preset uses Fastino's documented `fastino/GLiDE` model at
+`https://api.fastino.ai/v1/systemone`, with `FASTINO_API_KEY` read outside model
+context and sent as `X-API-Key`. It selects `strategy: managed`: GLiDE owns its
+adaptive thinking, so GW does not wrap it in another automatic cascade.
+
+Ask the agent to use the GLiDE preset from `gw_setup_options`, or use
+`gw setup --preset glide --check --yes` in an explicitly authorized setup script.
+A check can incur inference cost. The configured five-second socket timeout is
+still a GW hook constraint, not a Fastino latency guarantee.
+
+Fastino's [quickstart](https://docs.fastino.ai/quickstart) and
+[model catalog](https://docs.fastino.ai/concepts/models) specify this model ID and
+authentication. The [launch description](https://fastino.ai/blog/introducing-glide-the-first-thinking-decision-model)
+explains the fast assessment and extra reasoning for uncertain cases. Our tests
+validate the documented request/response shape and header using fixtures; no live
+Fastino account, latency, calibration, or task-quality result is implied.
 
 ## Configuration
 

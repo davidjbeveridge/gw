@@ -30,8 +30,8 @@ def validate_decision(c: dict) -> None:
         raise ValueError("Decision endpoint must not contain query parameters; use a credential reference")
     if not isinstance(c.get("model"), str) or not c["model"].strip():
         raise ValueError("Decision model ID is required")
-    if c.get("auth", "legacy") not in {"legacy", "bearer", "none"}:
-        raise ValueError("Decision auth must be bearer or none")
+    if c.get("auth", "legacy") not in {"legacy", "bearer", "api_key", "none"}:
+        raise ValueError("Decision auth must be bearer, api_key (X-API-Key), or none")
     key_env = c.get("key_env", "")
     if not isinstance(key_env, str) or (key_env and not ENV_NAME.fullmatch(key_env)):
         raise ValueError("Invalid decision credential environment variable name")
@@ -70,7 +70,7 @@ def credential(c: dict) -> str:
             token = f.read(16385).strip()
     if len(token) > 16384 or any(x.isspace() or ord(x) < 32 for x in token):
         raise ValueError("decision_key_invalid")
-    required = c.get("auth") == "bearer" or (c.get("auth", "legacy") == "legacy" and c["provider"] in {"jev", "systemone", "openai"})
+    required = c.get("auth") in {"bearer", "api_key"} or (c.get("auth", "legacy") == "legacy" and c["provider"] in {"jev", "systemone", "openai"})
     if required and not token:
         raise RuntimeError("decision_key_missing")
     return token
