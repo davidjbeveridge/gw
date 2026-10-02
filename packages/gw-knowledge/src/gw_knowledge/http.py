@@ -14,6 +14,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from socketserver import TCPServer
 from .contract import (
     PROTOCOL, Scope, SearchRequest, ReadRequest, DocumentInput, KnowledgeError,
     InvalidRequest, Unsupported, NotFound, Conflict, Unavailable, canonical,
@@ -187,4 +188,11 @@ def make_server(service, token: str, port: int = 0):
                 self.reply(status, {"protocol": PROTOCOL, "error": {"code": exc.code}})
             except Exception:
                 self.reply(503, {"protocol": PROTOCOL, "error": {"code": "unavailable"}})
-    return ThreadingHTTPServer(("127.0.0.1", port), Handler)
+    class LoopbackHTTPServer(ThreadingHTTPServer):
+        def server_bind(self):
+            # The endpoint is a literal loopback address; reverse DNS adds no
+            # security or functionality and can stall offline/macOS startup.
+            TCPServer.server_bind(self)
+            self.server_name = "127.0.0.1"
+            self.server_port = self.server_address[1]
+    return LoopbackHTTPServer(("127.0.0.1", port), Handler)
