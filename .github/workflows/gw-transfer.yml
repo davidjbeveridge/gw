@@ -29,11 +29,14 @@ jobs:
           git checkout --detach 7a125cef5102a89fbebd49598aacf0f21fa87309
           git apply --check "$RUNNER_TEMP/gw-v060.patch"
           git apply --binary "$RUNNER_TEMP/gw-v060.patch"
+          # Workflow edits are applied separately through the authorized connector.
+          # GITHUB_TOKEN only has content permission; do not widen its permissions.
+          git restore --source=HEAD -- .github/workflows/ci.yml
           test ! -e .gw-transfer
           test ! -e .github/workflows/gw-transfer.yml
           python -m compileall -q gw_supervisor packages/gw-knowledge/src
           git add -A
-          test "$(git diff --cached --name-only | wc -l)" -eq 45
+          test "$(git diff --cached --name-only | wc -l)" -eq 44
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'Add agent controls, bounded decision cascades and context compiler'
