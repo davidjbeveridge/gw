@@ -1,3 +1,20 @@
+# v0.4 validation
+
+The new knowledge package and GW bridge are tested separately. Core CI installs
+both distributions and exercises the suites on Python 3.10/3.13 and Linux/macOS/
+Windows. A dedicated job copies only packages/gw-knowledge into a temporary
+standalone directory, builds its wheel, confirms GW is not importable, and runs
+the package suite with the actual MCP SDK and JSON Schema validator installed.
+
+Coverage includes local/HTTP read conformance, scoped access and revocation,
+source updates/deletion/expiration, index rebuilds and newly added documents,
+empty-result invalidation, CAS conflicts/rollback, Unicode ranges, TTL/LRU,
+unversioned opt-in validation, no stale fallback, real loopback service behavior,
+MCP discovery/search/read/context/resource access, explicit write tools, source
+export/restore, CLI integration and package independence. No semantic/vector
+accuracy, managed-provider integration, enterprise ACL or savings benchmark is
+established. Prior validation records below are preserved.
+
 # v0.3 validation
 
 The suite contains **152 tests**: 144 dependency-free tests plus eight optional

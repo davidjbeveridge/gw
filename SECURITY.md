@@ -29,3 +29,14 @@ JSON minification removes only whitespace outside strings, without reserializing
 ## Reporting
 
 Open an issue without credentials, private tasks, or raw production traces. For a potentially exploitable disclosure, contact the repository owner privately through an appropriate existing channel before posting technical details publicly. Do not submit live secrets as a reproduction.
+
+## Knowledge extension
+
+Knowledge ingestion is explicit. Source/cache text remains untrusted data, not
+authorization or high-trust instructions. The standalone reference HTTP/MCP
+servers bind scope outside model arguments; SDK scope remains a trusted-host
+assertion. Local storage is not encrypted or tamper-proof against same-user code.
+Context-cache reuse depends on truthful corpus/index/ACL revision tokens. Unknown
+revision caching is off by default; provider outages never serve stale packets.
+Logical deletion is not secure disk/WAL/backup erasure. See the standalone
+package security limitations before applying enterprise retention requirements.

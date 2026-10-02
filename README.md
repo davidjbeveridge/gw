@@ -4,14 +4,14 @@
 
 One decision engine. Native agent hooks. An optional LiteLLM callback and HTTP API. SQLite state. No runtime dependencies in the core. No new orchestration framework.
 
-This is a **v0.3 prerelease**, not an enterprise security boundary or a claim that every agent runtime has been integration-tested. It implements deterministic policy, opt-in System One/JSON/HTTP classification, cumulative drift, retry limits, repetition candidates and protocol-aware proxy transforms. It does not automatically generate/install tools or resolve passwords.
+This is a **v0.4 prerelease**, not an enterprise security boundary or a claim that every agent runtime has been integration-tested. It implements deterministic policy, opt-in System One/JSON/HTTP classification, cumulative drift, retry limits, repetition candidates and protocol-aware proxy transforms. It does not automatically generate/install tools or resolve passwords.
 
 ## Install and bootstrap
 
 macOS / Linux, **Python 3.10+**:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.3.0/install.sh | bash -s -- --all
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.4.0/install.sh | bash -s -- --all
 ```
 
 This installs an isolated virtual environment under `~/.local/share/gw`, links `~/.local/bin/gw`, and registers user-level hooks for Claude Code, Codex, Gemini CLI, Cursor, Copilot/VS Code and OpenCode's classic plugin API. It preserves unrelated configuration, backs up changed files, and does not use sudo or modify shell profiles, login credentials, model selection, billing or permissions. Python must already be installed. The installer prints the PATH command when `~/.local/bin` is not on PATH.
@@ -21,7 +21,7 @@ This installs an isolated virtual environment under `~/.local/share/gw`, links `
 Windows / PowerShell, with Python 3.10+ on PATH:
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.3.0/install.ps1))) -All
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.4.0/install.ps1))) -All
 ```
 
 Windows installs under `%LOCALAPPDATA%\gw\venv`; the script prints the full `gw.exe` path. It does not change execution policy or machine PATH.
@@ -183,6 +183,23 @@ create accounts or turn subscription quota into API credits. Optional OpenRouter
 catalog import accepts an explicit model list and leaves entries disabled until
 reviewed. See [Model registry and routing](docs/MODELS.md) for configuration,
 subscription boundaries, the HTTP API and supported media contracts.
+
+## Optional knowledge and context caching
+
+`gw-knowledge` is a separate, independently installable MIT package. Add
+`--knowledge` to the installer, then run `gw knowledge init`. It provides durable
+source storage, keyword/structured search, revision-aware context caching, a
+versioned adapter contract, remote HTTP adapters and optional standard MCP access.
+It does not automatically capture transcripts or inject prompts.
+
+```bash
+gw knowledge ingest docs/CONFIGURATION.md --id configuration
+gw knowledge context "decision provider"
+```
+
+[GW integration guide](docs/KNOWLEDGE.md) ·
+[Standalone package](packages/gw-knowledge/README.md) ·
+[Adapter contract](packages/gw-knowledge/ADAPTERS.md)
 
 ## Agent support and verification
 

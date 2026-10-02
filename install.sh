@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 # Pinned, user-local installation. No sudo, shell-profile edits, API keys or daemon.
 set -euo pipefail
-REF="${GW_REF:-v0.3.0}"
+REF="${GW_REF:-v0.4.0}"
+KNOWLEDGE=0
+ARGS=()
+for arg in "$@"; do
+  if [ "$arg" = "--knowledge" ]; then KNOWLEDGE=1; else ARGS+=("$arg"); fi
+done
 case "$REF" in *[!A-Za-z0-9._-]*) echo 'Invalid GW_REF' >&2; exit 1;; esac
 ROOT="${GW_INSTALL_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/gw}"
 BIN="${GW_BIN_DIR:-$HOME/.local/bin}"
@@ -25,8 +30,12 @@ fi
 "$PYTHON" -m venv "$ROOT/venv"
 "$ROOT/venv/bin/python" -m pip install --disable-pip-version-check --no-input --upgrade \
   "https://github.com/davidjbeveridge/gw/archive/${REF}.zip"
+if [ "$KNOWLEDGE" = 1 ]; then
+  "$ROOT/venv/bin/python" -m pip install --disable-pip-version-check --no-input --upgrade \
+    "https://github.com/davidjbeveridge/gw/archive/${REF}.zip#subdirectory=packages/gw-knowledge"
+fi
 ln -sfn "$ROOT/venv/bin/gw" "$BIN/gw"
-"$ROOT/venv/bin/gw" bootstrap "$@"
+"$ROOT/venv/bin/gw" bootstrap "${ARGS[@]}"
 printf '\nInstalled %s\n' "$BIN/gw"
 case ":${PATH}:" in *":${BIN}:"*) ;; *) printf 'For the gw command in this shell: export PATH="%s:$PATH"\n' "$BIN";; esac
 printf 'Next: gw doctor. Restart agents; in Codex, review /hooks.\n'

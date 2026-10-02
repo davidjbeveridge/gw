@@ -1,38 +1,47 @@
-# gw v0.3.0 — guided decision-backend setup
+# gw v0.4.0 — pluggable knowledge and context caching
 
-Configure the supervisor's own decision model independently of worker models.
+Adds **gw-knowledge 0.1.0**, a separate MIT-licensed distribution. It has no GW
+imports and can be copied, built and installed independently. The release includes
+both wheels and a standalone knowledge source archive.
 
-- `gw setup`: interactive guide; noninteractive presets, dry-run, backup and apply.
-- TypeSafe and OpenRouter System One endpoints; keyless/authenticated local Kev
-  and Laya; arbitrary compatible System One or JSON chat proxies; custom HTTP
-  and explicit CUA bridge configuration.
-- `gw setup --describe`: JSON manifest; an agent setup skill and detailed guide.
-- `gw decision status/check`: no-network inspection or one synthetic test call.
-  Failed checked setup leaves existing config unchanged. The smoke is not an
-  accuracy evaluation.
-- Environment/private-file credential references; no raw keys stored in config.
-- Reject invalid/incomplete/refused decisions and reported context truncation.
-- Preserve worker login/billing, policies, registry and old session snapshots.
+## Included
 
-## Install or update
+- Provider-neutral `gw.knowledge/1` contract, typed Python protocols, packaged
+  JSON Schema, installed-adapter entry points and reusable conformance tests.
+- SQLite/FTS5 local sources and indexes, keyword and structured search, exact
+  source ranges/provenance, explicit ingestion/export, revisions and CAS updates.
+- Context packets with scope/principal-aware keys, source/index/corpus/ACL
+  invalidation, bounded TTL/LRU, and no stale-on-error or answer replay.
+- HTTP adapter and scope-bound reference service for self-hosted/cloud bridges.
+- Optional standard MCP tools/resources through the actual Python SDK.
+- GW CLI/API integration; no automatic transcript capture or context injection.
+
+## Install
 
 Python 3.10+, macOS/Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.3.0/install.sh | bash -s -- --all
-gw setup
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.4.0/install.sh | bash -s -- --all --knowledge
+gw knowledge init
+gw knowledge ingest docs/CONFIGURATION.md --id configuration
+gw knowledge context 'decision provider'
 ```
 
-Restart agents and start new sessions. For OpenRouter, provision
-OPENROUTER_API_KEY outside chat, then run
-`gw setup --preset openrouter --check --yes`.
+Use a source file that exists in your project. The PowerShell installer supports
+`-Knowledge`. Existing installation without the switch remains dependency-free.
+See docs/KNOWLEDGE.md and packages/gw-knowledge/README.md for standalone/MCP setup.
 
-## Validation and limits
+## Validation and boundaries
 
-152 tests: 144 core tests across the six OS/Python combinations, plus eight
-actual-LiteLLM callback tests separately. Installer checks run on all three OSes;
-publication is gated on those jobs. No live provider keys or model weights were
-used. Local model servers must be installed/warmed separately. CUA nano/forms
-are NOT claimed as general-purpose drop-in supervisors; a task-appropriate,
-evaluated bridge is required. Arbitrary proxy compatibility requires the chosen
-wire contract. See docs/DECISION_SETUP.md and docs/VALIDATION.md.
+CI gates publication on the existing six OS/Python combinations, fresh installers
+on all three OSes, real LiteLLM tests, and a new independent-package job. That job
+extracts the knowledge package outside the repository, builds/installs its wheel
+without GW, and tests actual MCP stdio and JSON Schema contracts. No managed
+provider accounts, paid model inference or production-scale benchmarks are used.
+
+The local provider implements keyword/structured search, not vector embeddings.
+Semantic/hybrid backends can implement the same interface. No commercial vendor
+adapter, enterprise synchronization, generative memory extractor, automatic prompt
+injection or policy authority from stored knowledge is claimed. Remote services
+must implement the wire contract or supply an adapter. Scope is host-bound, not
+an enterprise identity attestation; local files are not encrypted/tamper-proof.

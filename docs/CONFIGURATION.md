@@ -84,3 +84,9 @@ At three successful repeats, a candidate record is proposed. No source code is g
 ## Core decision-provider setup
 
 Use `gw setup` or `gw setup --describe`; see [DECISION_SETUP.md](DECISION_SETUP.md). Transport settings live in global/global-client `decision` configuration, not project files. `provider` selects `systemone`, `openai`, `http`, legacy `jev`, or `off`. Credentials are references (`key_env`, optional `key_file`), never literal keys. `auth: none` sends none.
+
+## Optional knowledge backend
+
+Global/global-client `knowledge` config is separate from goals and model routing.
+See [KNOWLEDGE.md](KNOWLEDGE.md) for local/remote setup, scopes and context-cache
+limits. Project configs cannot redirect the backend or change its principal.

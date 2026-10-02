@@ -79,6 +79,8 @@ def parser():
     importing.add_argument("--file", help="Read a saved catalog instead of making a public HTTP GET")
     from .decision_setup import add_arguments
     add_arguments(sub)
+    from .knowledge import add_arguments as add_knowledge_arguments
+    add_knowledge_arguments(sub)
     return p
 
 
@@ -110,6 +112,9 @@ def main(argv=None):
             output(manifest())
             return
         initialize(home)
+        if args.cmd == "knowledge":
+            from .knowledge import run
+            return run(args, home, output)
         if args.cmd == "setup":
             from .decision_setup import run_setup
             return run_setup(args, home, output)

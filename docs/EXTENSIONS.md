@@ -81,3 +81,13 @@ polling, cancellation, idempotency and authorization remain the executor's job.
 The selection result is not a capability token or authorization to execute tools.
 
 See [Decision setup](DECISION_SETUP.md) for endpoint/credential onboarding and protocol limits.
+
+## KnowledgeProvider (independent package)
+
+`gw-knowledge` is optional and imports nothing from the supervisor. Required read
+operations are capabilities/revision/search/read; writes are optional. The open
+`gw.knowledge/1` backend contract has packaged JSON Schema and Python protocols,
+an HTTP adapter and optional official MCP SDK transport. Plugin factories use
+`gw_knowledge.providers` entry points. See [KNOWLEDGE.md](KNOWLEDGE.md) and the
+[standalone adapter guide](../packages/gw-knowledge/ADAPTERS.md). Cached knowledge
+is source evidence, not authority or a substitute for policy evaluation.

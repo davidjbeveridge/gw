@@ -12,6 +12,7 @@ import secrets
 from typing import Any
 from .util import digest, read_json, write_json, safe_endpoint
 from .models import validate_registry
+from .knowledge import DEFAULT_KNOWLEDGE, validate_knowledge
 from .decision_transport import validate_decision
 
 DEFAULTS = {
@@ -21,6 +22,7 @@ DEFAULTS = {
     "rules": {},
     "registry": {},
     "inference": {"models": {}, "policy": {}},
+    "knowledge": DEFAULT_KNOWLEDGE,
     "decision": {"provider": "off", "endpoint": "https://api.typesafe.ai/v1/systemone", "model": "jev-latest", "key_env": "TYPESAFE_API_KEY", "timeout_seconds": 2, "max_state_chars": 16000, "cache_seconds": 60},
     "authority": {"endpoint": "", "key_env": "GW_AUTHORITY_TOKEN", "timeout_seconds": 2},
     "proxy": {"compact_tool_json": False, "inject_task": False, "max_output_tokens": 0, "models": {}},
@@ -123,6 +125,7 @@ def validate(config: dict) -> None:
     if config["authority"].get("endpoint"):
         safe_endpoint(config["authority"]["endpoint"])
     validate_registry(config["inference"])
+    validate_knowledge(config["knowledge"])
     proxy = config["proxy"]
     if not isinstance(proxy.get("max_output_tokens", 0), int) or proxy.get("max_output_tokens", 0) < 0:
         raise ValueError("max_output_tokens must be a nonnegative integer")

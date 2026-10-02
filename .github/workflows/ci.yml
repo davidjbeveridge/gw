@@ -20,8 +20,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: python -m pip install .
+      - run: python -m pip install . ./packages/gw-knowledge
       - run: python -m unittest discover -s tests -v
+      - run: python -m unittest discover -s packages/gw-knowledge/tests -v
       - run: gw --version
       - run: python -m compileall -q gw_supervisor
       - name: Shell installer syntax
@@ -59,11 +60,15 @@ jobs:
           export GW_HOME="$HOME/state"
           export GW_INSTALL_DIR="$HOME/install"
           export GW_BIN_DIR="$HOME/bin"
-          bash install.sh --all
+          bash install.sh --all --knowledge
           "$GW_BIN_DIR/gw" --version
           "$GW_BIN_DIR/gw" bootstrap --all > second.json
           python -c 'import json; d=json.load(open("second.json")); assert len(d["changes"]) == 6; assert all(not x["changed"] for x in d["changes"])'
           "$GW_BIN_DIR/gw" doctor
+          "$GW_INSTALL_DIR/venv/bin/python" -I -c "import gw_knowledge; print(gw_knowledge.__version__)"
+          "$GW_BIN_DIR/gw" knowledge init
+          "$GW_BIN_DIR/gw" knowledge ingest README.md --id readme
+          "$GW_BIN_DIR/gw" knowledge context "supervisor"
       - name: Install and bootstrap on Windows
         if: runner.os == 'Windows'
         shell: pwsh
@@ -74,12 +79,16 @@ jobs:
           $env:GW_INSTALL_DIR = Join-Path $env:RUNNER_TEMP 'gw-install'
           $project = Join-Path $env:RUNNER_TEMP 'gw-project'
           New-Item -ItemType Directory -Force $project | Out-Null
-          ./install.ps1 -All -Project $project
+          ./install.ps1 -All -Project $project -Knowledge
           $gw = Join-Path $env:GW_INSTALL_DIR 'venv\Scripts\gw.exe'
           & $gw --version
           $result = & $gw bootstrap --all --project $project | ConvertFrom-Json
           if (($result.changes | Where-Object changed).Count -ne 0) { throw 'Bootstrap was not idempotent' }
           & $gw doctor --project $project
+          & $gw knowledge --project $project init
+          & $gw knowledge --project $project ingest README.md --id readme
+          & $gw knowledge --project $project context "supervisor"
+          if ($LASTEXITCODE -ne 0) { throw "Knowledge smoke failed" }
   litellm:
     runs-on: ubuntu-latest
     steps:
@@ -90,9 +99,27 @@ jobs:
       - run: python -m pip install . litellm
       - run: python -c "import importlib.metadata; print('LiteLLM', importlib.metadata.version('litellm'))"
       - run: python -m unittest discover -s tests -p test_litellm.py -v
+  knowledge-standalone:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Build extracted package without the GW repository
+        shell: bash
+        run: |
+          cp -R packages/gw-knowledge "$RUNNER_TEMP/knowledge-standalone"
+          cd "$RUNNER_TEMP"
+          python -m pip wheel --no-deps --wheel-dir wheels ./knowledge-standalone
+          python -m pip install wheels/gw_knowledge-*.whl 'mcp>=1.12,<2' jsonschema
+          python -c "import importlib.util; assert importlib.util.find_spec('gw_supervisor') is None; from gw_knowledge import __version__; print(__version__)"
+          python -c "import importlib.metadata; print('MCP', importlib.metadata.version('mcp'))"
+          python -m unittest discover -s knowledge-standalone/tests -v
+          gw-knowledge --version
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [test, installer, litellm]
+    needs: [test, installer, litellm, knowledge-standalone]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -101,7 +128,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - run: python -m pip wheel --no-deps --wheel-dir dist .
+      - run: python -m pip wheel --no-deps --wheel-dir dist . ./packages/gw-knowledge
       - name: Publish version without replacing an existing release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -115,6 +142,7 @@ jobs:
             exit 0
           fi
           git archive --format=zip HEAD -o "dist/gw-${version}-source.zip"
+          git archive --format=zip HEAD:packages/gw-knowledge -o dist/gw-knowledge-v0.1.0-source.zip
           (cd dist && sha256sum *.whl *.zip > SHA256SUMS)
           cp docs/RELEASE_NOTES.md release-notes.md
           printf '\nValidation run: https://github.com/%s/actions/runs/%s\n' "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" >> release-notes.md

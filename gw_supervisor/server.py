@@ -60,6 +60,10 @@ def make_server(home: pathlib.Path, port: int = 7777) -> ThreadingHTTPServer:
                 if self.headers.get("Content-Type", "").split(";", 1)[0] != "application/json":
                     return self.respond(415, {"error": "expected_json"})
                 body = strict_json(self.rfile.read(length).decode())
+                if self.path == "/v1/knowledge":
+                    from .knowledge import call
+                    result = call(home, body["context"], body["method"], body.get("request", {}))
+                    return self.respond(200, result)
                 with Supervisor(home) as supervisor:
                     if self.path == "/v1/events":
                         result = supervisor.evaluate(body)
