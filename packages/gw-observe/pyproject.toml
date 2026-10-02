@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gw-observe"
+version = "0.1.0"
+description = "Local, deterministic observability for agent decisions and outcomes"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+readme = "README.md"
+dependencies = []
+
+[project.scripts]
+gw-observe = "gw_observe.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+gw_observe = ["py.typed", "web/*", "schemas/*.json"]

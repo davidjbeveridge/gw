@@ -68,6 +68,20 @@ def open_service(home, project, client):
         if hasattr(provider, "close"):
             stack.callback(provider.close)
         cache = stack.enter_context(ContextCache(home / "knowledge" / "cache", **c["cache"]))
+        from .plugins import enabled, publish_component
+        if enabled(config):
+            try:
+                from gw_observe.knowledge import ObservedKnowledgeProvider, ObservedContextCache
+                import os,uuid
+                identity={"client":client,"project":str(project),"session":os.environ.get("GW_SESSION") or "knowledge-"+uuid.uuid4().hex,
+                          "run_id":os.environ.get("GW_RUN_ID")}
+                def emit(kind,attrs,start,end):
+                    publish_component(home,config,identity,kind,attrs,start_ns=start,end_ns=end)
+                provider=ObservedKnowledgeProvider(provider,emit)
+                cache=ObservedContextCache(cache,emit)
+            except ImportError:
+                import warnings
+                warnings.warn("Knowledge tracing unavailable: optional gw-observe package is not installed",RuntimeWarning)
         yield KnowledgeService(provider, cache, scope=scope, writable=c["allow_writes"])
 
 

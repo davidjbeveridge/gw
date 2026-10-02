@@ -4,7 +4,8 @@ from __future__ import annotations
 import copy
 import json
 import uuid
-from .util import canonical, redact, strict_json
+import time
+from .util import canonical, redact, strict_json, digest
 from .models import requirements
 
 MARKER = "[gw pinned task] "
@@ -182,15 +183,18 @@ def model_summary(payload: dict, wire: str = "chat") -> dict:
     return {"model": payload.get("model", ""), "latest_user_excerpt": user[:6000], "excerpt_truncated": len(user) > 6000, "request_chars": len(raw), "capabilities": capabilities}
 
 
-def process_request(supervisor, context: dict, payload: dict, wire: str = "chat") -> dict:
+def _process_request(supervisor, context: dict, payload: dict, wire: str = "chat") -> dict:
     if wire not in WIRES or not isinstance(payload, dict):
         raise ValueError("Unsupported model request format")
     event = {**context, "type": "model.request", "id": context.get("id", str(uuid.uuid4())), **model_summary(payload, wire), "requirements": request_requirements(payload, wire, context.get("requirements"))}
     session = supervisor.session_context(event)
     config = session["config"]["proxy"]
+    if session["config"]["mode"] == "baseline":
+        result = supervisor.evaluate(event)
+        return {**result,"payload":payload,"request_id":event["id"],"transform":{"baseline":True,"input_bytes":len(canonical(payload).encode()),"output_bytes":len(canonical(payload).encode())}}
     if config.get("block_detected_secrets", False) and canonical(redact(payload)) != canonical(payload):
         # Heuristic detection only; this is neither complete DLP nor a secret broker.
-        return {"decision": "deny", "reason": "Potential secret detected in model input", "payload": payload}
+        event["preflight_denial"] = "Potential secret detected in model input"
     result = supervisor.evaluate(event)
     out = copy.deepcopy(payload)
     if event["requirements"].get("execution_target") and result.get("model", payload.get("model")) != payload.get("model"):
@@ -227,4 +231,46 @@ def process_response(supervisor, context: dict, response: dict) -> dict:
     # signatures, refusals, structured output and streaming ordering byte-for-byte.
     event = {**{k: v for k, v in context.items() if k != "requirements"}, "type": "model.response", "id": context.get("id", str(uuid.uuid4())), "model": response.get("model", ""), "usage": extract_usage(response), "response_chars": len(canonical(response)), "status": response.get("status"), "finish_reasons": [x.get("finish_reason") for x in response.get("choices", []) if isinstance(x, dict)]}
     result = supervisor.evaluate(event)
+    session=supervisor.session_context(event)
+    from .plugins import enabled,publish_component
+    if enabled(session["config"]):
+        try:
+            from gw_observe.contract import normalize_usage
+            usage=normalize_usage(response.get("usage",{}),context.get("usage_provider","generic"))
+            if isinstance(context.get("cost_usd"),(int,float)):
+                usage.update(normalize_usage({"cost_usd":context["cost_usd"]}))
+            now=time.time_ns()
+            publish_component(supervisor.home,session["config"],{**context,"session_id":session["id"]},"model.usage",
+                {"request_id":event["id"],"model":event["model"],"usage":usage,"usage_source":"proxy",
+                 "billing_kind":context.get("billing_kind","unknown"),"cost_basis":"provider_reported" if "cost_usd" in usage else "unknown"},
+                start_ns=context.get("started_ns",now),end_ns=context.get("finished_ns",now),
+                event_id=digest(["model.usage",session["id"],event["id"]]))
+        except Exception as exc:
+            result["observability_error"]=type(exc).__name__
     return {**result, "payload": response}
+
+
+def process_request(supervisor, context: dict, payload: dict, wire: str = "chat") -> dict:
+    """Measure applied transformations separately from the supervisor's verdict."""
+    started=time.time_ns()
+    # Stable ID across evaluation, transformations, response and native references.
+    context={**context,"id":context.get("id") or str(uuid.uuid4())}
+    result=_process_request(supervisor,context,payload,wire)
+    from .plugins import enabled,publish_component
+    session=supervisor.session_context({**context,"type":"model.request"})
+    if enabled(session["config"]):
+        roles={}
+        messages=payload.get("messages",payload.get("input",[]))
+        if isinstance(messages,list):
+            for m in messages:
+                if isinstance(m,dict):
+                    role=m.get("role",m.get("type","unknown"))
+                    roles[role]=roles.get(role,0)+len(canonical(m))
+        attrs={"request_id":context["id"],"wire":wire,"decision":result["decision"],
+               "original_model":payload.get("model"),"effective_model":result["payload"].get("model"),
+               "transform":result.get("transform",{}),"context_chars_by_role":roles,
+               "tool_schema_chars":len(canonical(payload.get("tools",[]))),
+               "measurement":"serialized characters/bytes, not model tokens"}
+        publish_component(supervisor.home,session["config"],{**context,"session_id":session["id"]},
+            "proxy.request",attrs,start_ns=started,end_ns=time.time_ns(),event_id=digest(["proxy.request",session["id"],context["id"]]))
+    return result

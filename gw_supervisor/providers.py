@@ -36,8 +36,10 @@ class CredentialInjector(Protocol):
 class Classifier:
     def __init__(self, config: dict):
         self.config = config
+        self.last_usage = None
 
     def decide(self, state: dict, goals: dict) -> dict[str, str]:
+        self.last_usage = None
         c = self.config
         if c["provider"] == "off":
             raise RuntimeError("decision_provider_disabled")
@@ -49,6 +51,7 @@ class Classifier:
         if len(canonical(body)) > c.get("max_request_chars", 64000):
             raise RuntimeError("decision_request_too_large: abstained instead of truncating")
         raw = post_json(c["endpoint"], body, credential(c), c["timeout_seconds"])
+        self.last_usage = raw.get("usage") if isinstance(raw.get("usage"),dict) else None
         return parse_answers(c, raw, goals)
 
 

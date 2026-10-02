@@ -13,6 +13,7 @@ from typing import Any
 from .util import digest, read_json, write_json, safe_endpoint
 from .models import validate_registry
 from .knowledge import DEFAULT_KNOWLEDGE, validate_knowledge
+from .plugins import DEFAULT_PLUGINS, validate_plugins
 from .decision_transport import validate_decision
 
 DEFAULTS = {
@@ -23,6 +24,7 @@ DEFAULTS = {
     "registry": {},
     "inference": {"models": {}, "policy": {}},
     "knowledge": DEFAULT_KNOWLEDGE,
+    "plugins": DEFAULT_PLUGINS,
     "decision": {"provider": "off", "endpoint": "https://api.typesafe.ai/v1/systemone", "model": "jev-latest", "key_env": "TYPESAFE_API_KEY", "timeout_seconds": 2, "max_state_chars": 16000, "cache_seconds": 60},
     "authority": {"endpoint": "", "key_env": "GW_AUTHORITY_TOKEN", "timeout_seconds": 2},
     "proxy": {"compact_tool_json": False, "inject_task": False, "max_output_tokens": 0, "models": {}},
@@ -96,8 +98,8 @@ def merge(base: dict, overlay: dict) -> dict:
 
 
 def validate(config: dict) -> None:
-    if config.get("version") != 1 or config.get("mode") not in {"observe", "enforce"}:
-        raise ValueError("Expected version=1 and mode=observe|enforce")
+    if config.get("version") != 1 or config.get("mode") not in {"observe", "enforce", "baseline"}:
+        raise ValueError("Expected version=1 and mode=observe|enforce|baseline")
     for name in ("goals", "rules", "registry", "decision", "authority", "proxy"):
         if not isinstance(config.get(name), dict):
             raise ValueError(f"{name} must be an object")
@@ -126,6 +128,9 @@ def validate(config: dict) -> None:
         safe_endpoint(config["authority"]["endpoint"])
     validate_registry(config["inference"])
     validate_knowledge(config["knowledge"])
+    validate_plugins(config["plugins"])
+    if config["mode"] == "baseline" and config["authority"].get("endpoint"):
+        raise ValueError("Baseline mode cannot bypass a configured external authority")
     proxy = config["proxy"]
     if not isinstance(proxy.get("max_output_tokens", 0), int) or proxy.get("max_output_tokens", 0) < 0:
         raise ValueError("max_output_tokens must be a nonnegative integer")

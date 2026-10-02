@@ -1,6 +1,6 @@
-param([switch]$All, [string]$Agents = '', [string]$Project = '', [switch]$Knowledge)
+param([switch]$All, [string]$Agents = '', [string]$Project = '', [switch]$Knowledge, [switch]$Plugins)
 $ErrorActionPreference = 'Stop'
-$ref = if ($env:GW_REF) { $env:GW_REF } else { 'v0.4.0' }
+$ref = if ($env:GW_REF) { $env:GW_REF } else { 'v0.5.0' }
 if ($ref -notmatch '^[A-Za-z0-9._-]+$') { throw 'Invalid GW_REF' }
 $root = if ($env:GW_INSTALL_DIR) { $env:GW_INSTALL_DIR } else { Join-Path $env:LOCALAPPDATA 'gw' }
 $python = (Get-Command python -ErrorAction SilentlyContinue).Source
@@ -15,6 +15,12 @@ if ($LASTEXITCODE -ne 0) { throw 'Package installation failed.' }
 if ($Knowledge) {
   & $venvPython -m pip install --disable-pip-version-check --no-input --upgrade "https://github.com/davidjbeveridge/gw/archive/$ref.zip#subdirectory=packages/gw-knowledge"
   if ($LASTEXITCODE -ne 0) { throw 'Knowledge package installation failed.' }
+}
+if ($Plugins) {
+  foreach ($package in @('gw-observe', 'gw-learning', 'gw-sync')) {
+    & $venvPython -m pip install --disable-pip-version-check --no-input --upgrade "https://github.com/davidjbeveridge/gw/archive/$ref.zip#subdirectory=packages/$package"
+    if ($LASTEXITCODE -ne 0) { throw "Plugin package installation failed: $package" }
+  }
 }
 $gw = Join-Path $root 'venv\Scripts\gw.exe'
 $arguments = @('bootstrap')

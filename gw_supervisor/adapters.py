@@ -50,6 +50,10 @@ def normalize(agent: str, phase: str, raw: dict, cwd: str | None = None) -> dict
     event = {"client": agent, "session": session, "project": project, "type": {"start": "session.start", "pre": "tool.before", "post": "tool.after", "error": "tool.after"}[phase]}
     native_id = raw.get("tool_use_id") or raw.get("toolUseId")
     event["id"] = str(native_id or (digest([session, raw.get("timestamp"), phase, raw.get("tool_name", raw.get("toolName")), inp]) if raw.get("timestamp") else uuid.uuid4()))
+    if isinstance(raw.get("transcript_path"),str):
+        event["native_trace_hint"]={"path":raw["transcript_path"],"status":"unregistered_reference"}
+    if isinstance(raw.get("parent_tool_use_id"),str):event["parent_id"]=raw["parent_tool_use_id"]
+    if isinstance(raw.get("agent_id"),str):event["agent_id"]=raw["agent_id"]
     if phase == "start":
         task = raw.get("prompt", raw.get("user_prompt", ""))
         event["task"] = task if isinstance(task, str) else ""

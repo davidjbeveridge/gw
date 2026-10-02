@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Pinned, user-local installation. No sudo, shell-profile edits, API keys or daemon.
 set -euo pipefail
-REF="${GW_REF:-v0.4.0}"
+REF="${GW_REF:-v0.5.0}"
 KNOWLEDGE=0
+PLUGINS=0
 ARGS=()
 for arg in "$@"; do
-  if [ "$arg" = "--knowledge" ]; then KNOWLEDGE=1; else ARGS+=("$arg"); fi
+  if [ "$arg" = "--knowledge" ]; then KNOWLEDGE=1; elif [ "$arg" = "--plugins" ]; then PLUGINS=1; else ARGS+=("$arg"); fi
 done
 case "$REF" in *[!A-Za-z0-9._-]*) echo 'Invalid GW_REF' >&2; exit 1;; esac
 ROOT="${GW_INSTALL_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/gw}"
@@ -33,6 +34,12 @@ fi
 if [ "$KNOWLEDGE" = 1 ]; then
   "$ROOT/venv/bin/python" -m pip install --disable-pip-version-check --no-input --upgrade \
     "https://github.com/davidjbeveridge/gw/archive/${REF}.zip#subdirectory=packages/gw-knowledge"
+fi
+if [ "$PLUGINS" = 1 ]; then
+  for package in gw-observe gw-learning gw-sync; do
+    "$ROOT/venv/bin/python" -m pip install --disable-pip-version-check --no-input --upgrade \
+      "https://github.com/davidjbeveridge/gw/archive/${REF}.zip#subdirectory=packages/${package}"
+  done
 fi
 ln -sfn "$ROOT/venv/bin/gw" "$BIN/gw"
 "$ROOT/venv/bin/gw" bootstrap "${ARGS[@]}"

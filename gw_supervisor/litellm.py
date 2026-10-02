@@ -23,7 +23,7 @@ def context_for(data: dict) -> dict:
     session = gw.get("session") or os.environ.get("GW_SESSION")
     if not project or not session:
         raise ValueError("gw requires metadata.gw.project/session or GW_PROJECT/GW_SESSION; refusing unscoped proxy traffic")
-    return {"client": gw.get("client", "litellm"), "project": project, "session": session, "id": gw.get("request_id") or str(uuid.uuid4()), "requirements": gw.get("requirements", {})}
+    return {"client": gw.get("client", "litellm"), "project": project, "session": session, "id": gw.get("request_id") or str(uuid.uuid4()), "requirements": gw.get("requirements", {}), "run_id":gw.get("run_id") or os.environ.get("GW_RUN_ID"), "parent_id":gw.get("parent_id")}
 
 
 class GWCallback(CustomLogger):
@@ -62,11 +62,35 @@ class GWCallback(CustomLogger):
         response = response_obj.model_dump(mode="json") if hasattr(response_obj, "model_dump") else response_obj
         if not isinstance(response, dict):
             return
-        context = {"client": gw["client"], "project": gw["project"], "session": gw["session"], "id": gw["request_id"]}
+        context = {"client": gw["client"], "project": gw["project"], "session": gw["session"], "id": gw["request_id"],
+                   "run_id":gw.get("run_id"),"parent_id":gw.get("parent_id"),
+                   "usage_provider":"anthropic" if kwargs.get("custom_llm_provider",kwargs.get("litellm_params",{}).get("custom_llm_provider"))=="anthropic" else "generic"}
+        if start_time is not None and hasattr(start_time,"timestamp"):context["started_ns"]=int(start_time.timestamp()*1e9)
+        if end_time is not None and hasattr(end_time,"timestamp"):context["finished_ns"]=int(end_time.timestamp()*1e9)
+        cost=kwargs.get("response_cost")
+        if isinstance(cost,(int,float)):context["cost_usd"]=cost
         def run():
             with Supervisor() as supervisor:
                 process_response(supervisor, context, response)
         await asyncio.to_thread(run)
+
+
+    async def async_log_failure_event(self, kwargs, response_obj, start_time, end_time):
+        metadata=kwargs.get("litellm_params",{}).get("metadata") or kwargs.get("metadata") or {}
+        gw=metadata.get("gw") or {}
+        if not gw.get("request_id"):return
+        def record():
+            import time
+            from .plugins import publish_component
+            from .util import digest
+            with Supervisor() as supervisor:
+                context={"client":gw["client"],"project":gw["project"],"session":gw["session"],"id":gw["request_id"],"run_id":gw.get("run_id")}
+                session=supervisor.session_context({**context,"type":"model.response"})
+                now=time.time_ns()
+                publish_component(supervisor.home,session["config"],{**context,"session_id":session["id"]},"model.failure",
+                    {"request_id":context["id"],"model":kwargs.get("model"),"status":"failed","cost":"unknown"},
+                    start_ns=now,end_ns=now,event_id=digest(["model.failure",session["id"],context["id"]]))
+        await asyncio.to_thread(record)
 
 
 gw_callback = GWCallback()

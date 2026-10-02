@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gw-sync"
+version = "0.1.0"
+description = "Content-addressed, reviewable distribution of agent harness bundles"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+readme = "README.md"
+dependencies = []
+
+[project.scripts]
+gw-sync = "gw_sync.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+gw_sync = ["py.typed", "web/*", "schemas/*.json"]

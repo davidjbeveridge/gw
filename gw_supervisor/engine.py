@@ -5,12 +5,14 @@ import fnmatch
 import pathlib
 import shutil
 import uuid
+import time
 from typing import Any
 from .config import EVENTS, get_path, home_path, initialize, project_root, resolve
 from .providers import Classifier, HttpAuthority
 from .models import select as select_model, requirements, decision_config
 from .store import Store
 from .util import canonical, digest, finite, redact
+from .plugins import enabled as tracing_enabled, proposal, publish_intercept, usage_metadata
 
 RANK = {"allow": 0, "advise": 1, "approve": 2, "deny": 3}
 
@@ -72,6 +74,8 @@ class Supervisor:
         self.close()
 
     def evaluate(self, source: dict) -> dict:
+        began_ns = time.time_ns()
+        began_clock = time.perf_counter()
         event = validate_event(source)
         current, config_status = resolve(self.home, pathlib.Path(event["project"]), event["client"])
         session = self.store.session(event, current)
@@ -89,6 +93,32 @@ class Supervisor:
         result = {"version": 1, "decision": "allow", "reasons": [], "advice": [], "labels": {}, "session_id": session["id"], "policy_hash": policy_hash, "config_status": config_status, "metrics": metrics}
         drift = None
         candidate_at = None
+        tracking = tracing_enabled(config)
+        audit = {"event_type":event["type"], "event_id":event["id"], "mode":config["mode"],
+                 "start_ns":began_ns, "proposal":proposal(event,config), "rules":[], "goals":[],
+                 "classifier_calls":[], "source_coverage":"hook_or_proxy_projection"} if tracking else None
+        goal_audits = {}
+        if tracking:
+            result["audit"] = audit
+            for gid,g in config["goals"].items():
+                record = {"id":gid,"evaluator":g.get("evaluator"),"status":"disabled" if not g.get("enabled",True) else "not_applicable","effect":None}
+                audit["goals"].append(record); goal_audits[gid]=record
+
+        def save():
+            if tracking:
+                audit.update(end_ns=time.time_ns(), evaluation_ms=round((time.perf_counter()-began_clock)*1000,3), alignment_observation=drift)
+            saved = self.store.record(session,event,action_hash,result,drift,candidate_at)
+            publish_intercept(self.home,session,event,saved)
+            return saved
+
+        if config["mode"] == "baseline":
+            if self.authority:
+                raise ValueError("Baseline cannot bypass an injected authority")
+            result.update(reason="Measurement-only baseline; GW did not evaluate policy or change the action",classifier_status="baseline")
+            if tracking:
+                for g in audit["goals"]: g["status"]="baseline_not_evaluated"
+            return save()
+
 
         def apply(effect: str, reason: str):
             reason = str(redact(reason))[:2000]
@@ -99,26 +129,42 @@ class Supervisor:
             if effect == "advise":
                 result["advice"].append(reason)
 
+        if event.get("preflight_denial"):
+            apply("deny",str(event["preflight_denial"]))
+            if tracking:audit["rules"].append({"id":"proxy_preflight","matched":True,"effect":"deny"})
+
         for rule_id, rule in config["rules"].items():
-            if rule.get("enabled", True) and event["type"] in rule.get("on", ["tool.before"]) and matches(event, rule["when"]):
+            matched = rule.get("enabled", True) and event["type"] in rule.get("on", ["tool.before"]) and matches(event, rule["when"])
+            if tracking:
+                audit["rules"].append({"id":rule_id,"matched":bool(matched),"effect":rule["effect"] if matched else None})
+            if matched:
                 apply(rule["effect"], f"{rule_id}: {rule.get('reason', 'Configured rule matched')}")
         active = {key: g for key, g in config["goals"].items() if g.get("enabled", True) and event["type"] in g["on"]}
         choices = {}
         for goal_id, goal in active.items():
             evaluator = goal["evaluator"]
+            detail = goal_audits.get(goal_id,{})
+            detail["status"]="evaluated"
             if evaluator == "choice":
                 choices[goal_id] = goal
+                detail["status"]="pending"
             elif evaluator == "metric":
                 metric = goal["metric"]
                 if metric not in metrics:
                     raise ValueError(f"Unknown metric: {metric}")
+                detail.update(metric=metric,value=metrics.get(metric),threshold=goal["threshold"],effect="allow")
                 if metrics[metric] >= goal["threshold"] and session["observations"] >= goal.get("min_observations", 0):
+                    detail["effect"]=goal["effect"]
                     apply(goal["effect"], goal.get("message", f"{goal_id}: threshold exceeded"))
             elif evaluator == "repetition" and event.get("success") is True:
                 candidate_at = int(goal.get("threshold", 3))
+                detail.update(value=counts["successes"]+1,threshold=candidate_at,effect="allow")
                 if counts["successes"] + 1 == candidate_at:
                     apply("advise", goal.get("message", "Automation candidate identified"))
                     result["automation_candidate"] = action_hash
+                    detail.update(effect="advise",candidate=action_hash)
+            elif evaluator == "repetition":
+                detail.update(status="outcome_not_success",effect=None)
             elif evaluator == "registry":
                 preference = goal.get("preference", [])
                 candidates = []
@@ -130,18 +176,28 @@ class Supervisor:
                     _, tool_id, tool = sorted(candidates, key=lambda t: (t[0], t[1]))[0]
                     apply("advise", f"Consider registered tool {tool_id}: {tool.get('description', '')}. {tool.get('example', '')}")
                     result["recommended_tool"] = tool_id
+                    detail.update(effect="advise",recommended_tool=tool_id)
+                else:
+                    detail.update(effect="allow",status="no_matching_installed_tool")
 
         if choices and (config["decision"]["provider"] != "off" or self.classifier):
             # Root-task-dependent goals abstain if no task was pinned.
             if not session["task"] and event["type"].startswith("tool."):
                 result["classifier_status"] = "no_pinned_task"
             else:
-                state = {"task": session["task"], "event": redact({k: v for k, v in event.items() if k not in {"project", "session", "id", "task"}}), "metrics": metrics}
+                state = {"task": session["task"], "event": redact({k: v for k, v in event.items() if k not in {"project", "session", "id", "task", "native_trace_hint"}}), "metrics": metrics}
                 cache_key = digest([policy_hash, session["task"], state, choices])
                 try:
                     labels = self.store.get_cache(cache_key)
                     if labels is None:
-                        labels = (self.classifier or Classifier(decision_config(config))).decide(state, choices)
+                        provider = self.classifier or Classifier(decision_config(config))
+                        call_start = time.perf_counter()
+                        try:
+                            labels = provider.decide(state, choices)
+                        finally:
+                            if tracking:
+                                audit["classifier_calls"].append({"purpose":"goals","elapsed_ms":round((time.perf_counter()-call_start)*1000,3),
+                                    "model":config["decision"].get("model"),"usage":usage_metadata(getattr(provider,"last_usage",None))})
                         if not isinstance(labels, dict) or any(labels.get(k) not in g["choices"] for k, g in choices.items()):
                             raise ValueError("Invalid classification")
                         self.store.put_cache(cache_key, labels, config["decision"].get("cache_seconds", 60))
@@ -151,6 +207,7 @@ class Supervisor:
                     result["classifier_status"] = "scored"
                     for goal_id, label in labels.items():
                         goal = choices[goal_id]
+                        if tracking:goal_audits[goal_id].update(status="evaluated",label=label,effect=goal.get("effects",{}).get(label,"allow"))
                         apply(goal.get("effects", {}).get(label, "allow"), f"{goal_id}: {goal['choices'][label]}")
                         if goal.get("metric") == "drift" and label in goal.get("scores", {}):
                             drift = finite(goal["scores"][label])
@@ -167,9 +224,15 @@ class Supervisor:
                     result["classifier_status"] = "unavailable"
                     result["classifier_error"] = type(exc).__name__
                     for goal_id, goal in choices.items():
+                        if tracking:goal_audits[goal_id].update(status="unavailable",effect=goal.get("on_error","advise"))
                         apply(goal.get("on_error", "advise"), f"{goal_id}: classifier unavailable; no semantic verdict")
         elif choices:
             result["classifier_status"] = "disabled"
+
+        if tracking:
+            for gid in choices:
+                if goal_audits[gid]["status"]=="pending":
+                    goal_audits[gid]["status"]=result.get("classifier_status","not_evaluated")
 
         # A general selection is a plan, not an execution. A proxy may only
         # replace an alias when the selected operation/transport is compatible.
@@ -187,6 +250,17 @@ class Supervisor:
                             selector = Classifier(decision_config(config))
                         except ValueError:
                             pass  # select() reports classifier_unavailable, never assumes success.
+                    if tracking and selector is not None:
+                        inner_selector = selector
+                        class MeasuredSelector:
+                            def decide(self, state, questions):
+                                t = time.perf_counter()
+                                try:
+                                    return inner_selector.decide(state, questions)
+                                finally:
+                                    audit["classifier_calls"].append({"purpose":"model_selection", "elapsed_ms":round((time.perf_counter()-t)*1000,3),
+                                        "model":config["decision"].get("model"), "usage":usage_metadata(getattr(inner_selector,"last_usage",None))})
+                        selector = MeasuredSelector()
                     selection = select_model(config["inference"], req, selector, {"task": session["task"], "request": event.get("latest_user_excerpt", ""), "metrics": metrics})
                     result["inference"] = selection
                     if selection["status"] != "selected":
@@ -221,7 +295,7 @@ class Supervisor:
             result["decision"] = "advise"
             result["advice"].extend(result["reasons"])
         result["reason"] = "; ".join(dict.fromkeys(result["reasons"])) or "No supervisor objection; native permissions still apply"
-        return self.store.record(session, event, action_hash, result, drift, candidate_at)
+        return save()
 
     def session_context(self, event: dict) -> dict:
         event = validate_event(event)
