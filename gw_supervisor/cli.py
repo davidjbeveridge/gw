@@ -142,8 +142,8 @@ def main(argv=None):
             return
         initialize(home)
         if args.cmd == "agent-guide":
-            import importlib.resources
-            print(importlib.resources.files("gw_supervisor").joinpath("templates/agent-skill.md").read_text(encoding="utf-8"))
+            from importlib.resources import files as resource_files
+            print(resource_files("gw_supervisor").joinpath("templates/agent-skill.md").read_text(encoding="utf-8"))
             return
         if args.cmd == "agent":
             from .agent import run
