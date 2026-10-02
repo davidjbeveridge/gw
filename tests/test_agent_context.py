@@ -9,7 +9,7 @@ import threading
 import unittest
 from unittest import mock
 from gw_supervisor.agent import AgentService
-from gw_supervisor.agent_bootstrap import bootstrap_agent_tools
+from gw_supervisor.agent_bootstrap import bootstrap_agent_tools, _toml
 from gw_supervisor.config import DEFAULTS, merge
 from gw_supervisor.context import compile_context, inject_context
 from gw_supervisor.engine import Supervisor
@@ -101,7 +101,10 @@ class BootstrapTests(Fixture):
         result=bootstrap_agent_tools(self.home,['codex'],project=self.project,dry_run=True)
         self.assertTrue(result);self.assertFalse((self.project/'.codex').exists())
         bootstrap_agent_tools(self.home,['codex'],project=self.project)
-        self.assertIn(str(self.project),(self.project/'.codex/config.toml').read_text())
+        config=_toml((self.project/'.codex/config.toml').read_text(encoding='utf-8'))
+        argv=config['mcp_servers']['gw']['args']
+        self.assertEqual(argv[argv.index('--project')+1],str(self.project))
+        self.assertIn('--manage',argv)
     def test_toml_preserves_existing_user_settings(self):
         path=self.project/'.codex/config.toml';path.parent.mkdir();path.write_text('model = "keep"\n[features]\nkeep = true\n')
         bootstrap_agent_tools(self.home,['codex'],self.project)
