@@ -80,3 +80,13 @@ class KnowledgeIntegrationTests(unittest.TestCase):
             self.assertEqual(result['result']['evidence'][0]['text'],'needle evidence')
         finally:
             server.shutdown();thread.join();server.server_close()
+
+    def test_legacy_console_json_preserves_unicode(self):
+        import subprocess,sys
+        self.cli('init');self.source.write_text('needle → 🐱 naïve',encoding='utf-8')
+        self.cli('ingest',str(self.source),'--id','unicode')
+        env={**os.environ,'PYTHONIOENCODING':'cp1252'}
+        for command in (['context','needle'],['export']):
+            run=subprocess.run([sys.executable,'-m','gw_supervisor','--home',str(self.home),'knowledge','--project',str(self.project),*command],capture_output=True,env=env,check=True)
+            result=json.loads(run.stdout.decode('ascii'))
+            self.assertEqual(result['evidence'][0]['text'] if command[0]=='context' else result['text'],'needle → 🐱 naïve')

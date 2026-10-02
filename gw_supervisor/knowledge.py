@@ -98,7 +98,7 @@ def add_arguments(sub):
 
 def run(args, home, output):
     require_package()
-    from gw_knowledge.cli import add_operations, run_operation
+    from gw_knowledge.cli import add_operations, run_operation, emit_json
     from gw_knowledge.contract import KnowledgeError, loads
     from .config import DEFAULTS, merge, project_root, validate
     parser = argparse.ArgumentParser(prog="gw knowledge", description="Set --project/--client before the operation. No automatic context injection.")
@@ -144,6 +144,6 @@ def run(args, home, output):
             if parsed.operation in {"mcp", "serve"}:
                 # A CLI switch can narrow host policy but cannot grant new access.
                 service.writable = service.writable and parsed.writable
-            run_operation(parsed, service, (lambda obj: print(canonical(obj))) if parsed.operation == "export" else output)
+            run_operation(parsed, service, emit_json)
     except KnowledgeError as exc:
         raise ValueError("Knowledge operation failed: " + exc.code) from None

@@ -49,3 +49,10 @@ class CLITests(unittest.TestCase):
         self.file.write_bytes(b'needle\r\nnext\r\n')
         self.cli('ingest',str(self.file),'--id','doc')
         self.assertEqual(json.loads(self.cli('read','doc').stdout)['text'],'needle\r\nnext\r\n')
+
+    def test_legacy_console_preserves_unicode_json(self):
+        self.file.write_text('needle → 🐱 naïve',encoding='utf-8')
+        self.cli('ingest',str(self.file),'--id','unicode')
+        env={**os.environ,'PYTHONIOENCODING':'cp1252'}
+        run=subprocess.run([sys.executable,'-m','gw_knowledge','--store',str(self.root/'store'),'--collection','demo','context','needle'],capture_output=True,env=env,check=True)
+        self.assertEqual(json.loads(run.stdout.decode('ascii'))['evidence'][0]['text'],'needle → 🐱 naïve')

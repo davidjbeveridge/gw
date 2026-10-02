@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import json
 import os
 import pathlib
 import sys
@@ -14,6 +15,11 @@ from .contract import (
 )
 from .registry import open_provider
 from .service import KnowledgeService
+
+
+def emit_json(value):
+    """ASCII JSON preserves Unicode through parsing on legacy console encodings."""
+    print(json.dumps(value, ensure_ascii=True, allow_nan=False, separators=(",", ":")))
 
 
 def add_operations(sub):
@@ -153,7 +159,7 @@ def main(argv=None):
             cache = stack.enter_context(ContextCache(pathlib.Path(args.store) / "cache"))
             writable = args.operation not in {"serve", "mcp"} or args.writable
             service = KnowledgeService(provider, cache, scope=Scope(args.tenant, args.collection, args.principal), writable=writable)
-            run_operation(args, service, lambda obj: print(canonical(obj)))
+            run_operation(args, service, emit_json)
     except (KnowledgeError, OSError, UnicodeError, RuntimeError) as exc:
         # Don't echo external errors, tokens, source content or request bodies.
         code = exc.code if isinstance(exc, KnowledgeError) else type(exc).__name__
