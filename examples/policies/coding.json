@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "goals": {
+    "task_alignment": {"on_error": "approve"},
+    "retry_limit": {"threshold": 2}
+  }
+}

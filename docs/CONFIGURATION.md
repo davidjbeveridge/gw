@@ -1,92 +1,198 @@
-# Configuration and decisions
+# Configuration reference
+
+[Handbook](README.md) · [Recipes](RECIPES.md) · [Model registry](MODELS.md) · [Decision setup](DECISION_SETUP.md)
+
+Configuration is JSON, not YAML. Examples in design discussions are not configuration syntax. Display the complete built-in policy with `gw config --defaults`; inspect the effective policy for a project and client with:
+
+```bash
+gw config --project . --client codex
+```
 
 ## Files and precedence
 
-`GW_HOME` defaults to `~/.config/gw`. It contains `config.json`, `state.sqlite3`, private API token, project snapshots and settings backups. The install location is separate (`~/.local/share/gw` by default).
+`GW_HOME` defaults to `~/.config/gw`; `--home` overrides it for that command. The global file is `config.json`. A project file is named `.gw.json`, but is not read as live policy until reviewed and imported with `gw trust --project PATH`.
 
-Resolution order: built-in defaults → global file (excluding clients) → global `clients[client]` → trusted project snapshot (excluding clients) → project `clients[client]`. Dictionaries merge; other values replace; goal and rule IDs remain stable. `locked` is additive and lists immutable dotted paths. The resolved policy is pinned at session creation. New global/project settings affect new sessions only.
+Resolution order, from least to most specific:
 
-Project `.gw.json` is inert until `gw trust --project PATH`. Do not place provider/authority configuration in a project: those are global-only. Changes to a reviewed worktree file are reported without changing the trusted copy. Malformed configuration is an error, not a silent reset to permissive defaults.
+```text
+built-in defaults
+  -> global config, excluding clients
+  -> global clients[client]
+  -> reviewed project config, excluding clients
+  -> reviewed project clients[client]
+```
 
-To require the classifier for alignment, set `goals.task_alignment.on_error` to `approve` or `deny`. Default `advise` favors usability while clearly reporting unavailable semantic scoring. Provider `off` intentionally disables all semantic goals; it is not a classification success. No pinned task means task-specific checks abstain. Set the task before starting a session.
+Dictionaries merge recursively. Scalars and arrays replace previous values. `locked` is the exception: it accumulates immutable dotted paths. There is no subtraction syntax for inherited objects; disable an inherited goal/rule with `enabled: false` rather than replacing its parent with an empty object.
 
-## Custom goal
+A client is the event identity, such as `claude`, `codex`, `opencode`, or `litellm`. The proxy's default identity is `litellm`; it does not automatically inherit your `codex` overrides. Use matching identifiers when deliberately correlating native and proxy events.
 
-Goals are configuration, evaluated by small implementation primitives. A custom classifier goal does not require a new Python class:
+### Project roots and trust
+
+The root resolver starts at the supplied directory and searches upward for `.gw.json` or `.git`. Otherwise it uses that directory. Pass an existing directory. Explicit stable knowledge collections are useful when a project needs to share knowledge across machines with different paths.
+
+`gw trust` stores a reviewed snapshot under `$GW_HOME/projects/`. Source edits afterward are reported as `project_changed_review_required`; the stored snapshot remains in use until reviewed again. With no trusted snapshot, `.gw.json` is inert and the status is `project_untrusted_global_only`. No project file gives `global_only`; an unchanged trusted one gives `trusted_snapshot`.
+
+Only these project-level keys are accepted: `version`, `mode`, `goals`, `rules`, `registry`, `proxy`, `clients`, `locked`, and `inference`. Decision endpoints/credentials, authority configuration, and knowledge connections/principals are global or global-client settings. Project-client overrides have the same restriction.
+
+Existing sessions keep their resolved policy. A valid global edit or newly trusted project affects **new sessions**. Current configuration is still parsed during event handling, so malformed files can interrupt an old session rather than being silently ignored. Fix the file instead of relying on a stored snapshot to hide syntax errors.
+
+## Top-level fields
+
+| Field | Default | Purpose |
+|---|---|---|
+| `version` | `1` | Configuration schema version, not the package version |
+| `mode` | `enforce` | `observe` records would-be local denials/reviews as advice |
+| `locked` | `[]` | Immutable paths inherited by later layers |
+| `rules` | `{}` | Deterministic event matches and effects |
+| `goals` | Supplied defaults | Evaluator-based objectives |
+| `registry` | `{}` | Registered executable recommendations, not model definitions |
+| `decision` | Provider `off` | Supervisor classifier transport and model |
+| `inference` | Empty model registry/policy | Worker capability selection |
+| `proxy` | Transformations disabled | Request transformations and legacy alias configuration |
+| `authority` | No endpoint | Optional external authorization contract |
+| `knowledge` | Disabled | Optional independent knowledge backend/cache |
+| `clients` | Absent | Per-client overlays in the global or reviewed project layer |
+
+Unknown global top-level keys are errors. Validation is not a universal schema for every nested object; use documented fields and test the resolved configuration. `gw config` may print paths, task-related policy, and operator-provided metadata. It should not contain secrets in the first place.
+
+## Locks
+
+This global fragment makes one rule immutable to project overrides:
+
+```json
+{
+  "locked": ["rules.no_production"],
+  "rules": {
+    "no_production": {
+      "on": ["tool.before"],
+      "when": {"environment": "production"},
+      "effect": "deny",
+      "reason": "Use the separately authorized production workflow"
+    }
+  }
+}
+```
+
+A custom host must supply a trustworthy `environment` field for this example. Ordinary native hooks do not invent one. Locking a rule without providing the evidence it matches does not create a production boundary.
+
+Locks prevent changes, not only weakening. gW does not implement a partial order that decides whether an arbitrary replacement policy is stricter. Use a whole-object lock such as `decision` or `inference.models` when that is the intended boundary. Dotted paths work best with simple IDs without literal dots.
+
+Locks are configuration inheritance, not protection against a process with your filesystem privileges. Global administrators can still edit global files. See [Security](../SECURITY.md).
+
+## Exact rules
+
+A rule has `when`, `effect`, optional `on` (default `tool.before`), optional `reason`, and optional `enabled` (default true).
+
+```json
+{
+  "rules": {
+    "review_submission": {
+      "on": ["tool.before"],
+      "when": {"operation": "application.submit", "target.origin": "https://jobs.example.test"},
+      "effect": "approve",
+      "reason": "Review the final application before submission"
+    }
+  }
+}
+```
+
+All conditions must match. Field names are dotted paths into the normalized event. String conditions use case-sensitive shell-style glob matching, not regular expressions. Arrays mean membership in the listed literal values. Other scalar values use equality. The special path `text` matches canonical JSON of the redacted event.
+
+A missing field normally cannot match a string. Do not use null as a substitute for explicit presence testing; there is no dedicated existence operator. Strings such as `.*deploy.*` are not regular expressions here. Use `*deploy*` for a glob, while recognizing the weakness of text matching.
+
+**Counterexample:** “Deny every dangerous shell command” cannot be implemented comprehensively with a few substrings. Scripts, wrappers, encoded commands, and alternate executables can escape that match. The example is a workflow aid, not a sandbox.
+
+All matching rule effects participate; this is not first-match-wins. Restrictiveness is `allow < advise < approve < deny`. A local allow cannot erase another local denial.
+
+## Supplied goals
+
+| Goal ID | Evaluator / event | Default behavior |
+|---|---|---|
+| `task_alignment` | Choice / `tool.before` | Direct/supporting work allowed, uncertain advised, off-task reviewed, conflicting denied |
+| `research_first` | Choice / `tool.before` | Advise when documentation or existing implementation should be consulted |
+| `tool_efficiency` | Registry / `tool.before` | Recommend a matching installed executable |
+| `retry_limit` | Metric / `tool.before` | Review after 3 consecutive recorded failures of this action |
+| `cumulative_drift` | Metric / `tool.before` | Review at drift >= 0.65 after at least 3 observations |
+| `repeat_work` | Repetition / `tool.after` | Propose a candidate at 3 successful occurrences |
+| `inbound_redirect` | Choice / `tool.after` | Advise when a tool result tries to redirect the task |
+
+Semantic choice goals require a configured decision provider. For tool events they also need a pinned task. With provider `off`, they are disabled; with no task, they abstain. Setting `on_error: deny` does **not** enable a disabled provider or turn missing-task abstention into denial. Add explicit host checks where semantic supervision must be mandatory.
+
+### Choice
+
+Required fields: `on`, `evaluator: choice`, `question`, and a nonempty `choices` map from label to description. Optional fields include `effects`, `on_error`, `metric`, and `scores`.
 
 ```json
 {
   "goals": {
-    "test_before_finish": {
+    "respect_requested_scope": {
       "on": ["tool.before"],
       "evaluator": "choice",
-      "question": "Is the agent proposing to commit changes without enough test evidence in the supplied context? Do not guess about evidence that is absent.",
+      "question": "Does the proposed change contradict the pinned task's explicit no-refactor constraint? If evidence is missing, choose uncertain.",
       "choices": {
-        "ready": "Sufficient evidence or not a commit",
-        "uncertain": "Evidence is absent or ambiguous",
-        "missing": "Clearly missing required validation"
+        "within_scope": "Routine work needed for the requested change",
+        "unrelated_refactor": "Unrelated restructuring contrary to the task",
+        "uncertain": "The supplied evidence cannot establish the relationship"
       },
-      "effects": {"uncertain": "advise", "missing": "approve"},
+      "effects": {"unrelated_refactor": "approve", "uncertain": "advise"},
       "on_error": "advise"
     }
   }
 }
 ```
 
-This example is a judgment about supplied evidence, not a guarantee that gw has collected a full test history. A deterministic CI/commit check is stronger when available.
+Unmapped labels default to allow. Active choice goals are batched. Errors use each active goal's `on_error` effect, defaulting to advice. A successful label is not proof that the underlying proposition is true. For custom classifiers, return only configured labels for every requested goal.
 
-Supported evaluators:
+Only the `drift` metric has classifier-update behavior in the current engine. Its score values must be finite numbers in [0,1]. Merely inventing `metric: productivity` does not add a tracked state variable.
 
-| Evaluator | Configuration | Behavior |
-|---|---|---|
-| `choice` | question, choices, effects, on_error | Batched typed decision questions |
-| `metric` | metric, threshold, optional min_observations, effect | Deterministic threshold over failures, successes, drift, observations |
-| `repetition` | threshold | On successful post-action events, propose automation at N exact repetitions |
-| `registry` | preference | Match installed registered executables; recommend, never secretly execute |
+**Counterexample:** ask whether all tests passed when the current event contains no test results. A classifier cannot recover missing evidence. Have the host supply an attested result or use a deterministic CI gate.
 
-Effects: `allow`, `advise`, `approve`, `deny`. Most restrictive wins. Native adapters decide which effects they can represent; unsupported review fails closed. Post-action decisions are advisory because execution already happened.
+### Metric
 
-Supported event types: `session.start`, `tool.before`, `tool.after`, `model.request`, `model.response`, `inference.select`. The normalized event is version 1. To add a new kind of side effect, send semantic fields such as `operation`, `target.origin`, and opaque `credential_ref` through the generic API. Rules can match dotted event paths. Native browser coordinates without semantic targets do not give the supervisor enough evidence to authorize an action.
+Required fields: `metric`, `threshold`, and an effect; `min_observations` is optional. Available metrics are `failures`, `successes`, `drift`, and `observations`. Values come from already recorded state before the current event.
 
-## Model routing
+Failures are consecutive failures of the same redacted action within a session, looking back at most 20 outcomes. A success or unknown outcome breaks that streak. Avoid a threshold above 20: this implementation will not observe a larger count. Success totals span sessions in the same project for the same action fingerprint.
 
-Use the general `inference.models` registry and `inference.policy`, described in
-[Model registry and routing](MODELS.md). There are no fixed model tiers.
-Operations, input/output modalities, capabilities, execution and billing are
-independent fields. Global/client/project inheritance and locks apply.
+Drift is an exponentially weighted alignment average. See [Architecture](ARCHITECTURE.md#session-state-and-cumulative-drift) for the formula and timing. There is no model-quality, dollar-spend, or task-completion metric implemented by naming one here.
 
-The v0.1 `proxy.models` plus choice-goal `route` mapping remains compatible for
-existing text-proxy configurations. It is only used when the new inference
-registry is empty. It is not a way to execute classifiers, media endpoints or
-subscription harnesses. Disable obsolete tier-selection goals after migrating
-to avoid spending classification calls on unused routes.
+### Repetition
 
-## Proxy configuration
+A successful `tool.after` event can record a candidate once the threshold is reached. Unknown outcome is not success. Event IDs prevent duplicate deliveries from creating extra successes.
 
-`compact_tool_json`: whitespace-only lexical JSON minification for tool-result text, default false. It preserves numeric spelling and strings, rejects duplicate-key/non-finite JSON, and leaves prose/logs/code alone. It never minifies function-call arguments or tool schemas.
+The record contains a fingerprint, tool, project, count, and proposed status—not generated source code. Use one repetition goal unless you have inspected the implementation: the engine keeps one candidate threshold per event rather than independent synthesis queues for several repetition goals.
 
-`inject_task`: add the pinned task once in a protocol-appropriate instruction location. Do not inject tool-output instructions into high-trust roles. The injected task is stable during the session to reduce unnecessary cache-prefix churn.
+### Registry
 
-`max_output_tokens`: zero disables the cap; a positive integer caps the protocol's output budget. A cap can truncate useful work. It is not a cost/quality guarantee.
+`registry` entries describe executable alternatives. Supply `kind`, `executable`, matching `when`, and useful `description`/`example` text. The default preference order is:
 
-`block_detected_secrets`: heuristic request screening, default false. This is not complete DLP. Keep secrets out of model traffic rather than relying on regexes.
+```text
+existing_tool -> cli -> mcp -> api -> script -> browser -> computer_use
+```
 
-The response path audits usage and preserves the response. Arbitrary response rewriting, lossy transcript compression, cache-based answer reuse, and signed-thinking manipulation are intentionally absent.
+This release checks `shutil.which(executable)` in the supervisor process. It is not a general MCP/API availability probe. Only matching entries with an available executable participate. A recommendation does not switch tools, validate the command's credentials, or cause execution.
 
-## Telemetry and learning
+## Classifier configuration
 
-A session is keyed by client, canonical project root and native session ID. Event IDs deduplicate retried delivery. Tool action fingerprints use the normalized, redacted tool name and arguments. Repetition is therefore exact after redaction, not a proof of semantic equivalence. A successful action is not proof that a human approved it.
+The `decision` object selects protocol, complete endpoint, model or `model_ref`, and credential references. The legacy `jev` protocol name remains supported; new System One setup uses `systemone`. `openai` uses Chat Completions JSON; `http` uses gW's custom classifier contract.
 
-Failure count tracks consecutive failures of the same action in a session, reset by a success/unknown outcome. The drift EWMA is `0.7 * previous + 0.3 * observation`, with the first observation used directly. Only real classifier alignment observations advance this measure. An inbound warning is not a fabricated zero-drift observation.
+Defaults include a 2-second timeout (maximum 5), 16,000 state characters, a 64,000-character request limit, up to 128 options per question, and 60 seconds for cached labels. JSON chat defaults to a 512-token output limit and strict JSON Schema. These are limits, not a provider guarantee. The key includes policy, task, state, and questions, so changing rolling metrics can reduce reuse.
 
-At three successful repeats, a candidate record is proposed. No source code is generated, no tools are registered, no cross-project capabilities are silently promoted. A later synthesis pipeline should collect consented fixtures, generate a candidate, test it in isolation, shadow/replay, promote a reviewed immutable version and keep rollback. See ROADMAP.md.
+Use [the setup guide](DECISION_SETUP.md) rather than guessing fields. Provider failure and intentional provider disablement have different meanings. Do not route classifier requests recursively through the same callback.
 
-## Core decision-provider setup
+## Proxy settings
 
-Use `gw setup` or `gw setup --describe`; see [DECISION_SETUP.md](DECISION_SETUP.md). Transport settings live in global/global-client `decision` configuration, not project files. `provider` selects `systemone`, `openai`, `http`, legacy `jev`, or `off`. Credentials are references (`key_env`, optional `key_file`), never literal keys. `auth: none` sends none.
+`compact_tool_json` and `inject_task` default false. `max_output_tokens` defaults to 0, which disables the cap. `block_detected_secrets` is an optional heuristic screen, default false. `proxy.models` is the legacy text alias registry; prefer `inference.models` for new configurations.
 
-## Optional knowledge backend
+JSON minification preserves strings and numeric spelling. It does not compress arbitrary prose, code, tool schemas, or function-call arguments. Pinned-task injection is stable for the session. Output caps can truncate useful work. The response path audits metadata and leaves model responses unchanged. [Proxy guide](PROXY.md).
 
-Global/global-client `knowledge` config is separate from goals and model routing.
-See [KNOWLEDGE.md](KNOWLEDGE.md) for local/remote setup, scopes and context-cache
-limits. Project configs cannot redirect the backend or change its principal.
+## Authority and knowledge
+
+Global `authority` config points to an optional authorization endpoint. External allow cannot weaken local deny; unavailable authority and unsupported returned constraints deny. Observation mode does not soften that authority result.
+
+Global `knowledge` config chooses the optional backend, scope, and context cache. It is separate from policy and classifier-response caching. Connection changes apply to new knowledge operations; those operations are not bound to an agent's pinned decision session. [Knowledge guide](KNOWLEDGE.md).
+
+## Safe editing workflow
+
+Inspect the effective config, edit the smallest relevant fragment, validate with `gw config`, review project changes with `gw trust`, then start a new session. Re-run a harmless canary before depending on a critical rule. Configuration files are backed up by setup/bootstrap paths where documented, but a manual edit is your responsibility.
+
+Do not replace an existing global file with a tutorial fragment. Do not commit a key to make an example run. Do not copy a model's proposed policy into a trusted snapshot without reviewing its effect.

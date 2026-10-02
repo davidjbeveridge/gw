@@ -1,0 +1,41 @@
+# gW
+
+> Configurable local agent supervision. Current runtime: gW 0.4.0; optional independent gw-knowledge 0.1.0. Read the implemented contract, not an earlier design sketch.
+
+## Start and scope
+
+- [README](README.md): installation first, motivation, implemented capabilities, limits, suitability.
+- [Handbook](docs/README.md): human-readable map of all documentation.
+- [Getting started](docs/GETTING_STARTED.md): isolated trial, native denial canary, update and removal.
+- [Architecture](docs/ARCHITECTURE.md): supervisor/worker/executor boundaries and actual event processing.
+- [Security](SECURITY.md): cooperative-user threat model; no vendor-policy or permission bypass.
+
+## Configure and integrate
+
+- [Decision setup](docs/DECISION_SETUP.md): supervisor classifier, not the worker registry.
+- [Setup skill](skills/gw-setup/SKILL.md): operator-approved backend onboarding; never retrieve raw secrets.
+- [Configuration](docs/CONFIGURATION.md): JSON, precedence, locks, goals, missing-evidence behavior.
+- [CLI](docs/CLI.md): commands, side effects and exit semantics.
+- [API](docs/API.md): exact event/model/knowledge envelopes; verdicts are not executable capabilities.
+- [Adapters](docs/ADAPTERS.md): supported native subset, approval/advice differences, verification.
+- [Models](docs/MODELS.md): operation/modality-based plans; no implicit native executor launch.
+- [Proxy](docs/PROXY.md): LiteLLM integration, correlation, transformations and streaming limits.
+- [Extensions](docs/EXTENSIONS.md): replaceable provider/authority/executor contracts.
+
+## Knowledge
+
+- [GW knowledge guide](docs/KNOWLEDGE.md): opt-in explicit source ingestion and context caching.
+- [Standalone package](packages/gw-knowledge/README.md): independent installation and use.
+- [Knowledge contract](packages/gw-knowledge/ADAPTERS.md): capabilities/revision/search/read, optional writes, MCP/HTTP.
+
+## Examples and evidence
+
+- [Examples](examples/README.md): temporary-state, no-key demonstrations and tested policy fragments.
+- [Recipes](docs/RECIPES.md): examples and counterexamples.
+- [FAQ](docs/FAQ.md): direct behavior and scope answers.
+- [Troubleshooting](docs/TROUBLESHOOTING.md): diagnose the failed layer.
+- [Validation](docs/VALIDATION.md): implementation evidence; not model efficacy.
+- [Benchmarks](docs/BENCHMARKS.md): no published gW performance results; proposed evaluation protocol.
+- [References](docs/REFERENCES.md): annotated primary technologies, standards and research.
+- [Roadmap](docs/ROADMAP.md): explicitly unimplemented future work.
+- [Contributing](CONTRIBUTING.md): tests, documentation and evidence requirements.

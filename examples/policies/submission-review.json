@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "rules": {
+    "review_final_submission": {
+      "on": ["tool.before"],
+      "when": {"operation": "application.submit"},
+      "effect": "approve",
+      "reason": "Review final fields before external submission"
+    }
+  }
+}
