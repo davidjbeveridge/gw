@@ -1,5 +1,7 @@
 # Optional knowledge layer and context caching
 
+[Handbook](README.md) · [Standalone package](../packages/gw-knowledge/README.md) · [Adapter contract](../packages/gw-knowledge/ADAPTERS.md) · [API](API.md)
+
 GW v0.4 integrates **gw-knowledge v0.1**, an independently installable MIT package
 under `packages/gw-knowledge`. It is not an answer cache, prompt/KV cache, or a
 mandatory managed service. See the package's [standalone guide](../packages/gw-knowledge/README.md)
@@ -100,10 +102,12 @@ The tool/skill deferred-loading project remains out of scope.
 {"context":{"project":"/absolute/project","client":"codex"},"method":"context","request":{"query":"provider failure","max_chars":8000}}
 ```
 
-The facade assigns scope and refuses a scope in `request`. It is local, uses the
-existing API token and accepts only configured projects/principals; it is not
-enterprise identity enforcement. For the independent `gw.knowledge/1` wire
-contract instead, run `gw-knowledge ... serve`, which binds one scope at startup.
+The facade assigns scope and refuses a scope in `request`. It derives the
+collection and principal from global configuration and the supplied existing
+project path. An authenticated local caller can choose that project path; this
+is not a project allowlist or enterprise identity boundary. For the independent
+`gw.knowledge/1` wire contract instead, run `gw-knowledge ... serve`, which binds
+one scope at startup.
 
 ## What is implemented
 

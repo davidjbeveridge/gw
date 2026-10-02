@@ -30,7 +30,7 @@ A client is the event identity, such as `claude`, `codex`, `opencode`, or `litel
 
 The root resolver starts at the supplied directory and searches upward for `.gw.json` or `.git`. Otherwise it uses that directory. Pass an existing directory. Explicit stable knowledge collections are useful when a project needs to share knowledge across machines with different paths.
 
-`gw trust` stores a reviewed snapshot under `$GW_HOME/projects/`. Source edits afterward are reported as `project_changed_review_required`; the stored snapshot remains in use until reviewed again. With no trusted snapshot, `.gw.json` is inert and the status is `project_untrusted_global_only`. No project file gives `global_only`; an unchanged trusted one gives `trusted_snapshot`.
+`gw trust` stores a reviewed snapshot under `$GW_HOME/projects/`. Source edits afterward are reported as `project_changed_review_required`; the stored snapshot remains in use until reviewed again. With no trusted snapshot, `.gw.json` is inert and the status is `project_untrusted_global_only`. With neither a project file nor a trusted snapshot, the status is `global_only`. A trusted snapshot remains in use if its source file is removed; it is not silently revoked by deletion. An unchanged trusted configuration gives `trusted_snapshot`.
 
 Only these project-level keys are accepted: `version`, `mode`, `goals`, `rules`, `registry`, `proxy`, `clients`, `locked`, and `inference`. Decision endpoints/credentials, authority configuration, and knowledge connections/principals are global or global-client settings. Project-client overrides have the same restriction.
 

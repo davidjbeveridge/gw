@@ -14,6 +14,7 @@ import sys
 import unittest
 import urllib.parse
 from gw_supervisor.config import DEFAULTS, merge, validate
+from gw_supervisor.proxy import WIRES
 from gw_supervisor.util import strict_json
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -104,6 +105,15 @@ class DocumentationTests(unittest.TestCase):
             with self.subTest(path=path.name):
                 validate(merge(DEFAULTS, strict_json(path.read_text(encoding="utf-8"))))
         self.assertEqual(json.dumps(DEFAULTS, sort_keys=True), before)
+
+    def test_documented_wire_contracts_match_implementation(self):
+        prose = (ROOT / "docs/PROXY.md").read_text(encoding="utf-8")
+        rows = re.findall(r"^\| `([^`]+)` \| `([^`]+)` \| ([^|]+) \|$", prose, re.MULTILINE)
+        documented = {wire: (operation, modalities.strip()) for wire, operation, modalities in rows}
+        self.assertEqual(set(documented), set(WIRES))
+        for wire, (operation, inputs, outputs) in WIRES.items():
+            with self.subTest(wire=wire):
+                self.assertEqual(documented[wire], (operation, ",".join(inputs) + " → " + ",".join(outputs)))
 
     def test_quick_install_and_fork_are_at_the_top(self):
         opening = "\n".join((ROOT / "README.md").read_text(encoding="utf-8").splitlines()[:20])

@@ -70,7 +70,7 @@ The additional requirements may strengthen capabilities or context needs and exc
 | `video` | `video.generate` | text → video |
 | `speech` | `audio.speech` | text → audio |
 | `transcription` | `audio.transcribe` | audio → text |
-| `embedding` | `embedding` | text → embedding |
+| `embedding` | `embedding` | text → embeddings |
 | `rerank` | `rerank` | text → rerank |
 | `decision` | `decision` | text → decisions |
 

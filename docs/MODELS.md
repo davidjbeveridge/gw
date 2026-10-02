@@ -1,5 +1,7 @@
 # Capability-first inference routing
 
+[Handbook](README.md) · [Core decision setup](DECISION_SETUP.md) · [Proxy integration](PROXY.md) · [API](API.md)
+
 `gw` selects **any configured model**, not a built-in cheap/medium/frontier enum.
 Price tiers can still be user-defined preferences, but they are not model types.
 
@@ -103,8 +105,10 @@ gw models select --operation video.generate --input text,image --output video
 
 The CLI prints a decision and `inference.plan`, including the selected registry
 ID, provider model, operation, execution kind/target and billing metadata. It does
-**not invoke the selected model**. Exit status 2 means selection was unavailable,
-blocked, or needs approval; malformed configuration exits 1.
+**not invoke the selected model**. Classifier-based selection can still call and
+bill the supervisor's decision backend when several candidates need ranking.
+Priority selection makes no such call. Exit status 2 means selection was
+unavailable, blocked, or needs approval; malformed configuration exits 1.
 
 `--execution proxy,harness,adapter` limits execution kinds. `--context-tokens N`
 requires a declared adequate context window. `--exclude ID1,ID2` excludes failed
