@@ -1,0 +1,41 @@
+name: Import tested agent-context changes
+on:
+  push:
+    branches: ['stage/gw-agent-context-v060']
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify exact patch and create a clean implementation commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64, bz2, hashlib, os, pathlib
+          encoded = ''.join(pathlib.Path(f'.gw-transfer/part{i:02}').read_text().strip() for i in range(4))
+          patch = bz2.decompress(base64.b64decode(encoded, validate=True))
+          expected = '8e9f9b1ad214b0ca6d7a1c10a2258d75be53ff47c38be9c08a6db0306d09c510'
+          assert hashlib.sha256(patch).hexdigest() == expected, 'Transferred patch digest mismatch'
+          pathlib.Path(os.environ['RUNNER_TEMP'], 'gw-v060.patch').write_bytes(patch)
+          PY
+          git checkout --detach 7a125cef5102a89fbebd49598aacf0f21fa87309
+          git apply --check "$RUNNER_TEMP/gw-v060.patch"
+          git apply --binary "$RUNNER_TEMP/gw-v060.patch"
+          test ! -e .gw-transfer
+          test ! -e .github/workflows/gw-transfer.yml
+          python -m compileall -q gw_supervisor packages/gw-knowledge/src
+          git add -A
+          test "$(git diff --cached --name-only | wc -l)" -eq 45
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Add agent controls, bounded decision cascades and context compiler'
+          git push origin HEAD:refs/heads/transfer/gw-agent-context-v060
+          git rev-parse HEAD
