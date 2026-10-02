@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: python -m pip install . ./packages/gw-knowledge ./packages/gw-observe ./packages/gw-learning ./packages/gw-sync
+      - run: python -m pip install ".[agent]" ./packages/gw-knowledge ./packages/gw-observe ./packages/gw-learning ./packages/gw-sync
       - run: python -m unittest discover -s tests -v
       - run: python -m unittest discover -s packages/gw-knowledge/tests -v
       - run: python -m unittest discover -s packages/gw-observe/tests -v
@@ -63,10 +63,10 @@ jobs:
           export GW_HOME="$HOME/state"
           export GW_INSTALL_DIR="$HOME/install"
           export GW_BIN_DIR="$HOME/bin"
-          bash install.sh --all --knowledge --plugins
+          bash install.sh --all --knowledge --plugins --agent-tools
           "$GW_BIN_DIR/gw" --version
-          "$GW_BIN_DIR/gw" bootstrap --all > second.json
-          python -c 'import json; d=json.load(open("second.json")); assert len(d["changes"]) == 6; assert all(not x["changed"] for x in d["changes"])'
+          "$GW_BIN_DIR/gw" bootstrap --all --agent-tools > second.json
+          python -c 'import json; d=json.load(open("second.json")); assert len(d["changes"]) == 14; assert all(not x["changed"] for x in d["changes"])'
           "$GW_BIN_DIR/gw" doctor
           "$GW_INSTALL_DIR/venv/bin/python" -I -c "import gw_knowledge; print(gw_knowledge.__version__)"
           "$GW_BIN_DIR/gw" knowledge init
@@ -91,10 +91,10 @@ jobs:
           $env:GW_INSTALL_DIR = Join-Path $env:RUNNER_TEMP 'gw-install'
           $project = Join-Path $env:RUNNER_TEMP 'gw-project'
           New-Item -ItemType Directory -Force $project | Out-Null
-          ./install.ps1 -All -Project $project -Knowledge -Plugins
+          ./install.ps1 -All -Project $project -Knowledge -Plugins -AgentTools
           $gw = Join-Path $env:GW_INSTALL_DIR 'venv\Scripts\gw.exe'
           & $gw --version
-          $result = & $gw bootstrap --all --project $project | ConvertFrom-Json
+          $result = & $gw bootstrap --all --agent-tools --project $project | ConvertFrom-Json
           if (($result.changes | Where-Object changed).Count -ne 0) { throw 'Bootstrap was not idempotent' }
           & $gw doctor --project $project
           & $gw knowledge --project $project init
@@ -198,9 +198,9 @@ jobs:
             exit 0
           fi
           git archive --format=zip HEAD -o "dist/gw-${version}-source.zip"
-          git archive --format=zip HEAD:packages/gw-knowledge -o dist/gw-knowledge-v0.1.0-source.zip
-          for package in gw-observe gw-learning gw-sync; do
-            git archive --format=zip "HEAD:packages/$package" -o "dist/$package-v0.1.0-source.zip"
+          for package in gw-knowledge gw-observe gw-learning gw-sync; do
+            pkg_version="$(PACKAGE="$package" python -c 'import os,tomllib; print(tomllib.load(open("packages/"+os.environ["PACKAGE"]+"/pyproject.toml","rb"))["project"]["version"])')"
+            git archive --format=zip "HEAD:packages/$package" -o "dist/$package-v$pkg_version-source.zip"
           done
           (cd dist && sha256sum *.whl *.zip > SHA256SUMS)
           cp docs/RELEASE_NOTES.md release-notes.md
