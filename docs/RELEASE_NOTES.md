@@ -1,47 +1,38 @@
-# gw v0.4.0 — pluggable knowledge and context caching
+# gW v0.5.0 — observability, learning and reviewed sync
 
-Adds **gw-knowledge 0.1.0**, a separate MIT-licensed distribution. It has no GW
-imports and can be copied, built and installed independently. The release includes
-both wheels and a standalone knowledge source archive.
-
-## Included
-
-- Provider-neutral `gw.knowledge/1` contract, typed Python protocols, packaged
-  JSON Schema, installed-adapter entry points and reusable conformance tests.
-- SQLite/FTS5 local sources and indexes, keyword and structured search, exact
-  source ranges/provenance, explicit ingestion/export, revisions and CAS updates.
-- Context packets with scope/principal-aware keys, source/index/corpus/ACL
-  invalidation, bounded TTL/LRU, and no stale-on-error or answer replay.
-- HTTP adapter and scope-bound reference service for self-hosted/cloud bridges.
-- Optional standard MCP tools/resources through the actual Python SDK.
-- GW CLI/API integration; no automatic transcript capture or context injection.
+Three independent, free MIT packages accompany the core: gw-observe 0.1.0,
+gw-learning 0.1.0 and gw-sync 0.1.0. The existing knowledge package remains optional.
 
 ## Install
 
-Python 3.10+, macOS/Linux:
-
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.4.0/install.sh | bash -s -- --all --knowledge
-gw knowledge init
-gw knowledge ingest docs/CONFIGURATION.md --id configuration
-gw knowledge context 'decision provider'
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.5.0/install.sh | bash -s -- --all --plugins
+gw trace init --baseline
+gw trace serve --open
 ```
 
-Use a source file that exists in your project. The PowerShell installer supports
-`-Knowledge`. Existing installation without the switch remains dependency-free.
-See docs/KNOWLEDGE.md and packages/gw-knowledge/README.md for standalone/MCP setup.
+`--knowledge` adds the independent knowledge package. PowerShell supports
+`-Plugins` and `-Knowledge`. Plugins are not silently enabled by installation.
 
-## Validation and boundaries
+## Included
 
-CI gates publication on the existing six OS/Python combinations, fresh installers
-on all three OSes, real LiteLLM tests, and a new independent-package job. That job
-extracts the knowledge package outside the repository, builds/installs its wheel
-without GW, and tests actual MCP stdio and JSON Schema contracts. No managed
-provider accounts, paid model inference or production-scale benchmarks are used.
+- Deterministic per-goal auditing, proposed/directed drill-down and native delivery
+  metadata, with uncertainty about host enforcement stated explicitly.
+- Local source-referencing trace index, immutable run variables, explicit task
+  outcomes, native Claude/Codex usage import, descriptive comparisons and dashboard.
+- Standard OTLP/HTTP JSON export to existing compatible collectors.
+- Measurement-only baseline mode with no classifier, policy or proxy changes.
+- Learning plugins for repeated-tool and guidance proposals; explicitly configured
+  research/expansion workers, lookback/modes, review and artifact history.
+- Content-addressed harness bundles with local/HTTP providers, CAS channels,
+  reviewed plans, conflict rejection and no automatic live activation.
 
-The local provider implements keyword/structured search, not vector embeddings.
-Semantic/hybrid backends can implement the same interface. No commercial vendor
-adapter, enterprise synchronization, generative memory extractor, automatic prompt
-injection or policy authority from stored knowledge is claimed. Remote services
-must implement the wire contract or supply an adapter. Scope is host-bound, not
-an enterprise identity attestation; local files are not encrypted/tamper-proof.
+Logging and visualization make no inference calls. Learning workers are separate,
+explicit workloads and can incur their own provider costs. No causal savings,
+automatic quality judgment, hidden activity reconstruction, subscription-dollar
+allocation, enterprise access certification or benchmark orchestration is claimed.
+
+CI gates publication on cross-platform/core/package checks, fresh installers,
+independent package extraction, actual LiteLLM/MCP/schema checks, and browser E2E.
+See docs/OBSERVABILITY.md, docs/LEARNING.md, docs/SYNC.md and docs/PLUGINS.md for
+configuration, data ownership and support boundaries.

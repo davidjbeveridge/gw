@@ -91,3 +91,11 @@ class ObservabilityIntegration(unittest.TestCase):
         from gw_supervisor.config import trust_project
         write_json(self.project/'.gw.json',{'plugins':{'observe':{'enabled':True}}})
         with self.assertRaises(ValueError):trust_project(self.home,self.project)
+
+    def test_proxy_correlation_preserves_partial_requirements(self):
+        with Supervisor(self.home) as s:
+            context={'client':'custom','project':str(self.project),'session':'native','id':'request','requirements':{'capabilities':['code']}}
+            payload={'model':'fixture','messages':[]}
+            result=process_request(s,context,payload)
+            self.assertEqual(result['payload'],payload)
+            self.assertEqual(result['decision'],'allow')

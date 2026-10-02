@@ -89,5 +89,17 @@ class LiteLLMTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result['max_output_tokens'], 75)
 
 
+    async def test_anthropic_usage_is_normalized_only_once(self):
+        data = await self.callback.async_pre_call_hook(None, None, {'model': 'example', 'messages': []}, 'completion')
+        kwargs = {'custom_llm_provider': 'anthropic', 'litellm_params': {'metadata': data['metadata']}}
+        for usage, expected in [
+            ({'prompt_tokens': 60, 'completion_tokens': 5, 'cache_read_input_tokens': 20}, 'generic'),
+            ({'input_tokens': 10, 'output_tokens': 5, 'cache_read_input_tokens': 20}, 'anthropic'),
+        ]:
+            with self.subTest(usage=usage), mock.patch('gw_supervisor.litellm.process_response') as capture:
+                await self.callback.async_log_success_event(kwargs, {'model': 'example', 'usage': usage}, None, None)
+                self.assertEqual(capture.call_args.args[1]['usage_provider'], expected)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -64,7 +64,7 @@ class GWCallback(CustomLogger):
             return
         context = {"client": gw["client"], "project": gw["project"], "session": gw["session"], "id": gw["request_id"],
                    "run_id":gw.get("run_id"),"parent_id":gw.get("parent_id"),
-                   "usage_provider":"anthropic" if kwargs.get("custom_llm_provider",kwargs.get("litellm_params",{}).get("custom_llm_provider"))=="anthropic" else "generic"}
+                   "usage_provider":"anthropic" if "prompt_tokens" not in (response.get("usage") or {}) and kwargs.get("custom_llm_provider",kwargs.get("litellm_params",{}).get("custom_llm_provider"))=="anthropic" else "generic"}
         if start_time is not None and hasattr(start_time,"timestamp"):context["started_ns"]=int(start_time.timestamp()*1e9)
         if end_time is not None and hasattr(end_time,"timestamp"):context["finished_ns"]=int(end_time.timestamp()*1e9)
         cost=kwargs.get("response_cost")

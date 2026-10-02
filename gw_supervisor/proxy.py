@@ -257,7 +257,7 @@ def process_request(supervisor, context: dict, payload: dict, wire: str = "chat"
     context={**context,"id":context.get("id") or str(uuid.uuid4())}
     result=_process_request(supervisor,context,payload,wire)
     from .plugins import enabled,publish_component
-    session=supervisor.session_context({**context,"type":"model.request"})
+    session=supervisor.session_context({**{k:v for k,v in context.items() if k != "requirements"},"type":"model.request"})
     if enabled(session["config"]):
         roles={}
         messages=payload.get("messages",payload.get("input",[]))

@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Source](../gw_supervisor/) · [Standalone knowledge package](../packages/gw-knowledge/README.md)
 
-These documents describe **gW 0.4.0 and gw-knowledge 0.1.0**. Examples marked as runnable use those interfaces. Plans and research are kept separate from implemented behavior. Installation remains pinned to the published release; documentation updates on `main` do not move that tag.
+These documents describe **gW 0.5.0 and gw-knowledge 0.1.0**. Examples marked as runnable use those interfaces. Plans and research are kept separate from implemented behavior. Installation remains pinned to the published release; documentation updates on `main` do not move that tag.
 
 ## Start here
 
@@ -47,3 +47,7 @@ These documents describe **gW 0.4.0 and gw-knowledge 0.1.0**. Examples marked as
 A **configuration fragment** must be merged into the intended file; it is not a command to replace your entire policy. A **template** contains explicit placeholders for your model, path, or endpoint. A **runnable example** includes its prerequisites and expected behavior. A **counterexample** deliberately shows a mistake and is labeled as such.
 
 References to an upstream capability do not mean the gW adapter supports every version of it. Likewise, protocol tests are not a live-model benchmark. Where support stops, the documentation says what remains the host's or operator's responsibility.
+
+## Optional operational plugins
+
+[Observability and run comparison](OBSERVABILITY.md) · [Learning](LEARNING.md) · [Sync](SYNC.md) · [Plugin contracts](PLUGINS.md)
