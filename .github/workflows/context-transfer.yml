@@ -1,0 +1,42 @@
+name: Import context extraction
+on:
+  push:
+    branches: ['stage/context-extraction-v070']
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify exact patch and create a clean implementation commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64, bz2, hashlib, os, pathlib
+          encoded = ''.join(pathlib.Path(f'.gw-transfer/context-part{i}').read_text().strip() for i in range(5))
+          patch = bz2.decompress(base64.b64decode(encoded, validate=True))
+          assert hashlib.sha256(patch).hexdigest() == '38fd87cf4e1fab16f34f72e81ea1dea9aff713084daeccc5959a3a517cf3369a', 'Transferred patch digest mismatch'
+          pathlib.Path(os.environ['RUNNER_TEMP'], 'context-extraction.patch').write_bytes(patch)
+          PY
+          git checkout --detach 7def58b6bfd2db453469af2e96cedd1cb73302eb
+          git apply --check "$RUNNER_TEMP/context-extraction.patch"
+          git apply --binary "$RUNNER_TEMP/context-extraction.patch"
+          # Workflow changes are applied separately through the connector.
+          git restore --source=HEAD -- .github/workflows/ci.yml
+          test ! -e .gw-transfer
+          test ! -e .github/workflows/context-transfer.yml
+          python -m compileall -q gw_supervisor packages/gw-context/src packages/gw-knowledge/src
+          git add -A
+          test "$(git diff --cached --name-only | wc -l)" -eq 44
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Extract provider-independent context compiler and source adapters'
+          git push origin HEAD:refs/heads/transfer/context-extraction-v070
+          git rev-parse HEAD
