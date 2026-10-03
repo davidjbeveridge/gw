@@ -113,7 +113,7 @@ class BootstrapTests(Fixture):
         path=self.project/'.codex/config.toml';path.parent.mkdir();path.write_text('[mcp_servers.gw]\ncommand="other"\n')
         with self.assertRaises(ValueError):bootstrap_agent_tools(self.home,['codex'],self.project)
 
-@unittest.skipUnless(importlib.util.find_spec('gw_knowledge'),'Optional knowledge package')
+@unittest.skipUnless(importlib.util.find_spec('gw_context'),'Optional context package')
 class ContextIntegrationTests(Fixture):
     def test_one_shot_requires_no_global_config(self):
         result=self.service.gw_context_compile(task='Fix login validation',query='fixture')
@@ -129,7 +129,7 @@ class ContextIntegrationTests(Fixture):
             (self.project/'README.md').unlink();(self.project/'README.md').symlink_to(self.root/'outside.md');(self.root/'outside.md').write_text('outside')
             with self.assertRaises(ValueError):self.service.gw_context_compile(task='Task')
     def test_required_preserved_or_budget_error(self):
-        from gw_knowledge.compiler import ContextBudgetExceeded
+        from gw_context import ContextBudgetExceeded
         (self.project/'SKILL.md').write_text('Important instructions '*100)
         write_json(self.home/'config.json',{'context_compiler':{'max_chars':700}})
         with self.assertRaises(ContextBudgetExceeded):self.service.gw_context_compile(task='Task',active_skills=['SKILL.md'])

@@ -152,6 +152,8 @@ def resolve(home: pathlib.Path, project: pathlib.Path, client: str) -> tuple[dic
     status = "global_only"
     if snapshot:
         overlay = snapshot["config"]
+        validate_project_context(overlay)
+        validate_project_context(overlay.get("clients", {}).get(client, {}))
         config = merge(config, {k: v for k, v in overlay.items() if k != "clients"})
         config = merge(config, overlay.get("clients", {}).get(client, {}))
         status = "trusted_snapshot"
@@ -164,12 +166,20 @@ def resolve(home: pathlib.Path, project: pathlib.Path, client: str) -> tuple[dic
     return config, status
 
 
+def validate_project_context(layer):
+    context = layer.get("context_compiler", {})
+    if isinstance(context, dict) and "sources" in context:
+        raise ValueError("Context source providers/options are global-only; projects may not redirect retrieval")
+
+
 def trust_project(home: pathlib.Path, project: pathlib.Path) -> dict:
     source = project / ".gw.json"
     overlay = read_json(source, {})
     if not isinstance(overlay, dict) or set(overlay) - PROJECT_KEYS:
         raise ValueError("Project config contains unsupported keys; provider/authority endpoints are global-only")
+    validate_project_context(overlay)
     for client_overlay in overlay.get("clients", {}).values():
+        validate_project_context(client_overlay)
         if set(client_overlay) - PROJECT_KEYS:
             raise ValueError("Client project override contains global-only keys")
     # Validate all known client layers before writing the trusted snapshot.

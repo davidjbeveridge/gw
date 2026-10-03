@@ -5,7 +5,7 @@
 **macOS or Linux · Python 3.10+**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.6.0/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.7.0/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
 ```
 
 **Star this repository** using GitHub's **Star** button if the project is useful. **[Fork it](https://github.com/davidjbeveridge/gw/fork)** to try your own policies, adapters, and experiments. Contributions with reproducible results are especially welcome.
@@ -18,13 +18,13 @@ The installer adds user-level hooks for Claude Code, Codex, Gemini CLI, Cursor, 
 Windows PowerShell, with Python 3.10+ on PATH:
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.6.0/install.ps1))) -All
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.7.0/install.ps1))) -All
 ```
 
 Add the independent knowledge package on macOS/Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.6.0/install.sh | bash -s -- --all --knowledge
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.7.0/install.sh | bash -s -- --all --knowledge
 ```
 
 On Windows, add `-Knowledge`. Neither option installs an embedding model or connects to a cloud knowledge service.
@@ -32,7 +32,7 @@ On Windows, add `-Knowledge`. Neither option installs an embedding model or conn
 Prefer to inspect the installer first?
 
 ```bash
-curl -fsSLo gw-install.sh https://raw.githubusercontent.com/davidjbeveridge/gw/v0.6.0/install.sh
+curl -fsSLo gw-install.sh https://raw.githubusercontent.com/davidjbeveridge/gw/v0.7.0/install.sh
 less gw-install.sh
 bash gw-install.sh --all
 ```
@@ -53,7 +53,7 @@ Keep the agent you like. Change the decisions around it.
 
 [Documentation](docs/README.md) · [First run](docs/GETTING_STARTED.md) · [Architecture](docs/ARCHITECTURE.md) · [Examples](examples/README.md) · [FAQ](docs/FAQ.md) · [Releases](https://github.com/davidjbeveridge/gw/releases)
 
-> **Current scope:** gW 0.6 is a prerelease for cooperative, user-controlled workflows. The core works without a model key; semantic supervision is **off until configured**. There is no published gW efficacy or cost benchmark yet. See [what is tested](docs/VALIDATION.md), [what is planned](docs/ROADMAP.md), and the [security model](SECURITY.md).
+> **Current scope:** gW 0.7 is a prerelease for cooperative, user-controlled workflows. The core works without a model key; semantic supervision is **off until configured**. There is no published gW efficacy or cost benchmark yet. See [what is tested](docs/VALIDATION.md), [what is planned](docs/ROADMAP.md), and the [security model](SECURITY.md).
 
 ## Why this exists
 
@@ -205,6 +205,19 @@ Use gW when you own the workflow, can inspect its behavior, and want repeatable 
 Do **not** rely on it as containment for an adversarial agent, a compliance certification, or an unattended credential/payment/legal-assent broker. It cannot control actions the host never exposes, make a vendor honor an unsupported hook, or force a model to stop refusing. It does not turn a prior approval in memory into present authorization.
 
 A simple deterministic script may be the better tool for an already understood workflow. A native hook may be enough for one rule in one agent. gW is useful when sharing policy, state, and integration boundaries is worth the added component. [Security](SECURITY.md) · [FAQ](docs/FAQ.md).
+
+## Context without a knowledge-store dependency
+
+The independently installable [`gw-context`](packages/gw-context/README.md) package
+combines task constraints, active skills, project files, session evidence and
+optional retrieval results. It works without `gw-knowledge`, with its local/remote
+provider, or with multiple third-party context sources at once.
+
+The existing agent tool is still `gw_context_compile`. The agent-tools installer
+includes the compiler; a knowledge-only installation remains independently usable.
+Use the [compiler guide](docs/CONTEXT_COMPILER.md) for setup and the
+[source adapter contract](packages/gw-context/ADAPTERS.md) for integrations. The
+reference compiler makes no model calls and never silently drops required content.
 
 ## Evidence before percentages
 

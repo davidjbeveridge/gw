@@ -9,12 +9,12 @@ backend, or compile context. The agent supplies the tool arguments.
 ## One installation, then ordinary requests
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.6.0/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.7.0/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
 ```
 
 This installs the optional MCP dependency and registers a server named `gw` in
-supported local clients. `--plugins` adds observability/learning/sync; `--knowledge`
-adds the context compiler and knowledge store. On Windows, the PowerShell switches
+supported local clients and includes the independent context compiler. `--plugins`
+adds observability/learning/sync; `--knowledge` adds the optional knowledge store. On Windows, the PowerShell switches
 are `-All -AgentTools -Plugins -Knowledge`. Existing core-only installations remain
 valid. No API account or paid model is configured by installation.
 
@@ -147,3 +147,12 @@ not pasted API keys or discovery of another application's OAuth tokens.
 Registration fixtures and an actual MCP client/server test verify this package's
 behavior. They are not proof that every installed vendor release loads every
 configuration automatically. Native approval and runtime checks still matter.
+
+## Context sources without a knowledge store
+
+Agent-tools installation now includes `gw-context`; it does not require
+`gw-knowledge`. `gw_setup_options` lists installed context-source providers
+without running them. Configure a requested adapter through the existing
+plan/apply tools, or leave sources empty for project/session-only compilation.
+The `gw_context_compile` operation and native permission behavior are unchanged.
+See [Context sources](CONTEXT_COMPILER.md#add-a-third-party-source).

@@ -1,6 +1,6 @@
 import unittest
-from gw_knowledge.compiler import ContextItem, DeterministicContextCompiler, ContextBudgetExceeded
-from gw_knowledge.contract import InvalidRequest, canonical
+from gw_context.compiler import ContextItem, DeterministicContextCompiler, ContextBudgetExceeded
+from gw_context.contract import InvalidRequest, canonical
 
 class CompilerTests(unittest.TestCase):
     def item(self, id='source', content='Use a fixture database.', **kw):

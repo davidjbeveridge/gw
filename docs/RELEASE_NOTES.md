@@ -1,24 +1,26 @@
-# gW v0.6.0 — agent tools, decision cascades and context compilation
+# gW v0.7.0 — context independent of knowledge
 
-The agent can operate GW through a host-bound MCP interface: inspect runs, open
-the local dashboard, prepare/apply requested setup, check decision backends,
-select models and retrieve compiled context. Native approval remains unchanged.
+`gw-context` 0.1.0 is an independent MIT package containing the compiler, context
+items, validation, exact chunking, and context-source interfaces. It imports no GW,
+knowledge backend or SQLite. The agent tool remains `gw_context_compile`.
 
-Decision strategies now support a bounded primary/fallback cascade or one
-compatible adaptive endpoint. Every stage keeps its latency/usage; no recursive
-reasoning rescue or permission override is introduced.
+GW can combine project/session/skill evidence with several explicitly configured
+third-party context sources without installing `gw-knowledge`. The existing
+knowledge integration remains optional and retains its source-backed retrieval
+cache. Whole compiled packets are not persistently cached.
 
-The independent gw-knowledge 0.2.0 compiler assembles exact project, task, skill,
-outcome and knowledge evidence. Required content is retained whole or fails the
-budget check. Optional omissions and provenance are inspectable. Automatic
-proxy/supervisor delivery is opt-in; baseline and opaque provider state remain
-unchanged. gw-observe 0.2.0 displays compilation activity and source relationships.
+Agent-tools installation now includes `gw-context`; `--context`/`-Context` installs
+it separately. `--knowledge`/`-Knowledge` still installs the combined experience.
+`gw-knowledge` 0.3.0 retains optional historical compiler import aliases but no
+longer loads the compiler during normal knowledge imports.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.6.0/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
-```
+Source adapters are installed entry points, not worktree imports. The host checks
+scope, namespaces source identities, records failures, and rejects source-authored
+mandatory instructions. Errors stop compilation unless explicit omission is
+configured. Logging and the reference compiler require no inference; external
+source costs and latency belong to their adapters.
 
-No specific Glide endpoint, universal vendor-runtime coverage, paid-provider
-accuracy, or cost/quality improvement is claimed. Tests use fixtures, real MCP
-stdio, local HTTP services, isolated packaging and the existing cross-platform
-suite. See the agent, decision cascade, and context compiler guides.
+Release gates include the existing OS/Python/MCP/proxy/browser tests, standalone
+package extraction, and new core-plus-context installations without knowledge.
+The external source example is an offline fixture; no live vendor integration,
+retrieval-quality improvement or savings benchmark is claimed.

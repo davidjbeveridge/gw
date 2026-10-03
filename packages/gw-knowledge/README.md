@@ -4,7 +4,7 @@
 of GW, any agent harness, model provider, or commercial service. MIT licensed.
 
 Python 3.10+, standard library only for the core. SQLite must include FTS5.
-Package version: **0.2.0**. Adapter protocol: **`gw.knowledge/1`**.
+Package version: **0.3.0**. Adapter protocol: **`gw.knowledge/1`**.
 
 ## Install independently
 
@@ -18,11 +18,11 @@ gw-knowledge --version
 From the GW release (no GW supervisor installation required):
 
 ```bash
-python -m pip install 'https://github.com/davidjbeveridge/gw/archive/v0.6.0.zip#subdirectory=packages/gw-knowledge'
+python -m pip install 'https://github.com/davidjbeveridge/gw/archive/v0.7.0.zip#subdirectory=packages/gw-knowledge'
 ```
 
-A separate `gw_knowledge-0.2.0-py3-none-any.whl` and standalone source ZIP are
-published with GW v0.6.0. No PyPI publication is implied. Copy this directory to
+A separate `gw_knowledge-0.3.0-py3-none-any.whl` and standalone source ZIP are
+published with GW v0.7.0. No PyPI publication is implied. Copy this directory to
 another repository and build it unchanged: it has its own package metadata,
 license, documentation, tests, CLI, schemas, and conformance helpers. It imports
 nothing from `gw_supervisor`. Both packages can evolve independently.
@@ -237,11 +237,15 @@ its wheel without GW, and executes the tests from outside the repository. Adapte
 authors can reuse `gw_knowledge.conformance.ReadConformanceMixin` and the read-only
 `check_provider()` smoke; passing is not a retrieval or security audit.
 
-## Context compiler (0.2)
+## Context compiler extraction (0.3)
 
-`gw_knowledge.compiler.ContextCompiler` is a standalone protocol. The bundled
-`DeterministicContextCompiler` ranks exact `ContextItem` values, preserves required
-items whole, rejects conflicting source revisions, and returns a bounded
-`gw.context/1` packet with provenance and omissions. No model call, generated
-summary or tool-schema pruning is performed. See the compiler module and
-`tests/test_compiler.py` for independently runnable examples.
+The compiler now lives in the independent **gw-context** distribution. Knowledge
+storage, search, revision checks and retrieval caching do not require it. New
+integrations import `gw_context`, not `gw_knowledge.compiler`. Historical compiler
+imports remain aliases when the separate package is installed; a missing compiler
+produces an explicit installation error, not an implicit backend installation.
+
+`ContextCache` still caches a provider's source-backed retrieval packets. It is
+not a cache of complete compiled task/skills/history context. Those complete
+packets are presently assembled on demand. See
+https://github.com/davidjbeveridge/gw/blob/main/docs/CONTEXT_COMPILER.md.

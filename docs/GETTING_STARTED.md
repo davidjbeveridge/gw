@@ -15,7 +15,7 @@ The scripts do not install Python, your agent, local model weights, LiteLLM, Cav
 ### Normal user-local installation
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.6.0/install.sh | bash -s -- --all
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.7.0/install.sh | bash -s -- --all
 ```
 
 On macOS/Linux, this creates a virtual environment under `~/.local/share/gw`, links `~/.local/bin/gw`, and installs all six adapter families. `XDG_DATA_HOME`, `GW_INSTALL_DIR`, and `GW_BIN_DIR` can change these paths. The installer refuses to overwrite an unrelated `gw` executable at its chosen link location.
@@ -34,7 +34,7 @@ Select fewer agents with `--agents claude,codex`; omit both `--all` and `--agent
 ### Inspect first
 
 ```bash
-curl -fsSLo gw-install.sh https://raw.githubusercontent.com/davidjbeveridge/gw/v0.6.0/install.sh
+curl -fsSLo gw-install.sh https://raw.githubusercontent.com/davidjbeveridge/gw/v0.7.0/install.sh
 less gw-install.sh
 bash gw-install.sh --agents claude,codex
 ```
@@ -44,7 +44,7 @@ Release artifacts include checksums. A checksum supplied alongside a download he
 ### Windows
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.6.0/install.ps1))) -All
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.7.0/install.ps1))) -All
 ```
 
 Python must be available as `python`. The default environment is `%LOCALAPPDATA%\gw\venv`; invoke its `Scripts\gw.exe` or use the printed command. The script does not change machine PATH or execution policy. Add `-Knowledge` for the independent knowledge package. Windows file-access restrictions require appropriate ACLs; POSIX permission bits are not a substitute.

@@ -1,3 +1,18 @@
+# v0.7 context extraction validation
+
+The compiler suite moved into `packages/gw-context`. Its source-contract tests
+cover scope mismatch, authority escalation, provider identity collisions, result
+limits and dependency isolation. The new `test_context_independence.py` covers
+project-only compilation, external/multiple sources, explicit failure handling,
+global-only source selection, agent plan/apply, and the existing knowledge path.
+
+CI additionally installs core + context + an actual offline source entry point
+without `gw-knowledge` on Linux/macOS/Windows, then exercises the same agent API
+and MCP exchange. The standalone knowledge job excludes `gw-context`; the context
+package job excludes both knowledge and core. No external vendor or model account
+is used. These are implementation/dependency tests, not retrieval-quality or
+productivity benchmarks.
+
 # v0.4 validation
 
 The new knowledge package and GW bridge are tested separately. Core CI installs

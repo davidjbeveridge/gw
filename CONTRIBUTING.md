@@ -9,7 +9,7 @@ Useful contributions make a boundary clearer, a behavior more reliable, or a res
 Fork the repository, clone your fork, and create a branch. Use Python 3.10+ in an isolated environment. Install the core and, when needed, the independent knowledge package:
 
 ```bash
-python -m pip install . ./packages/gw-knowledge
+python -m pip install . ./packages/gw-context ./packages/gw-knowledge
 python -m unittest discover -s tests -v
 python -m unittest discover -s packages/gw-knowledge/tests -v
 ```
@@ -59,3 +59,14 @@ Use [the benchmark protocol](docs/BENCHMARKS.md). Include failures, classifier o
 ## Before opening the pull request
 
 Review the diff for secrets and unrelated changes. Run the relevant tests. Link the documentation or source contract supporting external behavior. Describe unfinished integration work plainly rather than implying it shipped. The project is MIT-licensed; dependencies and contributed artifacts must remain compatible with their own terms.
+
+## Context adapters and dependency isolation
+
+The compiler and context source protocols live in `packages/gw-context`, with no
+mandatory dependencies. Test it on its own, then test core + context without
+knowledge. The explicit fixture in `examples/context-source` is a real installable
+entry point, not a bundled production provider. Do not introduce a compiler import
+from a knowledge backend or a knowledge dependency into the context package.
+
+Run `python -m unittest discover -s packages/gw-context/tests -v` and
+`python -m unittest discover -s tests -p test_context_independence.py -v`.

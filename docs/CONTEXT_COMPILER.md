@@ -7,7 +7,7 @@ working context, preserves its provenance, and says what did not fit. It does no
 make source text free to process or turn a saved instruction into authorization.
 
 GW's reference compiler is deterministic and lives in the independently usable
-`gw-knowledge` package. It has no model calls. It leaves tool schemas, conversation
+`gw-context` package. It does not import GW, a knowledge store, or SQLite. It has no model calls. It leaves tool schemas, conversation
 history, provider signatures and existing system instructions alone.
 
 ## Use it from the agent
@@ -31,7 +31,8 @@ read original sources where more detail is needed.
 | Required project files and active skill files | Whole, not machine-generated summaries |
 | Optional project files | Exact bounded source chunks |
 | Recent tool verdicts/outcomes for a bound session | Bounded metadata, not a copied transcript |
-| Knowledge retrieval | Authorized source passages from the configured provider/cache |
+| Knowledge retrieval (optional) | Authorized source passages from the configured provider/cache |
+| Installed context sources (optional) | Scoped evidence from one or several providers without requiring `gw-knowledge` |
 
 The reference ranking orders required items first, then optional priorities,
 lexical query overlap, and stable source identifiers. It deduplicates identical
@@ -67,7 +68,8 @@ reference for adapter authors, not a requirement that the user write JSON:
     "knowledge_mode": "keyword",
     "knowledge_limit": 4,
     "delivery": "tools",
-    "supervisor": false
+    "supervisor": false,
+    "sources": {}
   }
 }
 ```
@@ -105,16 +107,19 @@ are excluded, and detected secret-like content is rejected or omitted with an
 explicit status. The heuristic is not complete DLP. Knowledge access uses the
 provider's current scope/revision rules, not model-selected credentials.
 
-The context packet is not stored as another transcript. Knowledge retrieval can
-reuse its existing dependency-aware cache. Trace metadata records the packet ID,
+The complete context packet is not persistently cached or stored as another
+transcript. Knowledge retrieval can reuse its existing dependency-aware evidence
+cache. That cache covers one provider's retrieval, not the final task/skills/history
+packet. Any future whole-packet cache belongs to `gw-context` and must revalidate
+scope, source revisions, live inputs, compiler settings and budget. Trace metadata records the packet ID,
 selected source revisions/ranges, omissions and counts. The dashboard's Context
 view shows compilation totals and evidence relationships; event detail contains
-the selection record. Logging and compilation require no additional inference.
+the selection record. Logging and the reference compiler make no inference calls. A selected external source may perform billable retrieval or embedding work; its costs are not inferred from the compiler's `model_calls: 0`.
 
 ## Independent API
 
 ```python
-from gw_knowledge.compiler import ContextItem, DeterministicContextCompiler
+from gw_context import ContextItem, DeterministicContextCompiler
 
 packet = DeterministicContextCompiler().compile(
     "Fix login validation without deploying",
@@ -130,7 +135,7 @@ packet = DeterministicContextCompiler().compile(
 print(packet["text"])
 ```
 
-`ContextCompiler.compile(task, items, query, max_chars)` is the provider-neutral
+`ContextCompiler.compile(task, items, query, max_chars, scope)` is the provider-neutral
 Python protocol. The `gw.context/1` packet carries exact source items, not vector
 embeddings or a hard dependency on the GW supervisor. Another compiler can
 implement the protocol, but must make its ranking, truncation, provenance and
@@ -149,3 +154,72 @@ This is not the deferred universal tool/skill-loading optimizer. It does not
 hide capabilities from the agent or shrink every native harness's initial prompt.
 It supplies better organized, inspectable evidence at the integration paths GW
 actually controls.
+
+## Knowledge-independent installation and migration
+
+The installer includes `gw-context` with `--agent-tools` (PowerShell `-AgentTools`).
+Use `--context` / `-Context` to install only the context component alongside core.
+The existing `--knowledge` / `-Knowledge` option installs both, preserving the
+previous combined setup. None of these flags enables automatic retrieval or
+injection. Third-party sources are installed/configured separately and never
+selected merely because a package is present.
+
+The agent tool remains `gw_context_compile`. Existing `context_compiler` settings,
+project files, skill retention, proxy delivery and supervisor enrichment keep
+their roles. No local knowledge database is opened unless the knowledge bridge is
+explicitly enabled and used.
+
+New Python imports use `gw_context`. `gw_knowledge.compiler` and the previous
+package-root compiler names are compatibility aliases **when `gw-context` is
+installed**. Importing `gw_knowledge` for storage/search does not import the compiler.
+New compiler exceptions live under `gw_context` (`ContextError`, `InvalidRequest`,
+`ContextBudgetExceeded`); use their public classes or documented error codes,
+not knowledge-storage exception classes.
+
+## Add a third-party source
+
+A context source can use a managed knowledge API, an existing retriever, or an
+in-memory collection. It implements `collect(ContextRequest) -> SourceResult`.
+It does not have to implement the knowledge-store write/index/cache API. The
+[standalone adapter guide](../packages/gw-context/ADAPTERS.md) specifies exact types,
+limits, ownership and a complete installable offline example.
+
+Configure sources globally or in a global client layer:
+
+```json
+{
+  "context_compiler": {
+    "knowledge": false,
+    "sources": {
+      "company-docs": {
+        "provider": "your-installed-adapter",
+        "options": {"key_env": "COMPANY_KNOWLEDGE_KEY"},
+        "limit": 8,
+        "on_error": "error"
+      }
+    }
+  }
+}
+```
+
+The provider name is an installed `gw_context.sources` entry point, not a module
+path or a claim that this vendor adapter is bundled. `gw_setup_options` discovers
+names without running them; managed plan/apply can configure those installed
+sources. Project files cannot introduce sources or redirect their credentials.
+Existing locks and setup revision checks still apply.
+
+Several named sources can coexist. Namespaced provenance prevents providers with
+the same document ID from colliding. The host supplies an opaque scope and checks
+that the response matches it; adapters must still enforce real access against
+their own principal and service. Returning the same scope string is not proof of
+authorization. Sources cannot set `required` or `trust: host_instruction`.
+
+Source failure stops compilation by default. `on_error: omit` explicitly allows
+continuing while listing the unavailable source and error type. Raw vendor error
+messages are not returned. Disabled sources do not run. Source implementations
+own network deadlines, freshness and any model usage; synchronous compiler calls
+do not supply a sandbox or an automatic timeout around arbitrary installed code.
+
+The `sources` report contains collection status, revision and item count. Scope
+is included in the compiled payload identity. `context.source` observations store
+metadata only; they do not duplicate retrieved text or add inference calls.

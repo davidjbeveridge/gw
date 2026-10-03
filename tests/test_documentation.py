@@ -22,7 +22,7 @@ LINK = re.compile(r'\[[^\]\n]*\]\(([^\s)]+)(?:\s+"[^"]*")?\)')
 
 
 def documents():
-    roots = [ROOT, ROOT / "docs", ROOT / "examples", ROOT / "packages/gw-knowledge", ROOT / "skills"]
+    roots = [ROOT, ROOT / "docs", ROOT / "examples", ROOT / "packages/gw-knowledge", ROOT / "packages/gw-context", ROOT / "skills"]
     paths = set()
     for root in roots:
         paths.update(root.glob("*.md") if root == ROOT else root.rglob("*.md"))

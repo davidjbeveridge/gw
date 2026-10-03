@@ -29,3 +29,9 @@ network requests, downloads, source ingestion, and mutations explicit.
 Documentation must distinguish shipped behavior, templates, and future work.
 Run the documentation checks and offline examples described in CONTRIBUTING.md.
 Do not invent benchmark results or copy vendor savings claims into gW results.
+
+For context work, keep `packages/gw-context` independently buildable without
+`gw-knowledge`, GW core or SQLite. Source contracts belong there; the core owns
+source selection and delivery. Preserve the `gw_context_compile` agent tool.
+Run its package tests and `tests/test_context_independence.py`, including a clean
+installation with core + context + the explicit fixture source but no knowledge.

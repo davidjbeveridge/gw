@@ -47,7 +47,7 @@ class AgentService:
         finally:
             with_store.close()
         packages = {}
-        for name in ("gw-supervisor", "gw-knowledge", "gw-observe", "gw-learning", "gw-sync"):
+        for name in ("gw-supervisor", "gw-context", "gw-knowledge", "gw-observe", "gw-learning", "gw-sync"):
             try:
                 packages[name] = importlib.metadata.version(name)
             except importlib.metadata.PackageNotFoundError:
@@ -60,7 +60,14 @@ class AgentService:
         """Read supported setup presets, decision strategies and context options. Makes no provider calls."""
         from .decision_setup import manifest
         from .context import DEFAULT_CONTEXT
-        return {"decision": manifest(), "strategies": {
+        try:
+            from gw_context import installed_sources
+            sources = installed_sources()
+        except ModuleNotFoundError as exc:
+            if exc.name != "gw_context":
+                raise
+            sources = []
+        return {"context_source_providers": sources, "decision": manifest(), "strategies": {
             "single": "One configured typed decision endpoint",
             "cascade": "One primary plus at most one configured fallback for exact uncertainty labels; errors opt-in",
             "managed": "One compatible endpoint that owns its own adaptive reasoning/model switching"},
@@ -90,6 +97,18 @@ class AgentService:
         allowed = {"mode", "decision", "knowledge", "context_compiler", "goals", "rules", "registry", "inference", "plugins"}
         if not isinstance(patch, dict) or set(patch) - allowed or not patch or len(canonical(patch)) > 64000:
             raise ValueError("Unsupported configuration patch")
+        context = patch.get("context_compiler", {})
+        if isinstance(context, dict) and "sources" in context:
+            from gw_context import installed_sources
+            sources = context["sources"]
+            if not isinstance(sources, dict):
+                raise ValueError("Context sources must be an object")
+            existing_sources = self._config()["context_compiler"].get("sources", {})
+            installed = set(installed_sources())
+            for name, spec in sources.items():
+                provider = spec.get("provider", existing_sources.get(name, {}).get("provider")) if isinstance(spec, dict) else None
+                if provider not in installed:
+                    raise ValueError("Agent setup requires an already installed context source provider")
         if "knowledge" in patch:
             k = patch["knowledge"]
             if not isinstance(k, dict) or k.get("provider", "local") not in {"local", "http"}:

@@ -98,3 +98,10 @@ The observability and knowledge paths are read/record-oriented. Learning executi
 and sync application are explicitly mutating operations with their own review,
 limits and journals. Keeping those roles distinct avoids giving a charting plugin
 permission to rewrite the harness it observes.
+
+## Provider-independent context (0.7)
+
+`gw-context` defines `ContextCompiler` and `ContextSource` without requiring a
+knowledge backend. Named source factories use `gw_context.sources`. The GW host
+loads only globally configured sources and delivers the compiled packet; the pure
+compiler performs no provider discovery. See [Context compiler](CONTEXT_COMPILER.md).

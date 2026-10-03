@@ -196,3 +196,10 @@ Global `knowledge` config chooses the optional backend, scope, and context cache
 Inspect the effective config, edit the smallest relevant fragment, validate with `gw config`, review project changes with `gw trust`, then start a new session. Re-run a harmless canary before depending on a critical rule. Configuration files are backed up by setup/bootstrap paths where documented, but a manual edit is your responsibility.
 
 Do not replace an existing global file with a tutorial fragment. Do not commit a key to make an example run. Do not copy a model's proposed policy into a trusted snapshot without reviewing its effect.
+
+## Context source configuration
+
+`context_compiler.sources` is global/global-client only, unlike budget and file
+selection settings. Project overrides cannot introduce source code or redirect
+retrieval. Use the [context source guide](CONTEXT_COMPILER.md#add-a-third-party-source)
+for named installed adapters, limits, explicit failure policy and agent setup.

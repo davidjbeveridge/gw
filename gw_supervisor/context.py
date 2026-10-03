@@ -14,7 +14,7 @@ from .util import canonical, digest, redact
 DEFAULT_CONTEXT = {"enabled": False, "max_chars": 12000, "project_files": ["README.md"],
                    "required_files": [], "constraints": [], "history_limit": 6,
                    "knowledge": True, "knowledge_mode": "keyword", "knowledge_limit": 4,
-                   "delivery": "tools", "supervisor": False}
+                   "delivery": "tools", "supervisor": False, "sources": {}}
 
 
 def validate_context(c):
@@ -28,6 +28,23 @@ def validate_context(c):
             raise ValueError("Invalid context limit: " + key)
     if c.get("delivery") not in {"tools", "proxy"} or c.get("knowledge_mode") not in {"keyword", "structured", "semantic", "hybrid"}:
         raise ValueError("Invalid context delivery or retrieval mode")
+    sources = c.get("sources", {})
+    if not isinstance(sources, dict) or len(sources) > 16:
+        raise ValueError("Context sources must be a bounded mapping")
+    for name, spec in sources.items():
+        if not isinstance(name, str) or not name or len(name) > 128 or name == "gw-knowledge":
+            raise ValueError("Invalid context source name")
+        if not isinstance(spec, dict) or set(spec) - {"provider", "options", "enabled", "limit", "on_error"}:
+            raise ValueError("Unknown context source option")
+        if not isinstance(spec.get("provider"), str) or not spec["provider"] or len(spec["provider"]) > 128:
+            raise ValueError("Context source requires an installed provider name")
+        if type(spec.get("enabled", True)) is not bool or type(spec.get("limit", 16)) is not int or not 1 <= spec.get("limit", 16) <= 256:
+            raise ValueError("Invalid context source enablement or limit")
+        if spec.get("on_error", "error") not in {"error", "omit"}:
+            raise ValueError("Context source on_error must be error or omit")
+        options = spec.get("options", {})
+        if not isinstance(options, dict) or len(canonical(options)) > 16000 or redact(options) != options:
+            raise ValueError("Context source options need bounded JSON with credential references, not secrets")
     for key in ("project_files", "required_files", "constraints"):
         values = c.get(key)
         if not isinstance(values, list) or len(values) > 32 or any(not isinstance(v, str) or not v or len(v) > 8192 for v in values):
@@ -68,8 +85,13 @@ def read_project(root, relative):
 
 
 def compile_context(home, project, client, *, task=None, query="", session_id=None, active_skills=None, config=None, store=None, max_chars=None):
-    from gw_knowledge.compiler import ContextItem, DeterministicContextCompiler
-    from gw_knowledge.local import chunks
+    try:
+        from gw_context import ContextItem, DeterministicContextCompiler
+        from gw_context.text import chunks
+    except ModuleNotFoundError as exc:
+        if exc.name != "gw_context":
+            raise
+        raise ValueError("Install gw-context with the GW installer --context or --agent-tools; knowledge storage is not required") from exc
     from .config import project_root, resolve
     from .store import Store
     root = project_root(project)
@@ -123,35 +145,27 @@ def compile_context(home, project, client, *, task=None, query="", session_id=No
                 evidence = {"event": row["event_id"], "kind": row["kind"], "tool": row["tool"], "success": row["success"], "decision": result["decision"], "advice": result.get("advice", [])[:3]}
                 content = canonical(redact(evidence))
                 items.append(ContextItem("history:" + row["event_id"] + ":" + row["kind"], "history", content, "gw-event:" + digest([session_id, row["event_id"], row["kind"]]), digest(content), False, 50))
-        retrieval = None
-        if c["knowledge"] and config["knowledge"]["enabled"]:
-            from .knowledge import open_service
-            from gw_knowledge import SearchRequest
-            with open_service(home, root, client) as service:
-                request = SearchRequest(service.scope, "" if c["knowledge_mode"] == "structured" else (query or task)[:4096], mode=c["knowledge_mode"], limit=c["knowledge_limit"])
-                packet = service.cache.assemble(service.provider, request, max_chars=c["max_chars"])
-                retrieval = {"revision": packet["revision"], "cache": packet["cache"]}
-                for n, passage in enumerate(packet["evidence"]):
-                    if redact(passage["text"]) != passage["text"]:
-                        unavailable.append({"source": "knowledge:" + passage["document_id"], "reason": "potential_secret"})
-                        continue
-                    items.append(ContextItem("knowledge:" + passage["document_id"] + ":" + str(n), "knowledge", passage["text"],
-                                             "knowledge:" + packet["provider_id"] + ":" + passage["document_id"], passage["revision"], False, 75, passage["start_char"]))
+        from .context_sources import gather_sources
+        extra, missing, retrieval, sources, scope = gather_sources(
+            home, root, client, config, task, query, session_id=session_id,
+            max_chars=min(max_chars or c["max_chars"], c["max_chars"]))
+        items.extend(extra)
+        unavailable.extend(missing)
         if len(items) > 256:
             raise ValueError("Context candidate limit exceeded; narrow the configured file set")
-        packet = DeterministicContextCompiler().compile(task, items, query=query, max_chars=min(max_chars or c["max_chars"], c["max_chars"]))
+        packet = DeterministicContextCompiler().compile(task, items, query=query, max_chars=min(max_chars or c["max_chars"], c["max_chars"]), scope=scope)
         # File reads are not a filesystem snapshot. Detect edits made during
         # compilation instead of presenting mixed source versions as current.
         for relative, revision in project_revisions.items():
             current = read_project(root, relative)
             if current is None or digest(current) != revision:
                 raise ValueError("Project context changed during compilation; retry with fresh evidence")
-        packet.update(unavailable=unavailable, retrieval=retrieval)
+        packet.update(unavailable=unavailable, retrieval=retrieval, sources=sources, scope=scope)
         from .plugins import publish_component
         identity = {"project": str(root), "client": client, "session": "context", "session_id": session_id}
         publish_component(home, config, identity, "context.compile", {"packet_id": packet["id"], "compiled_chars": packet["compiled_chars"],
                           "max_chars": packet["max_chars"], "selected": packet["selected"], "omitted": packet["omitted"], "unavailable": unavailable,
-                          "model_calls": 0}, start_ns=started, end_ns=time.time_ns())
+                          "model_calls": 0, "sources": sources, "scope": scope}, start_ns=started, end_ns=time.time_ns())
         return packet
     except Exception as exc:
         from .plugins import publish_component
