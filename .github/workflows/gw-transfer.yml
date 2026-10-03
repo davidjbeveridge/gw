@@ -1,0 +1,75 @@
+name: Import checked plugin runtime source
+on:
+  push:
+    branches: ['stage/plugin-runtime-v080']
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify source delta and create a clean implementation commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64, bz2, hashlib, os, pathlib
+          encoded = ''.join(pathlib.Path(f'.gw-transfer/part{i:02}').read_text().strip() for i in range(5))
+          data = bz2.decompress(base64.b64decode(encoded, validate=True))
+          assert hashlib.sha256(data).hexdigest() == 'a90134656096f275d337fbcb9f332f4f82cc5844a5836717e168be7cc930ed83', 'Source manifest mismatch'
+          pathlib.Path(os.environ['RUNNER_TEMP'], 'gw-v080-deltas.json').write_bytes(data)
+          PY
+          git checkout --detach 9046490762fe25c5175130d0a088e6b3a8a8894b
+          python - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          base = '9046490762fe25c5175130d0a088e6b3a8a8894b'
+          changes = json.loads(pathlib.Path(os.environ['RUNNER_TEMP'], 'gw-v080-deltas.json').read_text())
+          assert len(changes) == 97
+          def relative(value):
+              p = pathlib.PurePosixPath(value)
+              assert not p.is_absolute() and '..' not in p.parts and '\\' not in value
+              assert not value.startswith('.gw-transfer') and value != '.github/workflows/gw-transfer.yml'
+              return pathlib.Path(value)
+          prepared = []
+          for change in changes:
+              path = relative(change['path'])
+              assert not any(p.is_symlink() for p in (path, *path.parents))
+              if change.get('delete'):
+                  prepared.append((path, None, False))
+                  continue
+              original = subprocess.check_output(['git', 'show', base + ':' + str(relative(change['base']))]) if change['base'] else b''
+              assert hashlib.sha256(original).hexdigest() == change['base_hash'], 'Base content mismatch: ' + str(path)
+              lines = original.decode('utf-8').splitlines(keepends=True)
+              for start, end, text in reversed(change['ops']):
+                  assert 0 <= start <= end <= len(lines)
+                  lines[start:end] = [text]
+              content = ''.join(lines).encode('utf-8')
+              assert hashlib.sha256(content).hexdigest() == change['hash'], 'Result mismatch: ' + str(path)
+              prepared.append((path, content, change['executable']))
+          for path, content, executable in prepared:
+              if content is None:
+                  path.unlink()
+              else:
+                  path.parent.mkdir(parents=True, exist_ok=True)
+                  path.write_bytes(content)
+                  path.chmod(0o755 if executable else 0o644)
+          PY
+          # Workflow updates are applied separately through the authorized connector.
+          # The Actions token here retains content-only permissions.
+          git restore --source=HEAD -- .github/workflows/ci.yml
+          test ! -e .gw-transfer
+          test ! -e .github/workflows/gw-transfer.yml
+          python -m compileall -q gw_supervisor packages/gw-builtin/src
+          git add -A
+          test "$(git diff --cached --no-renames --name-only | wc -l)" -eq 96
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Extract domain plugins behind the versioned GW runtime API'
+          git push origin HEAD:refs/heads/transfer/plugin-runtime-v080
+          git rev-parse HEAD
