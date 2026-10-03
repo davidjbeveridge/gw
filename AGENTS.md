@@ -35,3 +35,12 @@ For context work, keep `packages/gw-context` independently buildable without
 source selection and delivery. Preserve the `gw_context_compile` agent tool.
 Run its package tests and `tests/test_context_independence.py`, including a clean
 installation with core + context + the explicit fixture source but no knowledge.
+
+## Plugin runtime (0.8)
+
+The public SDK is `gw_supervisor.api`; core must not import `gw_builtin` or optional
+feature implementations except explicit legacy import aliases. Reference plugins
+live in `packages/gw-builtin`. Peer integration uses named services. Keep core
+verdict precedence and session pinning intact. Preserve independent package builds,
+agent tool registration, baseline/authority behavior and native denial on handled
+configuration errors. See `docs/PLUGINS.md` and `tests/test_runtime_plugins.py`.

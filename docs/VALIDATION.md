@@ -1,3 +1,23 @@
+# v0.8 runtime/plugin validation
+
+The new conformance suite tests explicit discovery, API and ownership collisions,
+missing/cyclic dependencies, deterministic phase order, lazy lifecycle cleanup,
+verdict precedence, baseline authority constraints, detached inputs, bounded
+contributions, first-result persistence and plugin-state rollback. An installed
+example adds an evaluator, setting and agent tool without changing runtime or
+agent-host implementation. Tests also cover generic configuration plans,
+client/project isolation and rejection of stale bound tool definitions.
+
+CI runs the core in fresh environments without `gw-builtin` or optional libraries,
+using an external in-memory repository. It also builds the reference distribution
+outside the repository, retains independent library builds, and runs the existing
+cross-platform, context-without-knowledge, installer, MCP, LiteLLM and browser gates.
+No live hosted model or enterprise authorization service was exercised.
+
+The GitHub Actions result for the exact commit is the execution record. Protocol
+fixtures and unit tests do not establish live vendor hook coverage, model accuracy,
+throughput or savings. Historical validation records below are preserved.
+
 # v0.7 context extraction validation
 
 The compiler suite moved into `packages/gw-context`. Its source-contract tests

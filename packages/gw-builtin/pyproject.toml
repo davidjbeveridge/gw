@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gw-builtin"
+version = "0.1.0"
+description = "Replaceable reference domain plugins for the GW runtime"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+readme = "README.md"
+dependencies = ["gw-supervisor>=0.8,<0.9"]
+
+[project.entry-points."gw_supervisor.plugins"]
+"gw.state" = "gw_builtin.registration:state"
+"gw.policy" = "gw_builtin.registration:policy"
+"gw.inference" = "gw_builtin.registration:inference"
+"gw.governance" = "gw_builtin.registration:governance"
+"gw.context" = "gw_builtin.registration:context"
+"gw.knowledge" = "gw_builtin.registration:knowledge"
+"gw.observe" = "gw_builtin.registration:observe"
+"gw.learning" = "gw_builtin.registration:learning"
+"gw.sync" = "gw_builtin.registration:sync"
+"gw.harness" = "gw_builtin.registration:harness"
+"gw.gateway" = "gw_builtin.registration:gateway"
+"gw.agent" = "gw_builtin.registration:agent"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+gw_builtin = ["templates/*", "py.typed"]

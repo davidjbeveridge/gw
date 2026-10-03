@@ -9,7 +9,7 @@ backend, or compile context. The agent supplies the tool arguments.
 ## One installation, then ordinary requests
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.7.0/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.0/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
 ```
 
 This installs the optional MCP dependency and registers a server named `gw` in
@@ -156,3 +156,17 @@ without running them. Configure a requested adapter through the existing
 plan/apply tools, or leave sources empty for project/session-only compilation.
 The `gw_context_compile` operation and native permission behavior are unchanged.
 See [Context sources](CONTEXT_COMPILER.md#add-a-third-party-source).
+
+## Runtime plugins
+
+`gw_runtime_inspect` shows selected plugins, service ownership, registered tools,
+execution phases and configuration scope. Tool registration now comes from plugin
+manifests rather than a fixed method list. Plugins can contribute their own typed,
+project-bound tools and explicitly agent-editable configuration sections.
+
+A configuration plan may enable/disable already installed runtime plugins; it does
+not install packages. Apply only the user's requested change, respecting native
+permissions, locks and review. Restart the MCP interface and begin a new native
+session after composition changes. A callable bound to the old manifest fails
+explicitly instead of running against a different schema/provider. See
+[Runtime plugins](PLUGINS.md).

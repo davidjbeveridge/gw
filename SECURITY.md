@@ -40,3 +40,13 @@ Context-cache reuse depends on truthful corpus/index/ACL revision tokens. Unknow
 revision caching is off by default; provider outages never serve stale packets.
 Logical deletion is not secure disk/WAL/backup erasure. See the standalone
 package security limitations before applying enterprise retention requirements.
+
+## Runtime plugin trust
+
+Plugins are operator-installed in-process code, not sandboxes. Only selected entry
+points activate; API/dependency/ownership errors fail explicitly. Project policies
+cannot select executable plugins. The core reducer owns permission precedence;
+observers cannot rewrite committed verdicts. Baseline rejects an authority plugin
+without explicit baseline validation. Plugin selection/version changes require
+fresh sessions and refreshed MCP tool definitions. Declared versions are not code
+attestation, and native hook coverage/timeout limits remain unchanged.

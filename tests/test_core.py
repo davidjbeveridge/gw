@@ -235,7 +235,7 @@ class ProviderTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             Classifier(config).decide({'content': 'x' * 100}, {})
     def test_unsupported_authority_obligations_deny(self):
-        with mock.patch('gw_supervisor.providers.post_json', return_value={'decision': 'allow', 'obligations': ['unknown']}):
+        with mock.patch('gw_builtin.governance.post_json', return_value={'decision': 'allow', 'obligations': ['unknown']}):
             self.assertEqual(HttpAuthority({'endpoint': 'https://example.test'}).authorize({})['decision'], 'deny')
     def test_endpoint_restrictions(self):
         self.assertEqual(safe_endpoint('http://127.0.0.1:7777'), 'http://127.0.0.1:7777')

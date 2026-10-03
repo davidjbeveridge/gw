@@ -1,6 +1,6 @@
 # gW
 
-> Configurable local agent supervision. Current runtime: gW 0.7.0; optional independent gw-knowledge 0.3.0. Read the implemented contract, not an earlier design sketch.
+> Configurable local agent supervision. Current runtime: gW 0.8.0; optional independent gw-knowledge 0.3.0. Read the implemented contract, not an earlier design sketch.
 
 ## Start and scope
 
@@ -50,3 +50,7 @@
 
 - [Context package](packages/gw-context/README.md): no knowledge/harness dependency; included with agent tools.
 - [Context source contract](packages/gw-context/ADAPTERS.md): installed, scoped evidence adapters; not host authority.
+
+## Runtime composition
+
+[Plugin architecture and public contracts](docs/PLUGINS.md) · [Reference bundle](packages/gw-builtin/README.md) · [Complete extension](examples/runtime-plugin/README.md)

@@ -8,6 +8,14 @@ Configuration is JSON, not YAML. Examples in design discussions are not configur
 gw config --project . --client codex
 ```
 
+## Runtime composition
+
+The `runtime` section selects installed plugins through a `standard` or `minimal`
+profile plus `enable`/`disable` ID lists. It is global/global-client only. Feature
+defaults and validators come from the selected registrations. Existing domain
+settings remain compatible with the reference bundle. Unowned settings are errors,
+not silently ignored policies. See [Plugin configuration](PLUGINS.md#configuration-belongs-to-its-owner).
+
 ## Files and precedence
 
 `GW_HOME` defaults to `~/.config/gw`; `--home` overrides it for that command. The global file is `config.json`. A project file is named `.gw.json`, but is not read as live policy until reviewed and imported with `gw trust --project PATH`.
@@ -153,7 +161,7 @@ Required fields: `metric`, `threshold`, and an effect; `min_observations` is opt
 
 Failures are consecutive failures of the same redacted action within a session, looking back at most 20 outcomes. A success or unknown outcome breaks that streak. Avoid a threshold above 20: this implementation will not observe a larger count. Success totals span sessions in the same project for the same action fingerprint.
 
-Drift is an exponentially weighted alignment average. See [Architecture](ARCHITECTURE.md#session-state-and-cumulative-drift) for the formula and timing. There is no model-quality, dollar-spend, or task-completion metric implemented by naming one here.
+Drift is an exponentially weighted alignment average. See [Architecture](ARCHITECTURE.md#state-without-another-transcript) for the formula and timing. There is no model-quality, dollar-spend, or task-completion metric implemented by naming one here.
 
 ### Repetition
 

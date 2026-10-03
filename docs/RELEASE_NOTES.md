@@ -1,26 +1,28 @@
-# gW v0.7.0 — context independent of knowledge
+# GW v0.8.0 — domain plugins, small runtime
 
-`gw-context` 0.1.0 is an independent MIT package containing the compiler, context
-items, validation, exact chunking, and context-source interfaces. It imports no GW,
-knowledge backend or SQLite. The agent tool remains `gw_context_compile`.
+The standard behavior is now a separate `gw-builtin` 0.1.0 distribution with twelve
+replaceable registrations. Core retains configuration, discovery/lifecycle,
+session identities, verdict reduction and a generic command host. Independent
+context, knowledge, observation, learning and sync packages remain independent.
 
-GW can combine project/session/skill evidence with several explicitly configured
-third-party context sources without installing `gw-knowledge`. The existing
-knowledge integration remains optional and retains its source-backed retrieval
-cache. Whole compiled packets are not persistently cached.
+Plugin API v1 supports owned configuration, lazy named services, ordered evaluators,
+commands, project-bound agent tools, namespaced state and non-authoritative
+observations. Installed entry points do not activate unless selected. API/ownership/
+dependency conflicts fail explicitly; authority precedence remains in core.
 
-Agent-tools installation now includes `gw-context`; `--context`/`-Context` installs
-it separately. `--knowledge`/`-Knowledge` still installs the combined experience.
-`gw-knowledge` 0.3.0 retains optional historical compiler import aliases but no
-longer loads the compiler during normal knowledge imports.
+The installer includes the reference bundle automatically. Existing commands and
+configuration fields remain; old Python feature imports are compatibility aliases.
+Start fresh native sessions after upgrading, and restart GW MCP after composition
+changes. No old session is silently migrated to a new plugin graph.
 
-Source adapters are installed entry points, not worktree imports. The host checks
-scope, namespaces source identities, records failures, and rejects source-authored
-mandatory instructions. Errors stop compilation unless explicit omission is
-configured. Logging and the reference compiler require no inference; external
-source costs and latency belong to their adapters.
+The agent can inspect `gw_runtime_inspect` and prepare reviewed changes to installed
+plugin selection and explicitly editable configuration. No automatic package
+installation, credential discovery, permission grant, background worker or cloud
+service was added.
 
-Release gates include the existing OS/Python/MCP/proxy/browser tests, standalone
-package extraction, and new core-plus-context installations without knowledge.
-The external source example is an offline fixture; no live vendor integration,
-retrieval-quality improvement or savings benchmark is claimed.
+Validation includes isolated core-only installations, an independently built
+reference bundle, an installed SDK-only example extension, cross-platform
+regressions, native installers, real MCP exchanges, LiteLLM and browser tests.
+These are implementation checks, not task-quality or cost-savings benchmarks.
+
+See docs/PLUGINS.md for architecture, API, examples, migration and failure limits.

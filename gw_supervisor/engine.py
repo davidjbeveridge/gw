@@ -1,72 +1,73 @@
-"""One decision engine used by CLI hooks, the optional HTTP API and LiteLLM."""
+"""Small runtime kernel: lifecycle, dispatch, verdict reduction and persistence.
+
+No model, goal, retrieval, SQLite, harness, or dashboard implementation lives here.
+Plugins contribute assessments; only this reducer produces an executable verdict.
+"""
 from __future__ import annotations
 
-import fnmatch
+import copy
 import pathlib
-import shutil
-import uuid
 import time
-from typing import Any
-from .config import EVENTS, get_path, home_path, initialize, project_root, resolve
-from .providers import Classifier, HttpAuthority
-from .decisions import make_decider, append_calls
-from .models import select as select_model, requirements, decision_config
-from .store import Store
-from .util import canonical, digest, finite, redact
-from .plugins import enabled as tracing_enabled, proposal, publish_intercept, usage_metadata
+import uuid
+from .api import Advice, Assessment, EvaluationContext, PluginError
+from .config import EVENTS, home_path, initialize, project_root, resolve
+from .registry import PluginManager, manager_for, CURRENT
+from .util import canonical, digest, redact
 
-RANK = {"allow": 0, "advise": 1, "approve": 2, "deny": 3}
-
-
-def matches(event: dict, conditions: dict) -> bool:
-    """Conjunctive, literal/glob matching; never eval arbitrary policy code."""
-    for path, pattern in conditions.items():
-        value = canonical(redact(event)) if path == "text" else get_path(event, path)
-        if isinstance(pattern, list):
-            if value not in pattern:
-                return False
-        elif isinstance(pattern, str):
-            if not isinstance(value, str) or not fnmatch.fnmatchcase(value, pattern):
-                return False
-        elif value != pattern:
-            return False
-    return True
+RANK = {'allow': 0, 'advise': 1, 'approve': 2, 'deny': 3}
+PROTECTED = {'version', 'decision', 'reason', 'reasons', 'advice', 'session_id',
+             'policy_hash', 'config_status', 'runtime_manifest_hash', 'runtime_steps', 'plugin_errors', 'would_decision'}
 
 
-def validate_event(event: dict) -> dict:
-    if not isinstance(event, dict) or event.get("type") not in EVENTS:
-        raise ValueError("Unknown supervisor event")
-    out = dict(event)
-    for key in ("client", "session", "project"):
+def validate_event(event):
+    if not isinstance(event, dict) or event.get('type') not in EVENTS:
+        raise ValueError('Unknown supervisor event')
+    out = copy.deepcopy(event)
+    for key in ('client', 'session', 'project'):
         if not isinstance(out.get(key), str) or not out[key].strip() or len(out[key]) > 4096:
-            raise ValueError(f"Event needs a nonempty {key}")
-    out["project"] = str(project_root(out["project"]))
-    out.setdefault("id", str(uuid.uuid4()))
-    if not isinstance(out["id"], str) or not out["id"] or len(out["id"]) > 4096:
-        raise ValueError("Invalid event id")
-    if out["type"].startswith("tool."):
-        if not isinstance(out.get("tool"), str) or not out["tool"]:
-            raise ValueError("Tool event has no tool name")
-        if not isinstance(out.get("input", {}), dict):
-            raise ValueError("Tool input must be an object")
-    if "success" in out and out["success"] is not None and not isinstance(out["success"], bool):
-        raise ValueError("success must be true, false, or null")
-    if out["type"] == "inference.select" or "requirements" in out:
-        out["requirements"] = requirements(out.get("requirements"))
-    canonical(out)  # Reject unsupported/non-finite data before scoring or persisting.
+            raise ValueError('Event needs a nonempty ' + key)
+    out['project'] = str(project_root(out['project']))
+    out.setdefault('id', str(uuid.uuid4()))
+    if not isinstance(out['id'], str) or not out['id'] or len(out['id']) > 4096:
+        raise ValueError('Invalid event id')
+    if out['type'].startswith('tool.'):
+        if not isinstance(out.get('tool'), str) or not out['tool'] or not isinstance(out.get('input', {}), dict):
+            raise ValueError('Tool event requires a tool name and object input')
+    if 'success' in out and out['success'] is not None and type(out['success']) is not bool:
+        raise ValueError('success must be true, false, or null')
+    canonical(out)
     return out
 
 
+def matches(event, conditions):
+    """Compatibility convenience; matching belongs to the selected policy service."""
+    from .api import service
+    return service('policy').matches(event, conditions)
+
+
 class Supervisor:
-    def __init__(self, home: str | pathlib.Path | None = None, classifier=None, authority=None):
+    def __init__(self, home=None, classifier=None, authority=None, *, plugins=None):
         self.home = home_path(str(home) if home is not None else None)
         initialize(self.home)
-        self.store = Store(self.home)
-        self.classifier = classifier
-        self.authority = authority
+        self._injected = plugins is not None
+        self._owned = plugins is not None or CURRENT.get() is None
+        self.manager = PluginManager(plugins) if plugins is not None else manager_for(self.home)
+        try:
+            self.store = self.manager.require('state').open(self.home)
+        except BaseException:
+            if self._owned: self.manager.close()
+            raise
+        self.classifier, self.authority = classifier, authority
+        self._closed = False
 
     def close(self):
-        self.store.close()
+        if not self._closed:
+            self._closed = True
+            try:
+                self.store.close()
+            finally:
+                if self._owned:
+                    self.manager.close()
 
     def __enter__(self):
         return self
@@ -74,233 +75,171 @@ class Supervisor:
     def __exit__(self, *exc):
         self.close()
 
-    def evaluate(self, source: dict) -> dict:
-        began_ns = time.time_ns()
-        began_clock = time.perf_counter()
-        event = validate_event(source)
-        current, config_status = resolve(self.home, pathlib.Path(event["project"]), event["client"])
-        session = self.store.session(event, current)
-        previous = self.store.cached_event(session["id"], event)
-        if previous:
-            return {**previous, "duplicate": True}
-        config = session["config"]
-        # Pre-v0.2 sessions keep their original policy; the new registry is empty.
-        config.setdefault("inference", {"models": {}, "policy": {}})
-        policy_hash = digest(config)
-        # Fingerprints are only for repetition, NEVER reusable consent.
-        action_hash = digest([event.get("tool", ""), redact(event.get("input", {}))])
-        counts = self.store.counts(session["id"], action_hash, session["project"])
-        metrics = {**counts, "drift": session["drift"], "observations": session["observations"]}
-        result = {"version": 1, "decision": "allow", "reasons": [], "advice": [], "labels": {}, "session_id": session["id"], "policy_hash": policy_hash, "config_status": config_status, "metrics": metrics}
-        drift = None
-        candidate_at = None
-        tracking = tracing_enabled(config)
-        audit = {"event_type":event["type"], "event_id":event["id"], "mode":config["mode"],
-                 "start_ns":began_ns, "proposal":proposal(event,config), "rules":[], "goals":[],
-                 "classifier_calls":[], "source_coverage":"hook_or_proxy_projection"} if tracking else None
-        goal_audits = {}
-        if tracking:
-            result["audit"] = audit
-            for gid,g in config["goals"].items():
-                record = {"id":gid,"evaluator":g.get("evaluator"),"status":"disabled" if not g.get("enabled",True) else "not_applicable","effect":None}
-                audit["goals"].append(record); goal_audits[gid]=record
+    def _select(self, client):
+        if not self._injected:
+            candidate = manager_for(self.home, client)
+            if candidate.manifest() != self.manager.manifest():
+                self.store.close()
+                if self._owned: self.manager.close()
+                self._owned = True
+                self.manager = candidate
+                self.store = candidate.require('state').open(self.home)
+            elif candidate is not self.manager:
+                candidate.close()
 
-        def save():
-            if tracking:
-                audit.update(end_ns=time.time_ns(), evaluation_ms=round((time.perf_counter()-began_clock)*1000,3), alignment_observation=drift)
-            saved = self.store.record(session,event,action_hash,result,drift,candidate_at)
-            publish_intercept(self.home,session,event,saved)
-            return saved
+    def _session(self, event):
+        config, status = resolve(self.home, pathlib.Path(event['project']), event['client'], manager=self.manager)
+        config['_runtime_manifest'] = self.manager.manifest()
+        session = self.store.session(event, config)
+        pinned = session['config'].get('_runtime_manifest')
+        if pinned is not None and pinned != config['_runtime_manifest']:
+            raise PluginError('Plugin composition changed during the session; start a new native session')
+        # Existing sessions from before the plugin runtime must not silently migrate.
+        if pinned is None:
+            raise PluginError('Legacy session needs a fresh native session after runtime migration')
+        return session, status
 
-        if config["mode"] == "baseline":
-            if self.authority:
-                raise ValueError("Baseline cannot bypass an injected authority")
-            result.update(reason="Measurement-only baseline; GW did not evaluate policy or change the action",classifier_status="baseline")
-            if tracking:
-                for g in audit["goals"]: g["status"]="baseline_not_evaluated"
-            return save()
+    def _normalize(self, event):
+        for key in self.manager.order:
+            normalize = self.manager.plugins[key].normalize_event
+            if normalize:
+                fields = normalize(copy.deepcopy(event))
+                if not isinstance(fields, dict) or set(fields) & {'project', 'client', 'session', 'id', 'type', 'tool', 'input'}:
+                    raise PluginError('Normalizer tried to replace event identity or proposed action')
+                event.update(fields)
+        return event
 
+    def scope(self, client="generic"):
+        """Bind this runtime for a transport or adapter invocation."""
+        self._select(client)
+        return self.manager.activate()
 
-        def apply(effect: str, reason: str):
-            reason = str(redact(reason))[:2000]
-            if RANK[effect] > RANK[result["decision"]]:
-                result["decision"] = effect
-            if effect != "allow":
-                result["reasons"].append(reason)
-            if effect == "advise":
-                result["advice"].append(reason)
-
-        if event.get("preflight_denial"):
-            apply("deny",str(event["preflight_denial"]))
-            if tracking:audit["rules"].append({"id":"proxy_preflight","matched":True,"effect":"deny"})
-
-        for rule_id, rule in config["rules"].items():
-            matched = rule.get("enabled", True) and event["type"] in rule.get("on", ["tool.before"]) and matches(event, rule["when"])
-            if tracking:
-                audit["rules"].append({"id":rule_id,"matched":bool(matched),"effect":rule["effect"] if matched else None})
-            if matched:
-                apply(rule["effect"], f"{rule_id}: {rule.get('reason', 'Configured rule matched')}")
-        active = {key: g for key, g in config["goals"].items() if g.get("enabled", True) and event["type"] in g["on"]}
-        choices = {}
-        for goal_id, goal in active.items():
-            evaluator = goal["evaluator"]
-            detail = goal_audits.get(goal_id,{})
-            detail["status"]="evaluated"
-            if evaluator == "choice":
-                choices[goal_id] = goal
-                detail["status"]="pending"
-            elif evaluator == "metric":
-                metric = goal["metric"]
-                if metric not in metrics:
-                    raise ValueError(f"Unknown metric: {metric}")
-                detail.update(metric=metric,value=metrics.get(metric),threshold=goal["threshold"],effect="allow")
-                if metrics[metric] >= goal["threshold"] and session["observations"] >= goal.get("min_observations", 0):
-                    detail["effect"]=goal["effect"]
-                    apply(goal["effect"], goal.get("message", f"{goal_id}: threshold exceeded"))
-            elif evaluator == "repetition" and event.get("success") is True:
-                candidate_at = int(goal.get("threshold", 3))
-                detail.update(value=counts["successes"]+1,threshold=candidate_at,effect="allow")
-                if counts["successes"] + 1 == candidate_at:
-                    apply("advise", goal.get("message", "Automation candidate identified"))
-                    result["automation_candidate"] = action_hash
-                    detail.update(effect="advise",candidate=action_hash)
-            elif evaluator == "repetition":
-                detail.update(status="outcome_not_success",effect=None)
-            elif evaluator == "registry":
-                preference = goal.get("preference", [])
-                candidates = []
-                for tool_id, tool in config["registry"].items():
-                    executable = tool.get("executable")
-                    if tool.get("enabled", True) and matches(event, tool.get("when", {})) and executable and shutil.which(executable):
-                        candidates.append((preference.index(tool.get("kind")) if tool.get("kind") in preference else 999, tool_id, tool))
-                if candidates:
-                    _, tool_id, tool = sorted(candidates, key=lambda t: (t[0], t[1]))[0]
-                    apply("advise", f"Consider registered tool {tool_id}: {tool.get('description', '')}. {tool.get('example', '')}")
-                    result["recommended_tool"] = tool_id
-                    detail.update(effect="advise",recommended_tool=tool_id)
-                else:
-                    detail.update(effect="allow",status="no_matching_installed_tool")
-
-        if choices and (config["decision"]["provider"] != "off" or self.classifier):
-            # Root-task-dependent goals abstain if no task was pinned.
-            if not session["task"] and event["type"].startswith("tool."):
-                result["classifier_status"] = "no_pinned_task"
-            else:
-                state = {"task": session["task"], "event": redact({k: v for k, v in event.items() if k not in {"project", "session", "id", "task", "native_trace_hint"}}), "metrics": metrics}
-                try:
-                    from .context import supervisor_context
-                    state, context_id = supervisor_context(self.home, session, event, state, self.store)
-                    if context_id:
-                        result["compiled_context_id"] = context_id
-                    cache_key = digest([policy_hash, session["task"], state, choices])
-                    labels = self.store.get_cache(cache_key)
-                    if labels is None:
-                        provider = self.classifier or make_decider(decision_config(config))
-                        call_start = time.perf_counter()
-                        try:
-                            labels = provider.decide(state, choices)
-                        finally:
-                            if tracking:
-                                append_calls(audit, provider, "goals", round((time.perf_counter()-call_start)*1000,3), config["decision"].get("model"))
-                        if not isinstance(labels, dict) or any(labels.get(k) not in g["choices"] for k, g in choices.items()):
-                            raise ValueError("Invalid classification")
-                        self.store.put_cache(cache_key, labels, config["decision"].get("cache_seconds", 60))
-                    else:
-                        result["classifier_cached"] = True
-                    result["labels"] = labels
-                    result["classifier_status"] = "scored"
-                    for goal_id, label in labels.items():
-                        goal = choices[goal_id]
-                        if tracking:goal_audits[goal_id].update(status="evaluated",label=label,effect=goal.get("effects",{}).get(label,"allow"))
-                        apply(goal.get("effects", {}).get(label, "allow"), f"{goal_id}: {goal['choices'][label]}")
-                        if goal.get("metric") == "drift" and label in goal.get("scores", {}):
-                            drift = finite(goal["scores"][label])
-                        route = goal.get("route", {}).get(label)
-                        if event["type"] == "model.request" and route and not config["inference"]["models"] and event.get("requirements", {}).get("operation", "chat") in {"chat", "responses", "messages"}:
-                            model = config["proxy"].get("models", {}).get(route)
-                            required = event.get("capabilities", [])
-                            if model and all(cap in model.get("capabilities", []) for cap in required):
-                                result["model"] = model["alias"]
-                            else:
-                                result["advice"].append("Requested route unavailable or missing required capabilities; retaining current model")
-                except Exception as exc:
-                    # Do not include third-party exception messages (may contain payloads/secrets).
-                    result["classifier_status"] = "unavailable"
-                    result["classifier_error"] = type(exc).__name__
-                    for goal_id, goal in choices.items():
-                        if tracking:goal_audits[goal_id].update(status="unavailable",effect=goal.get("on_error","advise"))
-                        apply(goal.get("on_error", "advise"), f"{goal_id}: classifier unavailable; no semantic verdict")
-        elif choices:
-            result["classifier_status"] = "disabled"
-
-        if tracking:
-            for gid in choices:
-                if goal_audits[gid]["status"]=="pending":
-                    goal_audits[gid]["status"]=result.get("classifier_status","not_evaluated")
-
-        # A general selection is a plan, not an execution. A proxy may only
-        # replace an alias when the selected operation/transport is compatible.
-        if event["type"] in {"inference.select", "model.request"} and (config["inference"]["models"] or event["type"] == "inference.select"):
-            if result["decision"] in {"deny", "approve"}:
-                result["inference"] = {"status": "blocked_by_policy", "selection_only": True}
-            else:
-                req = event.get("requirements")
-                if not req:
-                    apply("deny", "Explicit operation and modality requirements are required for model selection")
-                else:
-                    selector = self.classifier
-                    if selector is None and config["decision"]["provider"] != "off":
-                        try:
-                            selector = make_decider(decision_config(config))
-                        except ValueError:
-                            pass  # select() reports classifier_unavailable, never assumes success.
-                    if tracking and selector is not None:
-                        inner_selector = selector
-                        class MeasuredSelector:
-                            def decide(self, state, questions):
-                                t = time.perf_counter()
-                                try:
-                                    return inner_selector.decide(state, questions)
-                                finally:
-                                    append_calls(audit, inner_selector, "model_selection", round((time.perf_counter()-t)*1000,3), config["decision"].get("model"))
-                        selector = MeasuredSelector()
-                    selection = select_model(config["inference"], req, selector, {"task": session["task"], "request": event.get("latest_user_excerpt", ""), "metrics": metrics})
-                    result["inference"] = selection
-                    if selection["status"] != "selected":
-                        apply(config["inference"]["policy"].get("on_unavailable", "approve"), "No admissible model selected: " + selection["status"])
-                    elif event["type"] == "model.request":
-                        plan = selection["plan"]
-                        if plan["execution"]["kind"] != "proxy":
-                            apply("deny", "A harness/adapter plan requires its executor; it cannot rewrite a proxy model alias")
-                        else:
-                            result["model"] = plan["execution"]["target"]
-
-        would = result["decision"]
-        if config["mode"] == "observe" and would in {"approve", "deny"}:
-            result["would_decision"] = would
-            result["decision"] = "advise"
-            result["advice"].extend(result["reasons"])
-
-        if event["type"] in {"tool.before", "model.request", "inference.select"} and (config["authority"].get("endpoint") or self.authority):
-            try:
-                authority = (self.authority or HttpAuthority(config["authority"])).authorize({"session": session["id"], "task": session["task"], "policy_hash": policy_hash, "event": redact(event), "inference_plan": result.get("inference", {}).get("plan")})
-                if authority.get("decision") not in {"allow", "deny", "approve"}:
-                    raise ValueError("Invalid authority decision")
-                result["authority"] = redact(authority)
-                # External allow can never relax a local deny, nor vice versa.
-                apply(authority["decision"], authority.get("reason", "External authority"))
-            except Exception as exc:
-                apply("deny", f"Authority unavailable ({type(exc).__name__}); refusing to proceed")
-
-        # Post-action decisions are advice, never a claim to undo an action.
-        if event["type"] in {"tool.after", "model.response"} and result["decision"] in {"deny", "approve"}:
-            result["would_decision"] = result["decision"]
-            result["decision"] = "advise"
-            result["advice"].extend(result["reasons"])
-        result["reason"] = "; ".join(dict.fromkeys(result["reasons"])) or "No supervisor objection; native permissions still apply"
-        return save()
-
-    def session_context(self, event: dict) -> dict:
+    def session_context(self, event):
         event = validate_event(event)
-        config, _ = resolve(self.home, pathlib.Path(event["project"]), event["client"])
-        return self.store.session(event, config)
+        self._select(event['client'])
+        with self.manager.activate():
+            return self._session(self._normalize(event))[0]
+
+    def evaluate(self, source):
+        started_ns, started_clock = time.time_ns(), time.perf_counter()
+        event = validate_event(source)
+        self._select(event['client'])
+        with self.manager.activate():
+            event = self._normalize(event)
+            session, status = self._session(event)
+            previous = self.store.cached_event(session['id'], event)
+            if previous:
+                return {**previous, 'duplicate': True}
+            config = session['config']
+            result = {'version': 1, 'decision': 'allow', 'reasons': [], 'advice': [],
+                      'session_id': session['id'], 'policy_hash': digest(config),
+                      'config_status': status, 'runtime_manifest_hash': digest(self.manager.manifest()), 'runtime_steps': []}
+            updates, metadata_owners = {}, {}
+
+            def context():
+                return EvaluationContext(self.home, copy.deepcopy(event), copy.deepcopy(session),
+                    copy.deepcopy(config), copy.deepcopy(result), self.manager, self.store,
+                    {'classifier': self.classifier, 'authority': self.authority})
+
+            def apply(advice):
+                if not isinstance(advice, Advice) or advice.effect not in RANK or not isinstance(advice.reason, str):
+                    raise PluginError('Invalid plugin effect')
+                reason = str(redact(advice.reason))[:2000]
+                if RANK[advice.effect] > RANK[result['decision']]:
+                    result['decision'] = advice.effect
+                if advice.effect != 'allow': result['reasons'].append(reason)
+                if advice.effect == 'advise': result['advice'].append(reason)
+
+            def metadata(plugin, values):
+                if not isinstance(values, dict) or set(values) & PROTECTED:
+                    raise PluginError('Plugin cannot overwrite runtime verdict fields')
+                if len(canonical(values)) > 262144:
+                    raise PluginError('Plugin metadata exceeds budget')
+                for key in values:
+                    if key in metadata_owners and metadata_owners[key] != plugin:
+                        raise PluginError('Two plugins own metadata field: ' + key)
+                    metadata_owners[key] = plugin
+                result.update(copy.deepcopy(values))
+
+            def soften():
+                if config['mode'] == 'observe' and result['decision'] in {'deny', 'approve'}:
+                    result['would_decision'] = result['decision']
+                    result['decision'] = 'advise'
+                    result['advice'].extend(result['reasons'])
+
+            if config['mode'] == 'baseline':
+                for owner, evaluator in self.manager.evaluators:
+                    if evaluator.phase == 'authority' and self.manager.plugins[owner].baseline is None:
+                        raise PluginError('Authority plugin must explicitly validate baseline: ' + owner)
+                for key in self.manager.order:
+                    hook = self.manager.plugins[key].baseline
+                    if hook:
+                        metadata(key, dict(hook(context())))
+                result['reason'] = 'Measurement-only baseline; GW did not evaluate policy or change the action'
+            else:
+                authority_phase = False
+                for owner, evaluator in self.manager.evaluators:
+                    if evaluator.events and event['type'] not in evaluator.events:
+                        continue
+                    if evaluator.phase == 'authority' and not authority_phase:
+                        soften(); authority_phase = True
+                    began = time.perf_counter(); step = {'plugin': owner, 'evaluator': evaluator.name,
+                        'phase': evaluator.phase, 'status': 'completed'}
+                    try:
+                        assessment = evaluator.evaluate(context())
+                        if not isinstance(assessment, Assessment):
+                            raise PluginError('Evaluator must return Assessment')
+                        # Validate the entire contribution before applying any part.
+                        for effect in assessment.effects:
+                            if not isinstance(effect, Advice) or effect.effect not in RANK or not isinstance(effect.reason, str):
+                                raise PluginError('Invalid assessment effect')
+                        if len(assessment.effects) > 256 or len(canonical([dict(assessment.state), dict(assessment.audit)])) > 262144:
+                            raise PluginError('Assessment exceeds its contribution budget')
+                        if 'audit' in assessment.details:
+                            raise PluginError('Supply audit fields through Assessment.audit')
+                        next_audit = copy.deepcopy(result.get('audit', {}))
+                        for key, value in assessment.audit.items():
+                            if isinstance(value, list):
+                                if key in next_audit and not isinstance(next_audit[key], list):
+                                    raise PluginError('Conflicting audit field: ' + key)
+                                next_audit.setdefault(key, []).extend(copy.deepcopy(value))
+                            elif key in next_audit and next_audit[key] != value:
+                                raise PluginError('Conflicting audit field: ' + key)
+                            else: next_audit[key] = copy.deepcopy(value)
+                        if len(canonical(next_audit)) > 524288:
+                            raise PluginError('Combined audit exceeds its budget')
+                        metadata(owner, dict(assessment.details))
+                        if assessment.audit: result['audit'] = next_audit
+                        for effect in assessment.effects: apply(effect)
+                        if assessment.state:
+                            updates.setdefault(owner, {}).update(copy.deepcopy(dict(assessment.state)))
+                    except Exception as exc:
+                        # A broken evaluator cannot become permission through a failed import.
+                        step.update(status='error', error=type(exc).__name__)
+                        result.setdefault('plugin_errors', []).append({'plugin': owner, 'error': type(exc).__name__})
+                        apply(Advice('deny', owner + ': evaluator unavailable; inspect runtime diagnostics'))
+                    finally:
+                        step['elapsed_ms'] = round((time.perf_counter()-began)*1000, 3)
+                        result['runtime_steps'].append(step)
+                if not authority_phase: soften()
+                if event['type'] in {'tool.after', 'model.response'} and result['decision'] in {'deny', 'approve'}:
+                    result['would_decision'] = result['decision']; result['decision'] = 'advise'
+                    result['advice'].extend(result['reasons'])
+                result['reason'] = '; '.join(dict.fromkeys(result['reasons'])) or 'No supervisor objection; native permissions still apply'
+            if 'audit' in result:
+                result['audit'].update(start_ns=started_ns, end_ns=time.time_ns(),
+                    evaluation_ms=round((time.perf_counter()-started_clock)*1000, 3))
+            saved = self.store.commit(session, event, result, updates)
+            for key in self.manager.order:
+                observer = self.manager.plugins[key].observe
+                if observer:
+                    try:
+                        info = observer(context(), copy.deepcopy(saved))
+                        if info:
+                            # Compatibility reporting is restricted to non-authoritative fields.
+                            if not isinstance(info, dict) or len(canonical(info)) > 32768 or set(info) - {'trace_id', 'observability_error'}:
+                                raise PluginError('Observer returned unsupported fields')
+                            saved.update(info)
+                    except Exception as exc:
+                        saved['observability_error'] = type(exc).__name__
+            return saved

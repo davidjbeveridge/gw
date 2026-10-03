@@ -5,7 +5,7 @@
 **macOS or Linux · Python 3.10+**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.7.0/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.0/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
 ```
 
 **Star this repository** using GitHub's **Star** button if the project is useful. **[Fork it](https://github.com/davidjbeveridge/gw/fork)** to try your own policies, adapters, and experiments. Contributions with reproducible results are especially welcome.
@@ -18,13 +18,13 @@ The installer adds user-level hooks for Claude Code, Codex, Gemini CLI, Cursor, 
 Windows PowerShell, with Python 3.10+ on PATH:
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.7.0/install.ps1))) -All
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.0/install.ps1))) -All
 ```
 
 Add the independent knowledge package on macOS/Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.7.0/install.sh | bash -s -- --all --knowledge
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.0/install.sh | bash -s -- --all --knowledge
 ```
 
 On Windows, add `-Knowledge`. Neither option installs an embedding model or connects to a cloud knowledge service.
@@ -32,7 +32,7 @@ On Windows, add `-Knowledge`. Neither option installs an embedding model or conn
 Prefer to inspect the installer first?
 
 ```bash
-curl -fsSLo gw-install.sh https://raw.githubusercontent.com/davidjbeveridge/gw/v0.7.0/install.sh
+curl -fsSLo gw-install.sh https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.0/install.sh
 less gw-install.sh
 bash gw-install.sh --all
 ```
@@ -54,6 +54,25 @@ Keep the agent you like. Change the decisions around it.
 [Documentation](docs/README.md) · [First run](docs/GETTING_STARTED.md) · [Architecture](docs/ARCHITECTURE.md) · [Examples](examples/README.md) · [FAQ](docs/FAQ.md) · [Releases](https://github.com/davidjbeveridge/gw/releases)
 
 > **Current scope:** gW 0.7 is a prerelease for cooperative, user-controlled workflows. The core works without a model key; semantic supervision is **off until configured**. There is no published gW efficacy or cost benchmark yet. See [what is tested](docs/VALIDATION.md), [what is planned](docs/ROADMAP.md), and the [security model](SECURITY.md).
+
+## A runtime, not a monolith
+
+GW's core now owns configuration, plugin lifecycle, session identity and verdict
+precedence. The standard behavior ships in **`gw-builtin`**, a separate MIT bundle
+of replaceable domain plugins: policy, inference, context, governance, storage,
+observability, learning, sync and agent/gateway/harness integrations.
+
+The normal installer includes the reference bundle. You do not need to assemble
+the graph manually. Ask your agent to inspect `gw_runtime_inspect`, explain the
+active providers, or prepare a reviewed plugin/configuration change.
+
+Plugin authors build against `gw_supervisor.api`, not another plugin's private
+modules. Services have one selected owner; additive evaluators can coexist. The
+independent context and knowledge packages stay independent. No cloud service or
+new mandatory model call is introduced by this split.
+
+[Runtime architecture and authoring](docs/PLUGINS.md) ·
+[Installable extension example](examples/runtime-plugin/README.md)
 
 ## Why this exists
 
@@ -99,7 +118,7 @@ Agent tool hooks ---------------------+---------------- Model-gateway callback
 Optional, separate: agent or application -> knowledge API/MCP -> source-backed context
 ```
 
-Hooks and the optional [LiteLLM](https://docs.litellm.ai/docs/proxy/call_hooks) callback call the same Python library in their own processes. They share SQLite state; they do not need a gW daemon. `gw serve` is available for custom HTTP clients. LiteLLM remains the model gateway. [Caveman](https://docs.caveman.so/docs/proxy/litellm) can be a separately configured upstream compressor.
+Hooks and the optional [LiteLLM](https://docs.litellm.ai/docs/proxy/call_hooks) callback call the same runtime and selected plugins in their own processes. They share SQLite state; they do not need a gW daemon. `gw serve` is available for custom HTTP clients. LiteLLM remains the model gateway. [Caveman](https://docs.caveman.so/docs/proxy/litellm) can be a separately configured upstream compressor.
 
 A proposed action receives one of four outcomes:
 

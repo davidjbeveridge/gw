@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Pinned, user-local installation. No sudo, shell-profile edits, API keys or daemon.
 set -euo pipefail
-REF="${GW_REF:-v0.7.0}"
+REF="${GW_REF:-v0.8.0}"
 KNOWLEDGE=0
 CONTEXT=0
 PLUGINS=0
@@ -33,6 +33,8 @@ fi
 "$PYTHON" -m venv "$ROOT/venv"
 "$ROOT/venv/bin/python" -m pip install --disable-pip-version-check --no-input --upgrade \
   "https://github.com/davidjbeveridge/gw/archive/${REF}.zip"
+"$ROOT/venv/bin/python" -m pip install --disable-pip-version-check --no-input --upgrade \
+  "https://github.com/davidjbeveridge/gw/archive/${REF}.zip#subdirectory=packages/gw-builtin"
 if [ "$CONTEXT" = 1 ]; then
   "$ROOT/venv/bin/python" -m pip install --disable-pip-version-check --no-input --upgrade \
     "https://github.com/davidjbeveridge/gw/archive/${REF}.zip#subdirectory=packages/gw-context"

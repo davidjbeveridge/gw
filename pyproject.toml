@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gw-supervisor"
-version = "0.7.0"
+version = "0.8.0"
 description = "Local-first, configurable supervision for agent actions and inference"
 requires-python = ">=3.10"
 license = {text = "MIT"}
@@ -25,4 +25,4 @@ Repository = "https://github.com/davidjbeveridge/gw"
 include = ["gw_supervisor*"]
 
 [tool.setuptools.package-data]
-gw_supervisor = ["templates/*"]
+gw_supervisor = ["py.typed"]

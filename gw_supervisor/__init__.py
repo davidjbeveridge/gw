@@ -1,2 +1,2 @@
-"""gw: a decision plane, not an agent or an authorization bypass."""
-__version__ = "0.7.0"
+"""GW runtime and public plugin contracts. Feature implementations are optional."""
+__version__ = "0.8.0"

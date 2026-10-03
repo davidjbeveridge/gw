@@ -9,7 +9,7 @@ Useful contributions make a boundary clearer, a behavior more reliable, or a res
 Fork the repository, clone your fork, and create a branch. Use Python 3.10+ in an isolated environment. Install the core and, when needed, the independent knowledge package:
 
 ```bash
-python -m pip install . ./packages/gw-context ./packages/gw-knowledge
+python -m pip install . ./packages/gw-builtin ./packages/gw-context ./packages/gw-knowledge
 python -m unittest discover -s tests -v
 python -m unittest discover -s packages/gw-knowledge/tests -v
 ```
@@ -70,3 +70,16 @@ from a knowledge backend or a knowledge dependency into the context package.
 
 Run `python -m unittest discover -s packages/gw-context/tests -v` and
 `python -m unittest discover -s tests -p test_context_independence.py -v`.
+
+## Runtime changes
+
+Read [PLUGINS.md](docs/PLUGINS.md) before adding extension machinery. New plugins
+import `gw_supervisor.api`, declare owned configuration/services/tools, and return
+assessments rather than rewriting final verdicts. Do not import a peer's concrete
+implementation. Keep ordinary helpers inside a domain.
+
+Install core, `packages/gw-builtin` and the optional libraries used by your tests.
+Install `examples/runtime-plugin` to run real discovery/agent-administration
+integration tests. Run the kernel-only suite without the reference distribution;
+a full installation alone cannot prove separation. Keep legacy behavior tests and
+add negative authority, collision, stale-manifest and cleanup tests as appropriate.

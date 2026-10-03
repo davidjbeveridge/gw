@@ -147,3 +147,17 @@ Hook commands are different: handled failures return a protocol-native verdict o
 the same operation locally. `gw agent-guide` prints the operating skill.
 `bootstrap --agent-tools` and `uninstall --agent-tools` manage native MCP/skill
 registrations. See [the agent guide](AGENT_INTERFACE.md).
+
+## Plugin runtime
+
+`gw runtime inspect` lists the selected plugin manifest, execution phases, owned
+configuration, commands and tools. `gw plugins` additionally lists installed entry
+points and missing-composition diagnostics. `gw init --profile minimal` creates an
+empty operator profile without requiring the reference bundle.
+
+Feature commands are contributed by selected plugins. The shared reference parser
+preserves existing syntax; a new plugin can register its own command without
+changing it. `gw --transport-plugin ID hook ...` selects an installed native codec
+before loading the full graph, allowing that codec to handle configuration errors.
+The public extension API is `gw_supervisor.api`; old Python feature imports are
+reference-bundle compatibility aliases.
