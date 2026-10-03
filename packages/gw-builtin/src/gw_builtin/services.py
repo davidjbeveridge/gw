@@ -55,9 +55,6 @@ class ContextService:
     def inject(self, *args, **kwargs):
         from .context import inject_context
         return inject_context(*args, **kwargs)
-    def relative_path(self, path):
-        from .context import relative_path
-        return relative_path(path)
     def defaults(self):
         from .defaults import DEFAULT_CONTEXT
         return DEFAULT_CONTEXT

@@ -176,6 +176,9 @@ def _trust_project(home: pathlib.Path, project: pathlib.Path) -> dict:
 
 
 def resolve(home, project, client, *, manager=None):
+    # Public callers can supply path aliases; snapshot identity must match the
+    # canonical project used by native hooks and the agent interface.
+    home, project = home_path(str(home)), project_root(project)
     from .registry import manager_for
     manager = manager or manager_for(home, client)
     with manager.activate():
@@ -183,6 +186,7 @@ def resolve(home, project, client, *, manager=None):
 
 
 def trust_project(home, project):
+    home, project = home_path(str(home)), project_root(project)
     from .registry import manager_for
     manager = manager_for(home)
     with manager.activate():

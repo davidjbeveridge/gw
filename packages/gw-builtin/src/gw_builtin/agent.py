@@ -42,14 +42,6 @@ class AgentService:
             raise PermissionError("This agent interface is read-only; operator must enable managed tools at launch")
 
 
-    def _file(self, relative):
-        relative_path = service("context").relative_path
-        p = self.project.joinpath(*relative_path(relative).parts)
-        if p.is_symlink() or not p.resolve().is_relative_to(self.project):
-            raise ValueError("File must stay in the bound project")
-        return p
-
-
     def _repo(self):
         from .ports import trace_repository
         return trace_repository(self.home, self._config())
