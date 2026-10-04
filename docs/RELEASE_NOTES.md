@@ -1,28 +1,19 @@
-# GW v0.8.0 — domain plugins, small runtime
+# GW v0.8.1 — fix measured cache and context overhead
 
-The standard behavior is now a separate `gw-builtin` 0.1.0 distribution with twelve
-replaceable registrations. Core retains configuration, discovery/lifecycle,
-session identities, verdict reduction and a generic command host. Independent
-context, knowledge, observation, learning and sync packages remain independent.
+- Per-goal exact decision caching now uses declared dependencies for both the
+  provider request and key. Compatible misses are batched; custom goals retain
+  full state unless an explicit contract is supplied. Cached labels are not
+  cached authority, and metric checks still run every time.
+- Agent context delivery no longer includes the same content as both `payload`
+  and `text`. Detailed omission diagnostics are explicit. The SDK stays compatible.
+- Warm runtimes reuse loaded plugin compositions, and hook delivery runs within
+  the same scope. Repeated package-metadata parsing and redundant default copying
+  are removed. History and cache-expiry queries have additive SQLite indexes.
+- The reference bundle is v0.1.1. Restart agents/MCP and start fresh sessions when
+  upgrading; no existing release tag or source document is changed.
 
-Plugin API v1 supports owned configuration, lazy named services, ordered evaluators,
-commands, project-bound agent tools, namespaced state and non-authoritative
-observations. Installed entry points do not activate unless selected. API/ownership/
-dependency conflicts fail explicitly; authority precedence remains in core.
-
-The installer includes the reference bundle automatically. Existing commands and
-configuration fields remain; old Python feature imports are compatibility aliases.
-Start fresh native sessions after upgrading, and restart GW MCP after composition
-changes. No old session is silently migrated to a new plugin graph.
-
-The agent can inspect `gw_runtime_inspect` and prepare reviewed changes to installed
-plugin selection and explicitly editable configuration. No automatic package
-installation, credential discovery, permission grant, background worker or cloud
-service was added.
-
-Validation includes isolated core-only installations, an independently built
-reference bundle, an installed SDK-only example extension, cross-platform
-regressions, native installers, real MCP exchanges, LiteLLM and browser tests.
-These are implementation checks, not task-quality or cost-savings benchmarks.
-
-See docs/PLUGINS.md for architecture, API, examples, migration and failure limits.
+The regression tests cover exact dependencies, task/source/model/scope changes,
+partial batch failures, custom rubrics, duplicate delivery, authority revalidation,
+SDK/agent/proxy representations, configuration changes, metadata reads and indexes.
+No live model or productivity benchmark is claimed. Larger-scale knowledge-cache
+and frontier-agent comparisons remain separate experiments.

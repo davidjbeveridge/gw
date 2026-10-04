@@ -1,0 +1,10 @@
+{
+  "test": "test_twenty_repeated_successful_actions_make_two_calls_not_forty",
+  "tool_actions": 20,
+  "intercepts": 40,
+  "fixture_classifier_invocations_before": 40,
+  "fixture_classifier_invocations_after": 2,
+  "individual_goal_hits_after": 57,
+  "real_model_calls": 0,
+  "model_quality_or_billed_savings_measured": false
+}

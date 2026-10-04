@@ -340,3 +340,14 @@ without any reference or optional package, and build the reference bundle outsid
 the repository. Existing harness, context, provider and dashboard suites remain
 regression gates. These checks establish implementation behavior, not productivity
 or model-quality gains.
+
+## Warm runtime reuse (0.8.1)
+
+A runtime reuses its loaded plugin composition between events while re-reading
+selection and validating configuration. Native hooks bind that composition for the
+whole intercept/delivery operation. Package metadata is parsed once per distribution
+in a discovery pass. There is no process-global cache of policy, permissions, or
+mutable session state. Configuration changes apply to new sessions as before;
+a changed composition rejects old sessions. Updating installed implementation code
+requires restarting the runtime/MCP process; hot-swapping Python code in place is
+not supported. Command-based hooks still launch their Python process per call.

@@ -23,6 +23,10 @@ def validate_decision(c: dict) -> None:
         raise ValueError("Invalid decision request_options; request structure cannot be overridden")
     if options and c.get("provider") != "openai":
         raise ValueError("request_options are supported only by the JSON chat transport")
+    import math
+    ttl = c.get("cache_seconds", 60)
+    if type(ttl) not in {int, float} or not math.isfinite(ttl) or not 0 <= ttl <= 86400:
+        raise ValueError("cache_seconds must be finite and between zero and one day")
     if c.get("provider") == "off":
         return
     safe_endpoint(c["endpoint"])

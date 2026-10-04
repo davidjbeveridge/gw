@@ -21,12 +21,17 @@ CREATE TABLE IF NOT EXISTS events (
  result TEXT NOT NULL, created REAL NOT NULL,
  PRIMARY KEY(session,event_id,kind));
 CREATE INDEX IF NOT EXISTS event_action ON events(session,action_hash,kind);
+CREATE INDEX IF NOT EXISTS sessions_project_id ON sessions(project,id);
+CREATE INDEX IF NOT EXISTS event_outcome_time ON events(session,action_hash,created DESC) WHERE kind='tool.after';
+CREATE INDEX IF NOT EXISTS event_success_scope ON events(action_hash,session) WHERE kind='tool.after' AND success=1;
+CREATE INDEX IF NOT EXISTS event_session_time ON events(session,created DESC);
 CREATE TABLE IF NOT EXISTS candidates (
  project TEXT NOT NULL, action_hash TEXT NOT NULL, tool TEXT NOT NULL,
  successes INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'proposed',
  created REAL NOT NULL, PRIMARY KEY(project,action_hash));
 CREATE TABLE IF NOT EXISTS tasks (project TEXT PRIMARY KEY, task TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS cache (key TEXT PRIMARY KEY, result TEXT NOT NULL, expires REAL NOT NULL);
+CREATE INDEX IF NOT EXISTS decision_cache_expiry ON cache(expires);
 CREATE TABLE IF NOT EXISTS usage (
  session TEXT NOT NULL, event_id TEXT NOT NULL, model TEXT NOT NULL,
  input_tokens INTEGER, output_tokens INTEGER, created REAL NOT NULL,

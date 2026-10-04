@@ -9,7 +9,7 @@ backend, or compile context. The agent supplies the tool arguments.
 ## One installation, then ordinary requests
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.0/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.1/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
 ```
 
 This installs the optional MCP dependency and registers a server named `gw` in

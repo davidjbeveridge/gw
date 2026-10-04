@@ -18,7 +18,7 @@ def run_hook(args, home):
         if len(raw.encode()) > 4_194_304:
             raise ValueError("Hook payload too large")
         event = normalize(args.agent, args.phase, strict_json(raw))
-        with Supervisor(home) as supervisor:
+        with Supervisor(home, client=args.agent) as supervisor, supervisor.scope(args.agent):
             result = supervisor.evaluate(event)
             native = native_response(args.agent, args.phase, result)
             from .ports import enabled, publish_component

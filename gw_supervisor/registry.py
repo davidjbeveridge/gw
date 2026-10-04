@@ -204,7 +204,7 @@ class PluginManager:
 
 
 def discover(ids):
-    available = installed(); plugins = []; origins = {}
+    available = installed(); plugins = []; origins = {}; distributions = {}
     for key in ids:
         found = available.get(key, [])
         if len(found) != 1:
@@ -214,8 +214,14 @@ def discover(ids):
         if not isinstance(value, Plugin) or value.id != key:
             raise PluginError('Entry point identity does not match plugin: ' + key)
         plugins.append(value)
-        origins[key] = {'distribution': ep.dist.name if ep.dist else None,
-                        'version': ep.dist.version if ep.dist else None, 'entry_point': ep.value}
+        # Several domain entry points usually share one distribution. Parse its
+        # METADATA once per discovery, not twice for every plugin.
+        dist = ep.dist
+        if dist is not None and id(dist) not in distributions:
+            meta = dist.metadata
+            distributions[id(dist)] = (meta.get('Name'), meta.get('Version'))
+        name, version = distributions.get(id(dist), (None, None))
+        origins[key] = {'distribution': name, 'version': version, 'entry_point': ep.value}
     return PluginManager(plugins, origins=origins)
 
 

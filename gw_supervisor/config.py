@@ -108,7 +108,7 @@ def validate(config: dict) -> None:
         raise ValueError('locked must contain dotted paths')
     selection(config.get('runtime', {}))
     manager = current_manager()
-    allowed = set(defaults(manager)) | {'clients', '_runtime_manifest'}
+    allowed = set(CORE_DEFAULTS) | {name.split('.')[0] for name in manager.sections} | {'clients', '_runtime_manifest'}
     if set(config) - allowed:
         raise ValueError('Configuration belongs to an unselected plugin: ' + ', '.join(sorted(set(config)-allowed)))
     manager.validate(config)
@@ -122,7 +122,7 @@ def _resolve(home: pathlib.Path, project: pathlib.Path, client: str) -> tuple[di
     unknown = set(global_config) - set(base_defaults) - {"clients"}
     if unknown:
         raise ValueError(f"Unknown global configuration keys: {sorted(unknown)}")
-    config = merge(defaults(), {k: v for k, v in global_config.items() if k != "clients"})
+    config = merge(base_defaults, {k: v for k, v in global_config.items() if k != "clients"})
     config = merge(config, global_config.get("clients", {}).get(client, {}))
     snapshot = read_json(home / "projects" / (digest(str(project)) + ".json"), {})
     status = "global_only"

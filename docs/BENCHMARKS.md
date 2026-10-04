@@ -74,3 +74,10 @@ The README should link to an actual result directory and describe the tested pop
 ## What already counts as useful evidence
 
 The [validation record](VALIDATION.md) documents cross-platform, installer, protocol, storage, and MCP checks. The [offline examples](../examples/README.md) demonstrate inspectable behavior. Neither is presented as model quality or measured savings. Contributions can begin with a reproducible failed workflow; a credible result does not require a flattering result.
+
+## Measured overhead corrections
+
+The [October 4 regression check](../benchmarks/overhead-20261004/README.md) records
+the cache/output/startup corrections, raw runtime samples, and a bounded replay.
+It is a synthetic implementation diagnostic, not a live-agent productivity or
+model-token benchmark.
