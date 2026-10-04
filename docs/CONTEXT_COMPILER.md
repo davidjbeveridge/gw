@@ -223,3 +223,19 @@ do not supply a sandbox or an automatic timeout around arbitrary installed code.
 The `sources` report contains collection status, revision and item count. Scope
 is included in the compiled payload identity. `context.source` observations store
 metadata only; they do not duplicate retrieved text or add inference calls.
+
+## Agent delivery (0.8.1)
+
+`gw_context_compile` now returns the compiled `payload` once; it does not also
+include the same content as serialized `text`. Source citations, required flags,
+selection information, scope and freshness reporting remain available. Default
+responses give an `omitted_count`; `diagnostics: true` includes the full omission
+list. A diagnostic call compiles the current sources again, not an archived packet.
+
+The independent Python compiler still returns both SDK representations for callers
+that need them. Proxy injection serializes one representation and accepts either
+the full SDK packet or the structured agent result. The character budget still
+bounds the compiled payload, not all diagnostic metadata or MCP framing. MCP may
+expose text and structured transport representations; the harness determines which
+representation becomes model context. Do not equate JSON character reductions
+with measured provider-token savings.

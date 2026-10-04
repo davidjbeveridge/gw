@@ -46,12 +46,12 @@ def matches(event, conditions):
 
 
 class Supervisor:
-    def __init__(self, home=None, classifier=None, authority=None, *, plugins=None):
+    def __init__(self, home=None, classifier=None, authority=None, *, plugins=None, client="generic"):
         self.home = home_path(str(home) if home is not None else None)
         initialize(self.home)
         self._injected = plugins is not None
         self._owned = plugins is not None or CURRENT.get() is None
-        self.manager = PluginManager(plugins) if plugins is not None else manager_for(self.home)
+        self.manager = PluginManager(plugins) if plugins is not None else manager_for(self.home, client)
         try:
             self.store = self.manager.require('state').open(self.home)
         except BaseException:
@@ -77,7 +77,10 @@ class Supervisor:
 
     def _select(self, client):
         if not self._injected:
-            candidate = manager_for(self.home, client)
+            # Reuse the loaded implementation while re-reading selection. Code
+            # upgrades need a fresh runtime, as scoped execution already does.
+            with self.manager.activate():
+                candidate = manager_for(self.home, client)
             if candidate.manifest() != self.manager.manifest():
                 self.store.close()
                 if self._owned: self.manager.close()

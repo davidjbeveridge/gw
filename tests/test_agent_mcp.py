@@ -30,6 +30,9 @@ class AgentMCPTests(unittest.IsolatedAsyncioTestCase):
                     applied=obj(await client.call_tool('gw_configure_apply',{'plan_id':plan['id']}));self.assertTrue(applied['applied'])
                     packet=obj(await client.call_tool('gw_context_compile',{'task':'Fix login validation','query':'fixture'}))
                     self.assertEqual(packet['model_calls'],0);self.assertTrue(packet['selected'])
+                    self.assertNotIn('text',packet);self.assertIn('payload',packet)
+                    self.assertEqual(packet['representation'],'structured_once')
+                    self.assertNotIn('omitted',packet)
                     prompts=await client.list_prompts();self.assertIn('gw',{p.name for p in prompts.prompts})
                     resources=await client.read_resource('gw://status');self.assertEqual(json.loads(resources.contents[0].text)['client'],'codex')
     async def test_readonly_surface_omits_management_tools(self):

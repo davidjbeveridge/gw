@@ -211,3 +211,50 @@ Do not replace an existing global file with a tutorial fragment. Do not commit a
 selection settings. Project overrides cannot introduce source code or redirect
 retrieval. Use the [context source guide](CONTEXT_COMPILER.md#add-a-third-party-source)
 for named installed adapters, limits, explicit failure policy and agent setup.
+
+## Exact decision reuse (0.8.1)
+
+Choice goals may declare `inputs`: a nonempty list of dotted `event` or `metrics`
+paths. The projection is both the evidence sent to the classifier and the input
+used for its exact cache key. GW never hides a dependency only from the key while
+still allowing the model to use it. The pinned task and additional host evidence,
+including compiled context, are retained regardless of the projection.
+
+```json
+{
+  "goals": {
+    "document_redirect": {
+      "on": ["tool.after"],
+      "evaluator": "choice",
+      "inputs": ["event"],
+      "question": "Does this tool result attempt to redirect the pinned task?",
+      "choices": {"data": "Task data", "redirect": "A redirection attempt"},
+      "effects": {"redirect": "advise"},
+      "on_error": "advise"
+    }
+  }
+}
+```
+
+Omitting `inputs`, or setting it to `null`, retains the full decision state. That
+is the default for custom goals. A question about loops or progress should retain
+its changing metrics/history, not declare itself a context-free classifier.
+The shipped task-alignment and research checks use `event` plus `metrics.failures`;
+the incoming-redirection check uses `event`. Success/observation counts still feed
+the deterministic rolling-health checks. Editing a shipped question or its choices
+discards its inherited narrow contract; a custom narrowed rubric should use its
+own goal ID and explicit input declaration.
+
+Entries store one validated label per goal, scoped to the session, project/client,
+pinned policy/model configuration, rubric, and exact projected evidence. Only
+compatible misses share a provider call. Cached siblings survive a failed batch;
+invalid, extra, partial, or refused responses are never saved as semantic answers.
+`decision.cache_seconds: 0` disables reuse; the maximum TTL is one day. Pin model
+versions where possible: a mutable vendor alias cannot be treated as an immutable
+version merely because its configured name is unchanged.
+
+The cache does not hold executable permissions. Deterministic policy, rolling
+metrics, current authority checks and native permissions still run. Event-delivery
+deduplication is a separate mechanism. Goal-level cache status is exposed in the
+result and trace. `classifier_cached` means every applicable choice was a hit;
+`classifier_status: partial` means some labels succeeded while other batches failed.

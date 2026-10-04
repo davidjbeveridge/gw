@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Pinned, user-local installation. No sudo, shell-profile edits, API keys or daemon.
 set -euo pipefail
-REF="${GW_REF:-v0.8.0}"
+REF="${GW_REF:-v0.8.1}"
 KNOWLEDGE=0
 CONTEXT=0
 PLUGINS=0

@@ -9,6 +9,8 @@ from gw_supervisor.api import (Assessment, Advice, canonical, digest, finite, re
 from .host import get_path
 
 from .matching import matches
+from .decision_cache import evaluate_goals
+from .defaults import REFERENCE_DEFAULTS
 
 def _prepare(ctx):
     config, session, event = ctx.config, ctx.session, ctx.event
@@ -65,6 +67,12 @@ def assess(ctx):
         detail = goal_audits.get(goal_id,{})
         detail["status"]="evaluated"
         if evaluator == "choice":
+            # A deep-merged custom rubric must not accidentally inherit a
+            # narrower input contract authored for the shipped question.
+            default = REFERENCE_DEFAULTS["goals"].get(goal_id, {})
+            if (goal.get("inputs") == default.get("inputs")
+                    and any(goal.get(k) != default.get(k) for k in ("question", "choices"))):
+                goal = {k: v for k, v in goal.items() if k != "inputs"}
             choices[goal_id] = goal
             detail["status"]="pending"
         elif evaluator == "metric":
@@ -111,23 +119,35 @@ def assess(ctx):
                 state, context_id = supervisor_context(self.home, session, event, state, self.store)
                 if context_id:
                     result["compiled_context_id"] = context_id
-                cache_key = digest([policy_hash, session["task"], state, choices])
-                labels = self.store.get_cache(cache_key)
-                if labels is None:
-                    provider = self.classifier or make_decider(decision_config(config))
-                    call_start = time.perf_counter()
-                    try:
-                        labels = provider.decide(state, choices)
-                    finally:
-                        if tracking:
-                            append_calls(audit, provider, "goals", round((time.perf_counter()-call_start)*1000,3), config["decision"].get("model"))
-                    if not isinstance(labels, dict) or any(labels.get(k) not in g["choices"] for k, g in choices.items()):
-                        raise ValueError("Invalid classification")
-                    self.store.put_cache(cache_key, labels, config["decision"].get("cache_seconds", 60))
-                else:
+                def record_call(provider, goal_ids, elapsed_ms):
+                    if tracking:
+                        before = len(audit["classifier_calls"])
+                        append_calls(audit, provider, "goals", round(elapsed_ms, 3), config["decision"].get("model"))
+                        for call in audit["classifier_calls"][before:]:
+                            call.setdefault("goal_ids", goal_ids)
+                labels, errors, cache = evaluate_goals(
+                    self.store, scope={"policy": policy_hash, "session": session["id"],
+                        "project": session["project"], "client": event["client"],
+                        "override": id(self.classifier) if self.classifier else None},
+                    state=state, goals=choices, ttl=config["decision"].get("cache_seconds", 60),
+                    provider_factory=lambda: self.classifier or make_decider(decision_config(config)),
+                    record_call=record_call)
+                result["decision_cache"] = cache
+                if cache and all(v["status"] == "hit" for v in cache.values()):
                     result["classifier_cached"] = True
                 result["labels"] = labels
-                result["classifier_status"] = "scored"
+                result["classifier_status"] = "partial" if errors and labels else "unavailable" if errors else "scored"
+                for goal_id, error in errors.items():
+                    goal = choices[goal_id]
+                    if tracking:
+                        goal_audits[goal_id].update(status="unavailable", error=error, effect=goal.get("on_error", "advise"))
+                    apply(goal.get("on_error", "advise"), f"{goal_id}: classifier unavailable; no semantic verdict")
+                if errors:
+                    result["classifier_errors"] = errors
+                    result["classifier_error"] = next(iter(errors.values()))
+                if tracking:
+                    for gid, info in cache.items():
+                        goal_audits[gid]["cache"] = info
                 for goal_id, label in labels.items():
                     goal = choices[goal_id]
                     if tracking:goal_audits[goal_id].update(status="evaluated",label=label,effect=goal.get("effects",{}).get(label,"allow"))

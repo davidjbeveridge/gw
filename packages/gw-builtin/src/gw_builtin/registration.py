@@ -10,7 +10,7 @@ from types import MethodType
 from gw_supervisor.api import Advice, Assessment, Plugin, ConfigSection, Evaluator, Command, Tool, service, safe_endpoint
 from .defaults import REFERENCE_DEFAULTS, DEFAULT_PLUGINS
 
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 
 
 def call(module, method):
@@ -74,6 +74,11 @@ def validate_policy(config):
             raise ValueError('Unknown evaluator for ' + gid)
         if goal['evaluator'] == 'choice' and (not isinstance(goal.get('choices'), dict) or not goal['choices'] or not isinstance(goal.get('question'), str)):
             raise ValueError('Choice goal needs question and choices')
+        if 'inputs' in goal:
+            if goal['evaluator'] != 'choice':
+                raise ValueError('Only choice goals declare decision inputs')
+            from .decision_cache import validate_inputs
+            validate_inputs(goal)
         effects = [*goal.get('effects', {}).values(), goal.get('effect', 'allow'), goal.get('on_error', 'advise')]
         if any(x not in EFFECTS for x in effects): raise ValueError('Invalid effect in ' + gid)
     for rid, rule in config['rules'].items():

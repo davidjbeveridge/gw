@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gw-builtin"
-version = "0.1.0"
+version = "0.1.1"
 description = "Replaceable reference domain plugins for the GW runtime"
 requires-python = ">=3.10"
 license = {text = "MIT"}

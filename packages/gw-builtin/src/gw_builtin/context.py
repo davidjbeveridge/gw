@@ -180,7 +180,7 @@ def _compile_context(home, project, client, *, task=None, query="", session_id=N
 def inject_context(payload, wire, packet):
     """Append evidence in a user message. Never rewrite tools, arguments or system policy."""
     out = copy.deepcopy(payload)
-    block = "[gw compiled evidence " + packet["id"] + "]\n" + packet["text"]
+    block = "[gw compiled evidence " + packet["id"] + "]\n" + (packet["text"] if "text" in packet else canonical(packet["payload"]))
     messages = out.get("input") if wire == "responses" else out.get("messages")
     if wire == "responses" and isinstance(messages, str):
         messages = [{"role": "user", "content": messages}]

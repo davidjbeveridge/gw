@@ -5,7 +5,7 @@
 **macOS or Linux · Python 3.10+**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.0/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.1/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
 ```
 
 **Star this repository** using GitHub's **Star** button if the project is useful. **[Fork it](https://github.com/davidjbeveridge/gw/fork)** to try your own policies, adapters, and experiments. Contributions with reproducible results are especially welcome.
@@ -18,13 +18,13 @@ The installer adds user-level hooks for Claude Code, Codex, Gemini CLI, Cursor, 
 Windows PowerShell, with Python 3.10+ on PATH:
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.0/install.ps1))) -All
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.1/install.ps1))) -All
 ```
 
 Add the independent knowledge package on macOS/Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.0/install.sh | bash -s -- --all --knowledge
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.1/install.sh | bash -s -- --all --knowledge
 ```
 
 On Windows, add `-Knowledge`. Neither option installs an embedding model or connects to a cloud knowledge service.
@@ -32,7 +32,7 @@ On Windows, add `-Knowledge`. Neither option installs an embedding model or conn
 Prefer to inspect the installer first?
 
 ```bash
-curl -fsSLo gw-install.sh https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.0/install.sh
+curl -fsSLo gw-install.sh https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.1/install.sh
 less gw-install.sh
 bash gw-install.sh --all
 ```

@@ -116,6 +116,7 @@ def publish_intercept(home,session,event,result):
             attrs={'client':event['client'],'native_session':event['session'],'event_type':event['type'],'tool_call_id':event['id'] if event['type'].startswith('tool.') else None,'agent_id':event.get('agent_id'),'decision':result['decision'],
                    'model':event.get('model'),'tool':event.get('tool'),'skill_id':event.get('skill_id'),'task_type':event.get('task_type'),'success':event.get('success'), 'enforcement':'verdict_issued_not_execution_confirmation'}
             attrs['goal_index']=[{k:g[k] for k in ('id','status','effect','value','threshold','label') if k in g} for g in audit.get('goals',[])]
+            attrs['decision_cache']={gid: info['status'] for gid, info in result.get('decision_cache', {}).items()}
             attrs['alignment_observation']=audit.get('alignment_observation')
             attrs['policy_hash']=result.get('policy_hash')
             attrs['runtime_manifest_hash']=result.get('runtime_manifest_hash')
