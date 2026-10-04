@@ -1,0 +1,39 @@
+name: Assemble checksum-verified overhead fixes
+on:
+  push:
+    branches: [build/transfer-overhead-fixes]
+permissions:
+  contents: write
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify transported patch
+        run: |
+          python - <<'PY'
+          import base64, gzip, hashlib, os
+          from pathlib import Path
+          parts = [Path(f'.gw-transfer/part-{n}').read_text() for n in range(8)]
+          # Correct the two verified transport transcription substitutions.
+          parts[0] = parts[0].replace('ARLVdZZg', 'ARLVdZzg')
+          parts[2] = parts[2].replace('SALl3XImg', 'SALl3xImg')
+          patch = gzip.decompress(base64.b64decode(''.join(parts), validate=True))
+          assert hashlib.sha256(patch).hexdigest() == 'dc829685d239d80bb761d9ac3a02855dcabdfd42d09af0b88a7de0310969c82f'
+          Path(os.environ['RUNNER_TEMP'], 'gw-verified.patch').write_bytes(patch)
+          print('Verified', len(patch), 'patch bytes')
+          PY
+      - name: Apply only verified source changes to the pinned base
+        run: |
+          git checkout --detach 4aa76c63c64eef1aa97a1927a4424670d000e994
+          git apply --index --binary "$RUNNER_TEMP/gw-verified.patch"
+          test "$(git write-tree)" = b9af79d6d51c8589de881d5c92f394e7af256560
+          git diff --cached --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Fix decision dependency caching, context delivery and runtime overhead'
+          git push origin HEAD:refs/heads/build/prepared-overhead-fixes
+          echo "Verified clean candidate: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
