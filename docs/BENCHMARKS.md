@@ -81,3 +81,11 @@ The [October 4 regression check](../benchmarks/overhead-20261004/README.md) reco
 the cache/output/startup corrections, raw runtime samples, and a bounded replay.
 It is a synthetic implementation diagnostic, not a live-agent productivity or
 model-token benchmark.
+
+## Context coverage diagnostics
+
+The [read-only coverage diagnostic](../benchmarks/context-coverage-20261012/README.md)
+locates missing evidence across source access, chunking, search, cache budgeting
+and compiler selection using an operator-supplied frozen archive. The public
+repository includes synthetic diagnostic tests, not private case-level traces.
+It changes no retrieval policy and does not establish an efficacy improvement.
