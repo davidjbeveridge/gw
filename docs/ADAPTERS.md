@@ -15,7 +15,7 @@ The implementation is [adapters.py](../gw_supervisor/adapters.py). For vendor co
 | [Gemini CLI](https://geminicli.com/docs/hooks/reference/) | `~/.gemini/settings.json` | `.gemini/settings.json` | BeforeAgent, BeforeTool, AfterTool |
 | [Cursor](https://cursor.com/docs/hooks) | `~/.cursor/hooks.json` | `.cursor/hooks.json` | beforeSubmitPrompt, preToolUse, postToolUse, postToolUseFailure |
 | [Copilot CLI / VS Code Local](https://docs.github.com/en/copilot/reference/hooks-reference) | `~/.copilot/hooks/gw.json` | `.github/hooks/gw.json` | UserPromptSubmit, PreToolUse, PostToolUse, PostToolUseFailure |
-| [OpenCode classic](https://opencode.ai/docs/plugins/) | `~/.config/opencode/plugins/gw.mjs` | `.opencode/plugins/gw.mjs` | chat.message, tool.execute.before, tool.execute.after |
+| [OpenCode classic](https://opencode.ai/docs/plugins/) | `~/.config/opencode/plugins/gw.js` | `.opencode/plugins/gw.js` | chat.message, tool.execute.before, tool.execute.after |
 
 `COPILOT_HOME` and `XDG_CONFIG_HOME` are honored for the corresponding user paths. Other vendor-specific home overrides are not inferred by this adapter. The `vscode` alias selects the shared Copilot profile; VS Code running a different agent needs that agent's adapter. See [VS Code's hook reference](https://code.visualstudio.com/docs/agent-customization/hooks) for host behavior.
 
@@ -57,6 +57,14 @@ A Python exception caught by the hook wrapper can become a native denial. A host
 ## Bootstrap and upgrades
 
 Bootstrap merges recognized handlers into existing configuration and backs up changed files. It does not overwrite an unrelated OpenCode plugin occupying its destination. Repeated bootstrap is intended to be idempotent for the same installation and state paths.
+
+OpenCode 1.18.35 discovers `.js` and `.ts` plugin files. Earlier gW installers
+wrote `gw.mjs`, which that version does not discover. Re-bootstrap to install
+`gw.js`; only a legacy file bearing the gW generated-file marker is backed up
+and removed. Unrelated legacy files and symlinks remain untouched, and a collision
+or symlink at the new destination stops installation before migration. Uninstall
+also removes an owned legacy file. Filename discovery alone does not prove hook
+delivery or enforcement; repeat the canary on the actual host.
 
 Use the generated commands; they preserve interpreter and state-directory paths. Do not move a virtual environment and assume previously installed hooks follow it. Re-bootstrap after moving the installation. Avoid importing another tool's equivalent hooks in addition to installing gW natively; duplicate hooks can multiply judgments and observations.
 

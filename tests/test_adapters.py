@@ -7,7 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from gw_supervisor.adapters import PROFILES, bootstrap, native_response, normalize, plugin_source, settings_for
+from gw_supervisor.adapters import PROFILES, bootstrap, native_response, normalize, plugin_source, settings_for, profile_path
 from gw_supervisor.util import write_json
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -78,16 +78,84 @@ class AdapterTests(unittest.TestCase):
     def test_unrelated_opencode_plugin_not_overwritten(self):
         with tempfile.TemporaryDirectory() as d:
             root = pathlib.Path(d)
-            path = root / '.opencode/plugins/gw.mjs'
+            path = root / '.opencode/plugins/gw.js'
             path.parent.mkdir(parents=True)
             path.write_text('// my plugin')
             with self.assertRaises(ValueError):
                 bootstrap(root / 'state', ['opencode'], project=root)
             self.assertEqual(path.read_text(), '// my plugin')
+    def test_opencode_paths_match_native_discovery_extensions(self):
+        from unittest.mock import patch
+        with patch.dict(os.environ, {'XDG_CONFIG_HOME': '/tmp/test-xdg'}):
+            self.assertEqual(profile_path('opencode', pathlib.Path('/tmp/user'), None), pathlib.Path('/tmp/test-xdg/opencode/plugins/gw.js'))
+            self.assertEqual(profile_path('opencode', pathlib.Path('/tmp/user'), pathlib.Path('/tmp/project')), pathlib.Path('/tmp/project/.opencode/plugins/gw.js'))
+        self.assertTrue(PROFILES['opencode']['path'].endswith('/gw.js'))
+    def test_opencode_owned_legacy_migration_is_backed_up_and_idempotent(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            home = root / 'state'
+            legacy = root / '.opencode/plugins/gw.mjs'
+            legacy.parent.mkdir(parents=True)
+            previous = plugin_source(home)
+            legacy.write_text(previous)
+            result = bootstrap(home, ['opencode'], project=root, dry_run=True)[0]
+            self.assertTrue(result['changed'])
+            self.assertTrue(legacy.exists())
+            self.assertFalse(legacy.with_suffix('.js').exists())
+            self.assertFalse((home / 'backups').exists())
+            result = bootstrap(home, ['opencode'], project=root)[0]
+            self.assertTrue(result['legacy_retired'])
+            self.assertFalse(legacy.exists())
+            self.assertEqual(legacy.with_suffix('.js').read_text(), previous)
+            self.assertEqual([p.read_text() for p in (home / 'backups').iterdir()], [previous])
+            self.assertFalse(bootstrap(home, ['opencode'], project=root)[0]['changed'])
+            self.assertTrue(bootstrap(home, ['opencode'], project=root, install=False)[0]['changed'])
+            self.assertFalse(legacy.with_suffix('.js').exists())
+            self.assertFalse(bootstrap(home, ['opencode'], project=root, install=False)[0]['changed'])
+    def test_opencode_collision_preserves_owned_legacy(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            legacy = root / '.opencode/plugins/gw.mjs'
+            legacy.parent.mkdir(parents=True)
+            legacy.write_text(plugin_source(root / 'state'))
+            target = legacy.with_suffix('.js')
+            for unrelated in ('// keep', ''):
+                target.write_text(unrelated)
+                with self.assertRaisesRegex(ValueError, 'unrelated plugin'):
+                    bootstrap(root / 'state', ['opencode'], project=root)
+                self.assertEqual(target.read_text(), unrelated)
+                self.assertTrue(legacy.exists())
+                self.assertFalse((root / 'state/backups').exists())
+    def test_opencode_preserves_unrelated_legacy_and_symlinks(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            legacy = root / '.opencode/plugins/gw.mjs'
+            legacy.parent.mkdir(parents=True)
+            legacy.write_text('// unrelated legacy')
+            bootstrap(root / 'state', ['opencode'], project=root)
+            bootstrap(root / 'state', ['opencode'], project=root, install=False)
+            self.assertEqual(legacy.read_text(), '// unrelated legacy')
+            unrelated = root / 'unrelated.js'
+            unrelated.write_text('// preserve')
+            target = legacy.with_suffix('.js')
+            target.symlink_to(unrelated)
+            with self.assertRaisesRegex(ValueError, 'symlink'):
+                bootstrap(root / 'state', ['opencode'], project=root)
+            self.assertTrue(target.is_symlink())
+            self.assertEqual(unrelated.read_text(), '// preserve')
+    def test_opencode_uninstall_removes_owned_legacy_without_new_target(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            legacy = root / '.opencode/plugins/gw.mjs'
+            legacy.parent.mkdir(parents=True)
+            legacy.write_text(plugin_source(root / 'state'))
+            self.assertTrue(bootstrap(root / 'state', ['opencode'], project=root, install=False)[0]['changed'])
+            self.assertFalse(legacy.exists())
+            self.assertFalse(legacy.with_suffix('.js').exists())
     @unittest.skipUnless(shutil.which('node'), 'Node is needed for plugin syntax coverage')
     def test_opencode_plugin_parses(self):
         with tempfile.TemporaryDirectory() as d:
-            path = pathlib.Path(d) / 'gw.mjs'
+            path = pathlib.Path(d) / 'gw.js'
             path.write_text(plugin_source(pathlib.Path(d) / 'state'))
             subprocess.run(['node', '--check', str(path)], check=True, capture_output=True)
 
@@ -101,7 +169,8 @@ class CLITests(unittest.TestCase):
         self.project = self.root / 'project with spaces'
         self.project.mkdir()
         (self.project / '.git').mkdir()
-        self.env = {**os.environ, 'PYTHONPATH': str(ROOT)}
+        self.env = {**os.environ, 'PYTHONPATH': os.pathsep.join(str(p) for p in (
+            ROOT, ROOT / 'packages/gw-builtin/src', ROOT / 'packages/gw-context/src', ROOT / 'packages/gw-knowledge/src'))}
     def cli(self, *args, stdin=None):
         return subprocess.run([sys.executable, '-m', 'gw_supervisor', '--home', str(self.home), *args], input=stdin, text=True, capture_output=True, cwd=self.project, env=self.env, timeout=20)
     def test_all_bootstraps_preserve_settings(self):
