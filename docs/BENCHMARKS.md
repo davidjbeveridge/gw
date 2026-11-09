@@ -2,7 +2,7 @@
 
 [Handbook](README.md) · [Executed validation](VALIDATION.md) · [References](REFERENCES.md)
 
-**No gW efficacy, cost-saving, or task-quality benchmark has been published.** The test suite checks implementation behavior. It is not a performance study. This document specifies how we intend to evaluate the design without turning someone else's result into our headline.
+[Harness research findings](HARNESS_RESEARCH.md) summarize completed bounded studies, negative results, and unrun work. There is no established general cost or developer-productivity benefit. This document specifies how to test a narrower claim; implementation tests and vendor results do not substitute for measured task outcomes.
 
 ## Start with a falsifiable claim
 
@@ -69,7 +69,7 @@ Publish a clear task set, exact configuration, versions, procedure, raw or appro
 
 Record external provider outages and hardware differences without silently deleting inconvenient runs. Use reproducible plots/tables derived from committed data. Sensitive tasks need a consented, redacted release process rather than an assertion that anonymization happened.
 
-The README should link to an actual result directory and describe the tested population and setup. Until then, it should say that no benchmark exists. That is the present state.
+Link each result from the README or [research write-up](HARNESS_RESEARCH.md), including the tested population and setup. Keep aggregate reanalysis, reproduction from original captures, and new live trials distinct.
 
 ## What already counts as useful evidence
 

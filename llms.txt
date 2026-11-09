@@ -35,7 +35,8 @@
 - [FAQ](docs/FAQ.md): direct behavior and scope answers.
 - [Troubleshooting](docs/TROUBLESHOOTING.md): diagnose the failed layer.
 - [Validation](docs/VALIDATION.md): implementation evidence; not model efficacy.
-- [Benchmarks](docs/BENCHMARKS.md): no published gW performance results; proposed evaluation protocol.
+- [Harness research](docs/HARNESS_RESEARCH.md): bounded findings, setup recommendations, and unrun evaluations.
+- [Benchmarks](docs/BENCHMARKS.md): paired evaluation protocol and evidence requirements.
 - [References](docs/REFERENCES.md): annotated primary technologies, standards and research.
 - [Roadmap](docs/ROADMAP.md): explicitly unimplemented future work.
 - [Contributing](CONTRIBUTING.md): tests, documentation and evidence requirements.

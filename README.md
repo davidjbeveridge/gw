@@ -5,12 +5,14 @@
 **macOS or Linux · Python 3.10+**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.1/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.1/install.sh | bash -s -- --all
 ```
 
 **Star this repository** using GitHub's **Star** button if the project is useful. **[Fork it](https://github.com/davidjbeveridge/gw/fork)** to try your own policies, adapters, and experiments. Contributions with reproducible results are especially welcome.
 
 The installer adds user-level hooks for Claude Code, Codex, Gemini CLI, Cursor, Copilot/VS Code, and OpenCode's classic plugin API. It preserves unrelated settings and backs up changed files. It does not install those agents, change their authentication, redirect their inference, or grant permissions. Restart your agents afterward; in Codex, review and trust the hooks through `/hooks`.
+
+For a first trial, use [one adapter and a harmless denial check](docs/GETTING_STARTED.md#choose-an-installation). Add agent tools, optional plugins, and knowledge only as the workflow needs them.
 
 <details>
 <summary>Windows, optional knowledge support, and installation without a shell pipe</summary>
@@ -53,7 +55,7 @@ Keep the agent you like. Change the decisions around it.
 
 [Documentation](docs/README.md) · [First run](docs/GETTING_STARTED.md) · [Architecture](docs/ARCHITECTURE.md) · [Examples](examples/README.md) · [FAQ](docs/FAQ.md) · [Releases](https://github.com/davidjbeveridge/gw/releases)
 
-> **Current scope:** gW 0.7 is a prerelease for cooperative, user-controlled workflows. The core works without a model key; semantic supervision is **off until configured**. There is no published gW efficacy or cost benchmark yet. See [what is tested](docs/VALIDATION.md), [what is planned](docs/ROADMAP.md), and the [security model](SECURITY.md).
+> **Current scope:** The installer is pinned to gW 0.8.1 for cooperative, user-controlled workflows. The core works without a model key; semantic supervision is **off until configured**. See [research findings and limits](docs/HARNESS_RESEARCH.md), [implementation validation](docs/VALIDATION.md), and the [security model](SECURITY.md).
 
 ## A runtime, not a monolith
 
@@ -238,13 +240,32 @@ Use the [compiler guide](docs/CONTEXT_COMPILER.md) for setup and the
 [source adapter contract](packages/gw-context/ADAPTERS.md) for integrations. The
 reference compiler makes no model calls and never silently drops required content.
 
-## Evidence before percentages
+## What the harness research taught us
 
-The repository has cross-platform tests, installer checks, a real LiteLLM callback suite, and independent-package/MCP tests. Those establish specific implementation behavior. They do not establish that gW makes arbitrary agent work cheaper, faster, or more accurate.
+The best evidence is for **bounded handoffs and verifiable source delivery**. The
+studies do not establish that installing the full harness improves developer
+productivity or lowers total cost.
 
-There are **no published gW performance benchmarks yet**. The [benchmark plan](docs/BENCHMARKS.md) defines paired baselines, quality gates, overhead accounting, failure cases, and the artifacts needed to publish a result. Until then, no borrowed vendor percentage stands in for a gW measurement.
+| Finding | What it means for the setup |
+|---|---|
+| [Scope and continuity](docs/HARNESS_RESEARCH.md#scope-and-continuity): a scaffold improved AI-rated quality by 21.7 points across 64 staged episodes and preserved 20 handoffs versus none. | Keep a pinned task and a short, evidence-backed handoff when work resumes. Most milestones stopped at a resource guard; this was chiefly useful partial progress. |
+| [Configured repository work](docs/HARNESS_RESEARCH.md#configured-repository-work): ordinary OpenCode delivered 4/4 accepted artifacts; configured nonsemantic gW delivered 2/4, with one failure and one missing capture. | Start with a small deterministic setup. A hook event or an available tool does not mean the worker used it. The context tool was never called in this cohort. |
+| [Source-backed answers](docs/HARNESS_RESEARCH.md#source-backed-answers): early comparisons lost on quality; the final repair improved 8/12 to 10/12 with 26.1% more tokens. | Use source-backed context where the answer needs it. Verify the supporting span reached the worker and measure accepted answers as well as tokens. |
+| [Overhead and caching](docs/HARNESS_RESEARCH.md#overhead-and-accounting): PR #1 removed duplicated output and unnecessary repeated work in controlled checks. | Keep dependency-aware reuse and recheck current authority. Cache hits, smaller payloads, and fixture speedups are not evidence of cheaper completed tasks. |
 
-[Validation record](docs/VALIDATION.md) · [Current CI](https://github.com/davidjbeveridge/gw/actions/workflows/ci.yml).
+**Keep** exact rules and retry limits where they serve the workflow, one verified
+native hook path, task and policy pinning, and compact evidence with provenance.
+**Consider pruning** duplicate hooks and context injection, generic always-on
+classifier or reviewer passes, and unused routing, knowledge, or learning
+components. Enable them one at a time against a named failure and a measurable
+quality threshold. Keep human authorization for consequential actions.
+
+**Still open:** the fresh Jev/Clef diagnostic and the semantic OpenCode pilot were
+prepared but never run. We still need to measure hook enforcement, natural context
+uptake, false denials, accepted work, and total cost on fresh tasks before making
+deployment or savings claims.
+
+[Research write-ups and bounds](docs/HARNESS_RESEARCH.md) · [Curated evidence branch](https://github.com/davidjbeveridge/gw/tree/research/harness-performance/research/harness-performance) · [Benchmark protocol](docs/BENCHMARKS.md) · [Implementation validation](docs/VALIDATION.md)
 
 ## Read further
 

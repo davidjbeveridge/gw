@@ -38,7 +38,7 @@ These documents describe **gW 0.8.0 and gw-knowledge 0.3.0**. Examples marked as
 
 ## Evidence and development
 
-[Validation record](VALIDATION.md) documents executed checks. [Benchmark design](BENCHMARKS.md) describes the evidence required for efficacy and efficiency claims. [Annotated references](REFERENCES.md) explain the upstream work. [Roadmap](ROADMAP.md) distinguishes next steps from shipped features. [Contributing](../CONTRIBUTING.md) covers changes to code and prose.
+[Validation record](VALIDATION.md) documents executed implementation checks. [Harness research](HARNESS_RESEARCH.md) summarizes completed experiments, deployment recommendations, and open questions. [Benchmark design](BENCHMARKS.md) describes the evidence required for efficacy and efficiency claims. [Annotated references](REFERENCES.md) explain the upstream work. [Roadmap](ROADMAP.md) distinguishes next steps from shipped features. [Contributing](../CONTRIBUTING.md) covers changes to code and prose.
 
 [Runnable examples](../examples/README.md) use temporary state and require no model key. The [agent-readable index](../llms.txt) provides a compact map. The [setup skill](../skills/gw-setup/SKILL.md) is for agents helping an operator configure a decision backend; it does not authorize them to retrieve secrets.
 
