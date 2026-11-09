@@ -77,7 +77,7 @@ The [validation record](VALIDATION.md) documents cross-platform, installer, prot
 
 ## Measured overhead corrections
 
-The [October 4 regression check](../benchmarks/overhead-20261004/README.md) records
+The [October 4 regression check](https://github.com/davidjbeveridge/gw/tree/f3041b552f9c0d086d860b28b39b63183bf35971/benchmarks/overhead-20261004) records
 the cache/output/startup corrections, raw runtime samples, and a bounded replay.
 It is a synthetic implementation diagnostic, not a live-agent productivity or
 model-token benchmark.

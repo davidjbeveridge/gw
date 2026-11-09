@@ -75,7 +75,7 @@ of the recorded result and setup, not a new model replication.
 
 [PR #1](https://github.com/davidjbeveridge/gw/pull/1) merged decision dependency
 caching, removal of duplicated context output, and runtime reuse. The
-[overhead check](../benchmarks/overhead-20261004/README.md) measures specific
+[overhead check](https://github.com/davidjbeveridge/gw/tree/f3041b552f9c0d086d860b28b39b63183bf35971/benchmarks/overhead-20261004) measures specific
 subprocess and serializer fixtures. For example, a 200-line source payload was
 unchanged while the serialized result fell from 25,108 to 12,888 characters.
 Reuse classification only when its task, action, evidence, policy, and model
