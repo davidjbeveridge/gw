@@ -117,7 +117,7 @@ class DocumentationTests(unittest.TestCase):
 
     def test_quick_install_and_fork_are_at_the_top(self):
         opening = "\n".join((ROOT / "README.md").read_text(encoding="utf-8").splitlines()[:20])
-        self.assertIn("install.sh | bash -s -- --all", opening)
+        self.assertIn("install.sh | GW_REF=main bash -s -- --agents codex", opening)
         self.assertIn("/gw/fork", opening)
         self.assertIn("Star", opening)
 

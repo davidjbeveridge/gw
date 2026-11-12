@@ -107,6 +107,24 @@ research costs. They still consume resources.
    Keep learning, broad routing, compression, and shared knowledge experimental
    until a matched evaluation shows their benefit in that workflow.
 
+## Why semantic gating is opt-in
+
+In the early controlled OpenCode screening, each of the Jev supervision and
+Jev-plus-context arms verified 4/6 attempts, versus 6/6 in control. The
+separately frozen extension repeated those counts; the corresponding Clef arms
+verified 6/6 but took longer than control. Some approval-required decisions
+prevented edits in the unattended harness. The first blocked patches from
+four failed extension runs passed the unchanged grader when applied offline.
+Those runs remain live failures. These were small constructed task families
+with no staffed review queue, not a production classifier ranking.
+
+That evidence favors a deterministic default. Fresh bootstrap on `main`
+keeps exact rules, task pinning, retry limits, and local records. It leaves the
+bundled semantic goals inactive even when a backend is configured. Model
+judgment, source delivery and operational add-ons remain available through
+[explicit setup](GETTING_STARTED.md#add-only-the-optional-component-you-need).
+The change preserves existing policy and human authorization.
+
 ## What remains to be tested
 
 - **Host behavior.** An isolated check with OpenCode 1.18.35 found the installed

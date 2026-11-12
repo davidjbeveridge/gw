@@ -6,7 +6,7 @@ These documents describe **gW 0.8.0 and gw-knowledge 0.3.0**. Examples marked as
 
 ## Start here
 
-**New installation:** follow [Getting started](GETTING_STARTED.md), prove a harmless denial, then configure the [decision backend](DECISION_SETUP.md). Do not start by enabling every optional component.
+**New installation:** follow [Getting started](GETTING_STARTED.md) and prove a harmless denial. If you need semantic judgment, [configure a backend and enable a specific goal](DECISION_SETUP.md#opt-in-to-a-semantic-goal).
 
 **Evaluating the design:** read [Architecture and method](ARCHITECTURE.md), [Security](../SECURITY.md), and [Benchmarks](BENCHMARKS.md). These explain the boundaries as well as the intended benefits.
 

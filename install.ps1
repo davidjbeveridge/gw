@@ -35,6 +35,15 @@ if ($AgentTools) {
 $gw = Join-Path $root 'venv\Scripts\gw.exe'
 $arguments = @('bootstrap')
 if ($AgentTools) { $arguments += '--agent-tools' }
+if ($Context -or $Knowledge -or $AgentTools -or $Plugins) {
+  $bootstrapHelp = & $gw bootstrap --help | Out-String
+  if ($LASTEXITCODE -ne 0) { throw 'Could not inspect the installed bootstrap command.' }
+  if ($bootstrapHelp.Contains('--context')) {
+    if ($Knowledge) { $arguments += '--knowledge' }
+    elseif ($Context -or $AgentTools) { $arguments += '--context' }
+    if ($Plugins) { $arguments += '--plugins' }
+  }
+}
 if ($All) { $arguments += '--all' }
 if ($Agents) { $arguments += @('--agents', $Agents) }
 if ($Project) { $arguments += @('--project', $Project) }

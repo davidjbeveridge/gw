@@ -4,6 +4,11 @@
 
 The optional proxy integration adds gW decisions to requests handled by LiteLLM. It is separate from native action hooks. One observes inference; the other observes tools. Neither sees traffic that bypasses it.
 
+On a lean bootstrap, append `gw.gateway` to the existing `runtime.enable` list
+in the global config before using `gw proxy-init` or `gw serve`. Retain the
+native plugin IDs and verify the composition with `gw runtime inspect`. Proxy
+transformations and model choices still require explicit configuration.
+
 ## What the callback does
 
 The [callback](../gw_supervisor/litellm.py) projects a bounded model-request event, invokes the same supervisor engine, applies supported request transformations, and passes the result back to LiteLLM. A denial or review requirement raises before that controlled inference call. Completed responses are observed through the success callback; streamed chunks are not rewritten.

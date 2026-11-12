@@ -2,20 +2,30 @@
 
 ## Install
 
-**macOS or Linux · Python 3.10+**
+**macOS or Linux · Python 3.10+** · Try the lean setup from the current source:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.1/install.sh | bash -s -- --all
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/main/install.sh | GW_REF=main bash -s -- --agents codex
 ```
 
 **Star this repository** using GitHub's **Star** button if the project is useful. **[Fork it](https://github.com/davidjbeveridge/gw/fork)** to try your own policies, adapters, and experiments. Contributions with reproducible results are especially welcome.
 
 The installer adds user-level hooks for Claude Code, Codex, Gemini CLI, Cursor, Copilot/VS Code, and OpenCode's classic plugin API. It preserves unrelated settings and backs up changed files. It does not install those agents, change their authentication, redirect their inference, or grant permissions. Restart your agents afterward; in Codex, review and trust the hooks through `/hooks`.
 
-For a first trial, use [one adapter and a harmless denial check](docs/GETTING_STARTED.md#choose-an-installation). Add agent tools, optional plugins, and knowledge only as the workflow needs them.
+Replace `codex` with your agent. Fresh bootstrap starts with pinned tasks, exact
+rules, retry limits, and a local event record. Semantic goals, context and
+knowledge, tracing, learning, sync, and the gateway are opt-in. Verify the
+[native denial check](docs/GETTING_STARTED.md#prove-that-the-hook-runs) before relying on it.
 
 <details>
-<summary>Windows, optional knowledge support, and installation without a shell pipe</summary>
+<summary>Pinned release, Windows, and optional knowledge support</summary>
+
+The pinned v0.8.1 release predates the lean bootstrap on `main`. Its defaults
+are unchanged. To install that release on macOS/Linux:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.1/install.sh | bash -s -- --agents codex
+```
 
 Windows PowerShell, with Python 3.10+ on PATH:
 
@@ -55,7 +65,7 @@ Keep the agent you like. Change the decisions around it.
 
 [Documentation](docs/README.md) · [First run](docs/GETTING_STARTED.md) · [Architecture](docs/ARCHITECTURE.md) · [Examples](examples/README.md) · [FAQ](docs/FAQ.md) · [Releases](https://github.com/davidjbeveridge/gw/releases)
 
-> **Current scope:** The installer is pinned to gW 0.8.1 for cooperative, user-controlled workflows. The core works without a model key; semantic supervision is **off until configured**. See [research findings and limits](docs/HARNESS_RESEARCH.md), [implementation validation](docs/VALIDATION.md), and the [security model](SECURITY.md).
+> **Current scope:** gW is for cooperative, user-controlled workflows. Fresh bootstraps on `main` use deterministic supervision without a model key. Existing policy is preserved. See [why the defaults changed](docs/HARNESS_RESEARCH.md#why-semantic-gating-is-opt-in), [implementation validation](docs/VALIDATION.md), and the [security model](SECURITY.md).
 
 ## A runtime, not a monolith
 
@@ -142,20 +152,6 @@ gw doctor
 gw task 'Fix login validation and add regression tests. Do not deploy.' --project .
 ```
 
-Then configure the **supervisor's decision backend**, separately from the model doing the work:
-
-```bash
-gw setup
-```
-
-For an already provisioned OpenRouter key:
-
-```bash
-gw setup --preset openrouter --check --yes
-```
-
-That explicit check sends one synthetic request before saving. It does not send your project or prove task-alignment accuracy. Other presets cover TypeSafe direct, local Kev/Laya servers, System One-compatible proxies, JSON chat classifiers, and custom bridges. The [decision setup guide](docs/DECISION_SETUP.md) explains credentials, model limits, and why CUA form models are not general-purpose drop-in supervisors.
-
 Start a **new** agent session, then run the [harmless denial check](docs/GETTING_STARTED.md#prove-that-the-hook-runs). A hook file on disk is not evidence that the agent loaded it.
 
 ```bash
@@ -163,6 +159,8 @@ gw status
 ```
 
 This reports sessions, drift observations, usage received through instrumented calls, and proposed automation candidates. It is not a complete transcript or a live dashboard.
+
+If you need model judgment, [configure a backend and opt in to one goal](docs/DECISION_SETUP.md#opt-in-to-a-semantic-goal). Backend setup alone does not turn on bundled semantic goals in the lean setup.
 
 ## Your policy, not our house rules
 
@@ -250,6 +248,7 @@ productivity or lowers total cost.
 |---|---|
 | [Scope and continuity](docs/HARNESS_RESEARCH.md#scope-and-continuity): a scaffold improved AI-rated quality by 21.7 points across 64 staged episodes and preserved 20 handoffs versus none. | Keep a pinned task and a short, evidence-backed handoff when work resumes. Most milestones stopped at a resource guard; this was chiefly useful partial progress. |
 | [Configured repository work](docs/HARNESS_RESEARCH.md#configured-repository-work): ordinary OpenCode delivered 4/4 accepted artifacts; configured nonsemantic gW delivered 2/4, with one failure and one missing capture. | Start with a small deterministic setup. A hook event or an available tool does not mean the worker used it. The context tool was never called in this cohort. |
+| [Semantic gating](docs/HARNESS_RESEARCH.md#why-semantic-gating-is-opt-in): early supervised trials blocked some edits that passed the grader offline. | Keep model-based gating off by default. Enable a specific goal only after checking it against ordinary supporting work and providing a review path. |
 | [Source-backed answers](docs/HARNESS_RESEARCH.md#source-backed-answers): early comparisons lost on quality; the final repair improved 8/12 to 10/12 with 26.1% more tokens. | Use source-backed context where the answer needs it. Verify the supporting span reached the worker and measure accepted answers as well as tokens. |
 | [Overhead and caching](docs/HARNESS_RESEARCH.md#overhead-and-accounting): PR #1 removed duplicated output and unnecessary repeated work in controlled checks. | Keep dependency-aware reuse and recheck current authority. Cache hits, smaller payloads, and fixture speedups are not evidence of cheaper completed tasks. |
 
@@ -281,9 +280,9 @@ MIT licensed. Local use does not require a gW account or a hosted service. The s
 
 ## Operate GW through your agent
 
-Install with `--agent-tools --plugins --knowledge`, then ask your agent to open
-the dashboard, inspect a run, configure a decision cascade, or compile task context.
-The agent uses GW tools rather than asking you to type commands or JSON. Native
-trust/restart requirements remain explicit.
+Opt in with `--agent-tools` to inspect a run, configure a decision backend, or
+compile task context from the agent. Add `--plugins` for the dashboard or
+`--knowledge` for a source store if needed. Native trust and restart
+requirements remain explicit.
 
 [Agent interface](docs/AGENT_INTERFACE.md) · [Fast/slow decisions](docs/DECISION_CASCADES.md) · [Context compiler](docs/CONTEXT_COMPILER.md)

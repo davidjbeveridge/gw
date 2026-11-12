@@ -68,7 +68,10 @@ Installed distributions advertise zero-argument factories under
 Discovery reads package metadata and loads only selected factories. A package
 being present is not permission to activate every entry point it contains.
 
-The default `standard` profile selects the twelve names above. Selection is
+The `standard` profile selects the twelve names above and remains the fallback
+for older configuration without a profile. Fresh native bootstrap on `main`
+instead writes a `minimal` profile with the explicit native plugin IDs listed
+in [configuration](CONFIGURATION.md#runtime-composition). Selection is
 operator/global-client configuration:
 
 ```json

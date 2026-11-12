@@ -76,7 +76,8 @@ def manifest():
             "presets": {name: {**config, "note": NOTES.get(name, "TypeSafe direct System One access")} for name, config in PRESETS.items()},
             "credential_inputs": ["environment variable name", "existing private file path"],
             "workflow": ["Choose protocol and served model", "Provide credentials outside chat", "Preview with --dry-run", "Run --check to test with synthetic data", "Apply with --yes", "Start a new agent session and verify a deny canary"],
-            "documentation": DOC, "live_test": "one synthetic request; not an accuracy benchmark; no project data", "local_runtime_installation": False}
+            "documentation": DOC, "live_test": "one synthetic request; not an accuracy benchmark; no project data", "local_runtime_installation": False,
+            "goal_activation": "This command configures the backend only. On fresh native setups, explicitly enable the particular semantic goal you want."}
 
 
 def effective(global_config, client=None):
@@ -215,5 +216,5 @@ def run_setup(args, home, output):
             result["backup"] = str(backup)
         write_json(path, new)
         result["applied"] = True
-    result["next"] = "Start a new agent session. Run gw decision check in the same environment as the agent, then verify a native deny canary."
+    result["next"] = "Run gw decision check in the agent environment. On a fresh native setup, explicitly enable a goal if needed, then start a new session."
     output(result)

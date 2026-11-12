@@ -16,6 +16,20 @@ defaults and validators come from the selected registrations. Existing domain
 settings remain compatible with the reference bundle. Unowned settings are errors,
 not silently ignored policies. See [Plugin configuration](PLUGINS.md#configuration-belongs-to-its-owner).
 
+Fresh native bootstrap on `main` writes `profile: minimal` and explicitly
+selects `gw.state`, `gw.policy`, `gw.inference`, `gw.governance`, and
+`gw.harness`. A bare `gw init --profile minimal` still selects no plugins;
+it is intended for custom SDK compositions. Existing configuration without a
+profile continues to resolve as `standard`. Bootstrap adds requested plugins
+to an existing minimal selection without replacing its policy; a lock or an
+explicit disable can prevent the addition.
+
+To add one plugin manually, append its ID to the existing `runtime.enable` list
+and retain the other IDs. Follow its package and dependency requirements in
+[Plugin contracts](PLUGINS.md). Use `gw runtime inspect` to verify the selection,
+then start new sessions after changing it. Do not leave config sections owned by
+plugins you removed.
+
 ## Files and precedence
 
 `GW_HOME` defaults to `~/.config/gw`; `--home` overrides it for that command. The global file is `config.json`. A project file is named `.gw.json`, but is not read as live policy until reviewed and imported with `gw trust --project PATH`.

@@ -12,6 +12,26 @@ The scripts do not install Python, your agent, local model weights, LiteLLM, Cav
 
 ## Choose an installation
 
+### Lean setup from current source
+
+The source installer on `main` uses the lean setup for a new state directory:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/main/install.sh | GW_REF=main bash -s -- --agents codex
+```
+
+Choose one adapter; `--all` is an explicit broader install. On Windows, use the
+source PowerShell installer with `GW_REF=main` and `-Agents codex`. Set `GW_REF`
+to a reviewed commit if you need a reproducible source install. The pinned
+v0.8.1 release below keeps its original behavior.
+
+Fresh bootstrap selects the native hook, state, policy, inference setup, and
+governance plugins. Only the exact retry goal is active; literal rules apply
+when configured. It records events locally. It does not expose MCP tools,
+send model requests, or activate context, tracing, or learning by default.
+Existing config files and existing state directories with session or trusted
+project data retain their composition; bootstrap does not migrate them.
+
 ### Normal user-local installation
 
 ```bash
@@ -115,13 +135,15 @@ Three outcomes need different interpretations:
 
 Some agents wrap commands or use different argument fields. Inspect a harmless native payload before widening the canary. Do not claim that one shell denial verifies browser, MCP, subagent, or cloud execution paths. Remove the rule when finished and begin a new session. [Troubleshooting](TROUBLESHOOTING.md) covers the failure cases.
 
-## Enable semantic decisions
+## Optional semantic decisions
 
 ```bash
 gw setup
 ```
 
-The guide configures the supervisor, not the working model. After provisioning the relevant key outside the conversation, a noninteractive example is:
+The guide configures the supervisor, not the working model. On a lean setup it
+does not enable a semantic goal. After provisioning the relevant key outside the
+conversation, a noninteractive example is:
 
 ```bash
 gw setup --preset openrouter --check --yes
@@ -131,9 +153,23 @@ gw setup --preset openrouter --check --yes
 
 For local Kev/Laya, start and warm the model server separately. Read [Decision setup](DECISION_SETUP.md) before choosing an endpoint: System One, OpenAI-compatible JSON chat, and the custom HTTP contract are not interchangeable wire formats.
 
-Start a new agent session after changing the backend. A successful connection check does not establish decision quality. Try a few representative tasks with reviewable consequences before enabling stricter per-goal error policies.
+Follow [goal opt-in](DECISION_SETUP.md#opt-in-to-a-semantic-goal) to enable one goal,
+then start a new agent session. A successful connection check does not establish
+decision quality. Try representative tasks before enabling blocking effects.
 
 ## Add only the optional component you need
+
+On `main`, installer options install the supporting packages and select their
+plugins. `--context` selects the context compiler; `--knowledge` adds knowledge;
+`--agent-tools` selects MCP management tools and context; `--plugins` selects
+the trace, learning, and sync commands. With packages already installed, pass
+the same flags to `gw bootstrap` (`--dry-run` previews native registration).
+Selection makes commands and tools available; it does not turn on background
+observation, learning, sync, ingestion, or automatic context delivery.
+
+See [runtime composition](CONFIGURATION.md#runtime-composition) for opting in to
+a single plugin. Prefer a separate trial state directory to changing a
+working setup in place.
 
 **Proxy:** follow [Proxy integration](PROXY.md). The bootstrap does not redirect your existing subscription traffic. Routing model calls through an API gateway is a separate, explicit configuration choice.
 

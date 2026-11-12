@@ -14,7 +14,7 @@ from gw_supervisor import __version__
 from .host import home_path, initialize, merge, project_root, resolve, trust_project, validate
 from . import host as config_host
 from gw_supervisor.api import runtime as Supervisor
-from gw_supervisor.api import atomic_write, canonical, read_json, strict_json, write_json
+from gw_supervisor.api import atomic_write, canonical, digest, read_json, strict_json, write_json
 
 
 def output(value):
@@ -34,6 +34,10 @@ def parser():
         s.add_argument("--project", help="Install project-local hooks instead of user-wide hooks")
         s.add_argument("--dry-run", action="store_true")
         s.add_argument("--agent-tools", action="store_true", help="Also register MCP tools and the GW skill; native permissions unchanged")
+        if name == "bootstrap":
+            s.add_argument("--context", action="store_true", help="Select the optional context plugin (install gw-context separately)")
+            s.add_argument("--knowledge", action="store_true", help="Select context and knowledge plugins (install their packages separately)")
+            s.add_argument("--plugins", action="store_true", help="Select optional observability, learning and sync commands; services remain off until configured")
     s = sub.add_parser("init")
     s.add_argument("--project")
     s = sub.add_parser("trust", help="Review/import the current .gw.json as a trusted project snapshot")
@@ -45,7 +49,7 @@ def parser():
     s.add_argument("--project", default=".")
     s.add_argument("--client", default="generic")
     s.add_argument("--defaults", action="store_true")
-    s = sub.add_parser("enable-jev", help="Opt in to sending redacted decision context to the configured Jev endpoint")
+    s = sub.add_parser("enable-jev", help="Configure the Jev decision backend (fresh setups still require goal opt-in)")
     s.add_argument("--key-env", default="TYPESAFE_API_KEY")
     s = sub.add_parser("hook")
     s.add_argument("agent", choices=[*PROFILES, "generic"])
@@ -172,7 +176,7 @@ def main(argv=None):
                 raise SystemExit(2)
             return
         if args.cmd in {"bootstrap", "uninstall"}:
-            from .adapters import PROFILES, bootstrap, detected_agents
+            from .adapters import ALIASES, PROFILES, bootstrap, detected_agents
             if args.all and args.agents:
                 raise ValueError("Use --all or --agents, not both")
             agents = list(PROFILES) if args.all else args.agents.split(",") if args.agents else detected_agents()
@@ -180,13 +184,23 @@ def main(argv=None):
             if not agents:
                 raise ValueError("No agents detected; use gw bootstrap --all or --agents claude,codex,opencode")
             project = project_root(args.project) if args.project else None
+            path = home / "config.json"
+            install = args.cmd == "bootstrap"
+            if install:
+                from .bootstrap_config import plan
+                had_config = path.exists()
+                before, after = plan(home, args, [ALIASES.get(agent, agent) for agent in agents])
             result = bootstrap(home, agents, project, install=args.cmd == "bootstrap", dry_run=args.dry_run)
-            if not args.dry_run and args.cmd == "bootstrap" and not (home / "config.json").exists():
-                write_json(home / "config.json", {"version": 1, "clients": {}})
             if args.agent_tools:
                 from .agent_bootstrap import bootstrap_agent_tools
                 result.extend(bootstrap_agent_tools(home, agents, project, install=args.cmd == "bootstrap", dry_run=args.dry_run))
-            output({"changes": result, "notes": ["Restart agents after changing hooks.", "Codex requires review/trust through /hooks; gw does not bypass it.", "Native allow means no objection, not a permission grant.", "Configure the supervisor decision backend: gw setup (interactive) or gw setup --describe (agent guide). Existing OAuth/subscription billing is unchanged.", "OpenCode uses the classic v1 plugin API; a v2 plugin adapter is not claimed.", "Run gw doctor, then verify a deny canary inside each installed agent."]})
+            if install and before != after and not args.dry_run:
+                if path.exists() != had_config or read_json(path, {}) != before:
+                    raise ValueError("Configuration changed during bootstrap; review it and retry")
+                if had_config:
+                    write_json(home / "backups" / ("bootstrap-" + digest(before) + ".json"), before)
+                write_json(path, after)
+            output({"changes": result, "notes": ["Restart agents after changing hooks.", "Codex requires review/trust through /hooks; gw does not bypass it.", "Native allow means no objection, not a permission grant.", "Fresh setups use deterministic rules and retry limits. Configure a decision backend and explicitly enable a goal only if needed.", "OpenCode uses the classic v1 plugin API; a v2 plugin adapter is not claimed.", "Run gw doctor, then verify a deny canary inside each installed agent."]})
         elif args.cmd == "models":
             if args.models_cmd == "import-openrouter":
                 from .catalog import fetch_openrouter, import_openrouter

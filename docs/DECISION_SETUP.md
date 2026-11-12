@@ -5,6 +5,10 @@ separate from `gw models`, which configures worker-model selection. Changing a
 worker's model or adding it to OpenRouter does not automatically configure the
 supervisor's classifier. No setup command changes your agent's login or billing.
 
+On a fresh lean bootstrap, setting up the backend does not enable a semantic
+goal. Existing configurations keep their previously selected goals. See
+[the research behind that default](HARNESS_RESEARCH.md#why-semantic-gating-is-opt-in).
+
 ## Quick paths
 
 After installing gw, run the interactive guide:
@@ -52,6 +56,28 @@ Run the check in the **same environment as the agent**. A successful check in on
 terminal does not prove a GUI-launched app received that terminal's environment.
 Then verify the README's native deny canary inside each agent. A working model
 endpoint does not prove the agent loaded its hooks.
+
+## Opt in to a semantic goal
+
+After configuring a backend, merge a goal override into the global config or a
+reviewed project policy. Start with one goal and advisory effects, for example:
+
+```json
+{
+  "goals": {
+    "task_alignment": {
+      "enabled": true,
+      "effects": {"off_task": "advise", "conflicting": "advise"}
+    }
+  }
+}
+```
+
+If this is a project policy, review and import it with `gw trust --project .`.
+Pin the task and start a fresh session. Check useful supporting actions and
+uncertain cases before assigning `approve` or `deny`. Keep real authorization
+rules independent of the model. To turn this goal back off, set `enabled: false`
+in the same scope; the backend can remain configured for explicit checks.
 
 ## Choose a wire protocol, not just a brand
 

@@ -7,7 +7,9 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import Mock
 from gw_supervisor.adapters import PROFILES, bootstrap, native_response, normalize, plugin_source, settings_for
+from gw_supervisor.api import runtime
 from gw_supervisor.util import write_json
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -111,6 +113,75 @@ class CLITests(unittest.TestCase):
         self.assertEqual(len(changes), 6)
         second = json.loads(self.cli('bootstrap', '--all', '--project', str(self.project)).stdout)
         self.assertTrue(all(not x['changed'] for x in second['changes']))
+    def test_fresh_bootstrap_is_deterministic_until_a_goal_is_enabled(self):
+        result = self.cli('bootstrap', '--agents', 'codex', '--project', str(self.project))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        inspect = self.cli('runtime', 'inspect')
+        active = json.loads(inspect.stdout)
+        self.assertEqual({p['id'] for p in active['plugins']},
+                         {'gw.state', 'gw.policy', 'gw.inference', 'gw.governance', 'gw.harness'})
+        self.assertNotIn('serve', active['commands'])
+        self.assertFalse((self.project / '.codex/config.toml').exists())
+        # Setting a backend must not enable any shipped goal on its own.
+        setup = self.cli('setup', '--preset', 'kev', '--yes')
+        self.assertEqual(setup.returncode, 0, setup.stderr)
+        classifier = Mock()
+        classifier.decide.return_value = {'task_alignment': 'conflicting'}
+        event = {'type': 'tool.before', 'client': 'codex', 'session': 'plain',
+                 'project': str(self.project), 'tool': 'Bash', 'input': {'command': 'pytest'}}
+        with runtime(self.home, classifier=classifier) as supervisor:
+            supervisor.store.set_task(str(self.project), 'Run the test suite')
+            self.assertEqual(supervisor.evaluate(event)['decision'], 'allow')
+            classifier.decide.assert_not_called()
+            for _ in range(3):
+                supervisor.evaluate({**event, 'type': 'tool.after', 'success': False})
+            self.assertEqual(supervisor.evaluate(event)['decision'], 'approve')
+        path = self.home / 'config.json'
+        cfg = json.loads(path.read_text())
+        cfg['goals']['task_alignment']['enabled'] = True
+        write_json(path, cfg)
+        with runtime(self.home, classifier=classifier) as supervisor:
+            self.assertEqual(supervisor.evaluate({**event, 'session': 'opt-in'})['decision'], 'deny')
+        classifier.decide.assert_called_once()
+        self.assertEqual(set(classifier.decide.call_args.args[1]), {'task_alignment'})
+
+    def test_addon_flags_select_tools_without_enabling_services(self):
+        bootstrap_args = ('bootstrap', '--agents', 'codex', '--project', str(self.project))
+        first = self.cli(*bootstrap_args)
+        self.assertEqual(first.returncode, 0, first.stderr)
+        path = self.home / 'config.json'
+        before = json.loads(path.read_text())
+        args = (*bootstrap_args, '--knowledge', '--plugins', '--agent-tools')
+        preview = self.cli(*args, '--dry-run')
+        self.assertEqual(preview.returncode, 0, preview.stderr)
+        self.assertEqual(json.loads(path.read_text()), before)
+        self.assertFalse((self.project / '.codex/config.toml').exists())
+        opted_in = self.cli(*args)
+        self.assertEqual(opted_in.returncode, 0, opted_in.stderr)
+        cfg = json.loads(self.cli('config').stdout)['config']
+        self.assertFalse(cfg['context_compiler']['enabled'])
+        self.assertFalse(cfg['knowledge']['enabled'])
+        self.assertTrue(all(not cfg['plugins'][key]['enabled'] for key in ('observe', 'learning', 'sync')))
+        active = json.loads(self.cli('runtime', 'inspect').stdout)
+        self.assertIn('gw_context_compile', active['tools'])
+        self.assertIn('gw_knowledge', active['tools'])
+        self.assertNotIn('serve', active['commands'])
+        self.assertEqual(len(list((self.home / 'backups').glob('bootstrap-*.json'))), 1)
+
+    def test_bootstrap_preserves_existing_config_and_rejects_locked_addon(self):
+        path = self.home / 'config.json'
+        original = {'version': 1, 'runtime': {'profile': 'standard', 'disable': ['gw.context']},
+                    'goals': {'task_alignment': {'enabled': True}}, 'locked': ['runtime']}
+        write_json(path, original)
+        before = path.read_bytes()
+        args = ('bootstrap', '--agents', 'codex', '--project', str(self.project))
+        denied = self.cli(*args, '--context')
+        self.assertNotEqual(denied.returncode, 0)
+        self.assertIn('Requested plugins are not selected', denied.stderr)
+        self.assertFalse((self.project / '.codex/hooks.json').exists())
+        boot = self.cli(*args)
+        self.assertEqual(boot.returncode, 0, boot.stderr)
+        self.assertEqual(path.read_bytes(), before)
     def test_corrupt_hook_payload_has_native_deny_exit_zero(self):
         result = self.cli('hook', 'codex', 'pre', stdin='not json')
         self.assertEqual(result.returncode, 0)

@@ -10,8 +10,8 @@ This reference describes 0.4.0. A fresh shell may need the installer's printed P
 
 | Command | Options | Effect |
 |---|---|---|
-| `bootstrap` | `--all` or `--agents NAMES`, `--project PATH`, `--dry-run` | Register user- or project-level hooks; default selection is detected agents |
-| `uninstall` | Same options | Remove recognized gW hooks, preserving unrelated settings and retained data |
+| `bootstrap` | `--all` or `--agents NAMES`, `--project PATH`, `--dry-run`, `--context`, `--knowledge`, `--plugins`, `--agent-tools` | Register user- or project-level hooks; a fresh setup on `main` selects the lean runtime unless extras are requested |
+| `uninstall` | `--all` or `--agents NAMES`, `--project PATH`, `--dry-run`, `--agent-tools` | Remove recognized gW hooks, preserving unrelated settings and retained data |
 | `doctor` | `--project PATH` | Inspect configuration and executable presence; no live agent verification |
 | `status` | None | Report recent sessions/candidates, event count, and recorded usage |
 | `serve` | `--port N` (7777) | Start the authenticated IPv4 loopback supervisor API |
@@ -19,6 +19,10 @@ This reference describes 0.4.0. A fresh shell may need the installer's printed P
 `--all` and `--agents` are mutually exclusive. Names are `claude`, `codex`, `gemini`, `cursor`, `copilot`, and `opencode`; aliases include `claude-code`, `gemini-cli`, `vscode`, and `github-copilot`.
 
 A dry-run bootstrap does not write native settings, but ordinary command initialization can create the private state directory and API token. It is not a promise of zero filesystem effects. Multi-agent writes are atomic per file, not as a group.
+
+Optional bootstrap flags select plugins but do not install their supporting
+packages when calling `gw` directly. Use the installer or install the packages
+first. See [optional components](GETTING_STARTED.md#add-only-the-optional-component-you-need).
 
 `status` lists up to 100 sessions and 100 candidates. It does not print every event, raw transcript, provider account quota, or a computed dollar total. Missing usage fields remain unknown.
 

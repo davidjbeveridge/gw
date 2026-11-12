@@ -9,13 +9,14 @@ backend, or compile context. The agent supplies the tool arguments.
 ## One installation, then ordinary requests
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/v0.8.1/install.sh | bash -s -- --all --agent-tools --plugins --knowledge
+curl -fsSL https://raw.githubusercontent.com/davidjbeveridge/gw/main/install.sh | GW_REF=main bash -s -- --agents codex --agent-tools
 ```
 
 This installs the optional MCP dependency and registers a server named `gw` in
-supported local clients and includes the independent context compiler. `--plugins`
-adds observability/learning/sync; `--knowledge` adds the optional knowledge store. On Windows, the PowerShell switches
-are `-All -AgentTools -Plugins -Knowledge`. Existing core-only installations remain
+the selected local client and includes the independent context compiler. Add
+`--plugins` for observability, learning, and sync commands or `--knowledge` for
+the optional knowledge store. On Windows, use `-Agents codex -AgentTools` with
+the source installer and `GW_REF=main`. Existing core-only installations remain
 valid. No API account or paid model is configured by installation.
 
 Restart your agent and approve its native MCP/hook trust prompt where required.

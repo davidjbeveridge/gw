@@ -53,6 +53,17 @@ if [ "$AGENT_TOOLS" = 1 ]; then
   "$ROOT/venv/bin/python" -m pip install --disable-pip-version-check --no-input --upgrade \
     "gw-supervisor[agent] @ https://github.com/davidjbeveridge/gw/archive/${REF}.zip"
 fi
+# Older pinned releases already select the full plugin graph and do not accept
+# the new bootstrap flags. Forward the opt-ins when the installed CLI supports them.
+if [ "$CONTEXT" = 1 ] || [ "$PLUGINS" = 1 ]; then
+  BOOTSTRAP_HELP=$("$ROOT/venv/bin/gw" bootstrap --help)
+  case "$BOOTSTRAP_HELP" in
+    *--context*)
+      if [ "$KNOWLEDGE" = 1 ]; then ARGS+=("--knowledge"); elif [ "$CONTEXT" = 1 ]; then ARGS+=("--context"); fi
+      if [ "$PLUGINS" = 1 ]; then ARGS+=("--plugins"); fi
+      ;;
+  esac
+fi
 ln -sfn "$ROOT/venv/bin/gw" "$BIN/gw"
 "$ROOT/venv/bin/gw" bootstrap "${ARGS[@]}"
 printf '\nInstalled %s\n' "$BIN/gw"
