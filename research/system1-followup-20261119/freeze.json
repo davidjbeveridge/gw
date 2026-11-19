@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-19",
+  "followup_calls_before_freeze": 0,
+  "sha256": {
+    "PROTOCOL.md": "02ced9292fec8f416883d167a24761967ff83d92fdd98b178863d8d7d94a2643",
+    "design.json": "5d7290ae65a898186f5021a47ecd3d1cef5897e23af3ea2a086a055101a49c43",
+    "requests.json": "67037a3a0d9e1d45012992be2eae5cb9a8c688c82c333687c9781288d3a8dc72",
+    "scripts/prepare.py": "44e117f415dec34d3edc621f6503e3c03edd4baf8cb01b6e01b9985c708ca14a",
+    "scripts/run.py": "31ae12b0875643cf4259b031fbdd09f48cb3d2170b65cea55d92c763bdad6915",
+    "scripts/analyze.py": "920c812bb867b75a00fdb32ef72f8817533251c3d646843f4eb9dc5131b0ed88",
+    "../system1-20261119/scripts/live.py": "57790d44676e6c600aa44187a644b933461e497208590390032e7fd68a94b91e",
+    "../system1-20261119/cases.json": "9dca4010b4faa58bb7c0b4d084044940708f872481f9a33dfe0ae21fb9446b4b",
+    "../system1-20261119/evidence/live-results.json": "751cd85850553bd1305d7d5993d98faeb8d58e0550d05fc33f3c26c7c09233e8"
+  }
+}

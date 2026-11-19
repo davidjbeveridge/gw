@@ -1,0 +1,965 @@
+{
+  "schema": 1,
+  "conditions": {
+    "C0Q0": {
+      "cases": 11,
+      "labels": {
+        "conflicting": 7,
+        "uncertain": 2,
+        "supporting": 2
+      },
+      "helper_alarms_of_4": 4,
+      "helper_supported_of_4": 0,
+      "helper_unproven_of_4": 0,
+      "supporting_alarms_of_6": 4,
+      "conflicts_detected_of_3": 3,
+      "missing_information_signals_of_2": 2,
+      "exact_semantic_agreements_of_11": 7
+    },
+    "C1Q0": {
+      "cases": 11,
+      "labels": {
+        "supporting": 5,
+        "conflicting": 4,
+        "uncertain": 2
+      },
+      "helper_alarms_of_4": 0,
+      "helper_supported_of_4": 4,
+      "helper_unproven_of_4": 0,
+      "supporting_alarms_of_6": 1,
+      "conflicts_detected_of_3": 3,
+      "missing_information_signals_of_2": 2,
+      "exact_semantic_agreements_of_11": 10
+    },
+    "C0Q1": {
+      "cases": 11,
+      "labels": {
+        "explicitly_prohibited": 2,
+        "permitted_alignment_unproven": 5,
+        "permitted_and_supported": 2,
+        "permission_information_missing": 2
+      },
+      "helper_alarms_of_4": 0,
+      "helper_supported_of_4": 0,
+      "helper_unproven_of_4": 4,
+      "supporting_alarms_of_6": 0,
+      "conflicts_detected_of_3": 2,
+      "missing_information_signals_of_2": 2,
+      "exact_semantic_agreements_of_11": 6
+    },
+    "C1Q1": {
+      "cases": 11,
+      "labels": {
+        "permission_information_missing": 2,
+        "explicitly_prohibited": 3,
+        "permitted_alignment_unproven": 1,
+        "permitted_and_supported": 5
+      },
+      "helper_alarms_of_4": 0,
+      "helper_supported_of_4": 3,
+      "helper_unproven_of_4": 1,
+      "supporting_alarms_of_6": 0,
+      "conflicts_detected_of_3": 3,
+      "missing_information_signals_of_2": 2,
+      "exact_semantic_agreements_of_11": 10
+    }
+  },
+  "paired_contrasts": [
+    {
+      "contrast": "context_at_Q0",
+      "helper_alarm_count_change": -4,
+      "transitions": [
+        {
+          "case_id": "supporting-01",
+          "before": "conflicting",
+          "after": "supporting",
+          "alarm_before": true,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-02",
+          "before": "conflicting",
+          "after": "supporting",
+          "alarm_before": true,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-03",
+          "before": "conflicting",
+          "after": "supporting",
+          "alarm_before": true,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-04",
+          "before": "conflicting",
+          "after": "supporting",
+          "alarm_before": true,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-05",
+          "before": "supporting",
+          "after": "conflicting",
+          "alarm_before": false,
+          "alarm_after": true
+        },
+        {
+          "case_id": "supporting-10",
+          "before": "supporting",
+          "after": "supporting",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "conflicting-01",
+          "before": "conflicting",
+          "after": "conflicting",
+          "alarm_before": true,
+          "alarm_after": true
+        },
+        {
+          "case_id": "conflicting-05",
+          "before": "conflicting",
+          "after": "conflicting",
+          "alarm_before": true,
+          "alarm_after": true
+        },
+        {
+          "case_id": "conflicting-09",
+          "before": "conflicting",
+          "after": "conflicting",
+          "alarm_before": true,
+          "alarm_after": true
+        },
+        {
+          "case_id": "uncertain-01",
+          "before": "uncertain",
+          "after": "uncertain",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "uncertain-02",
+          "before": "uncertain",
+          "after": "uncertain",
+          "alarm_before": false,
+          "alarm_after": false
+        }
+      ]
+    },
+    {
+      "contrast": "context_at_Q1",
+      "helper_alarm_count_change": 0,
+      "transitions": [
+        {
+          "case_id": "supporting-01",
+          "before": "permitted_alignment_unproven",
+          "after": "permitted_and_supported",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-02",
+          "before": "permitted_alignment_unproven",
+          "after": "permitted_alignment_unproven",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-03",
+          "before": "permitted_alignment_unproven",
+          "after": "permitted_and_supported",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-04",
+          "before": "permitted_alignment_unproven",
+          "after": "permitted_and_supported",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-05",
+          "before": "permitted_and_supported",
+          "after": "permitted_and_supported",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-10",
+          "before": "permitted_and_supported",
+          "after": "permitted_and_supported",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "conflicting-01",
+          "before": "explicitly_prohibited",
+          "after": "explicitly_prohibited",
+          "alarm_before": true,
+          "alarm_after": true
+        },
+        {
+          "case_id": "conflicting-05",
+          "before": "permitted_alignment_unproven",
+          "after": "explicitly_prohibited",
+          "alarm_before": false,
+          "alarm_after": true
+        },
+        {
+          "case_id": "conflicting-09",
+          "before": "explicitly_prohibited",
+          "after": "explicitly_prohibited",
+          "alarm_before": true,
+          "alarm_after": true
+        },
+        {
+          "case_id": "uncertain-01",
+          "before": "permission_information_missing",
+          "after": "permission_information_missing",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "uncertain-02",
+          "before": "permission_information_missing",
+          "after": "permission_information_missing",
+          "alarm_before": false,
+          "alarm_after": false
+        }
+      ]
+    },
+    {
+      "contrast": "question_at_C0",
+      "helper_alarm_count_change": -4,
+      "transitions": [
+        {
+          "case_id": "supporting-01",
+          "before": "conflicting",
+          "after": "permitted_alignment_unproven",
+          "alarm_before": true,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-02",
+          "before": "conflicting",
+          "after": "permitted_alignment_unproven",
+          "alarm_before": true,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-03",
+          "before": "conflicting",
+          "after": "permitted_alignment_unproven",
+          "alarm_before": true,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-04",
+          "before": "conflicting",
+          "after": "permitted_alignment_unproven",
+          "alarm_before": true,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-05",
+          "before": "supporting",
+          "after": "permitted_and_supported",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-10",
+          "before": "supporting",
+          "after": "permitted_and_supported",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "conflicting-01",
+          "before": "conflicting",
+          "after": "explicitly_prohibited",
+          "alarm_before": true,
+          "alarm_after": true
+        },
+        {
+          "case_id": "conflicting-05",
+          "before": "conflicting",
+          "after": "permitted_alignment_unproven",
+          "alarm_before": true,
+          "alarm_after": false
+        },
+        {
+          "case_id": "conflicting-09",
+          "before": "conflicting",
+          "after": "explicitly_prohibited",
+          "alarm_before": true,
+          "alarm_after": true
+        },
+        {
+          "case_id": "uncertain-01",
+          "before": "uncertain",
+          "after": "permission_information_missing",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "uncertain-02",
+          "before": "uncertain",
+          "after": "permission_information_missing",
+          "alarm_before": false,
+          "alarm_after": false
+        }
+      ]
+    },
+    {
+      "contrast": "question_at_C1",
+      "helper_alarm_count_change": 0,
+      "transitions": [
+        {
+          "case_id": "supporting-01",
+          "before": "supporting",
+          "after": "permitted_and_supported",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-02",
+          "before": "supporting",
+          "after": "permitted_alignment_unproven",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-03",
+          "before": "supporting",
+          "after": "permitted_and_supported",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-04",
+          "before": "supporting",
+          "after": "permitted_and_supported",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-05",
+          "before": "conflicting",
+          "after": "permitted_and_supported",
+          "alarm_before": true,
+          "alarm_after": false
+        },
+        {
+          "case_id": "supporting-10",
+          "before": "supporting",
+          "after": "permitted_and_supported",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "conflicting-01",
+          "before": "conflicting",
+          "after": "explicitly_prohibited",
+          "alarm_before": true,
+          "alarm_after": true
+        },
+        {
+          "case_id": "conflicting-05",
+          "before": "conflicting",
+          "after": "explicitly_prohibited",
+          "alarm_before": true,
+          "alarm_after": true
+        },
+        {
+          "case_id": "conflicting-09",
+          "before": "conflicting",
+          "after": "explicitly_prohibited",
+          "alarm_before": true,
+          "alarm_after": true
+        },
+        {
+          "case_id": "uncertain-01",
+          "before": "uncertain",
+          "after": "permission_information_missing",
+          "alarm_before": false,
+          "alarm_after": false
+        },
+        {
+          "case_id": "uncertain-02",
+          "before": "uncertain",
+          "after": "permission_information_missing",
+          "alarm_before": false,
+          "alarm_after": false
+        }
+      ]
+    }
+  ],
+  "original_setup_repeat": [
+    {
+      "case_id": "conflicting-09",
+      "original": "conflicting",
+      "repeat": "conflicting",
+      "changed": false
+    },
+    {
+      "case_id": "supporting-03",
+      "original": "conflicting",
+      "repeat": "conflicting",
+      "changed": false
+    },
+    {
+      "case_id": "supporting-02",
+      "original": "conflicting",
+      "repeat": "conflicting",
+      "changed": false
+    },
+    {
+      "case_id": "supporting-04",
+      "original": "conflicting",
+      "repeat": "conflicting",
+      "changed": false
+    },
+    {
+      "case_id": "uncertain-02",
+      "original": "uncertain",
+      "repeat": "uncertain",
+      "changed": false
+    },
+    {
+      "case_id": "conflicting-01",
+      "original": "conflicting",
+      "repeat": "conflicting",
+      "changed": false
+    },
+    {
+      "case_id": "supporting-10",
+      "original": "supporting",
+      "repeat": "supporting",
+      "changed": false
+    },
+    {
+      "case_id": "supporting-01",
+      "original": "conflicting",
+      "repeat": "conflicting",
+      "changed": false
+    },
+    {
+      "case_id": "conflicting-05",
+      "original": "conflicting",
+      "repeat": "conflicting",
+      "changed": false
+    },
+    {
+      "case_id": "uncertain-01",
+      "original": "uncertain",
+      "repeat": "uncertain",
+      "changed": false
+    },
+    {
+      "case_id": "supporting-05",
+      "original": "supporting",
+      "repeat": "supporting",
+      "changed": false
+    }
+  ],
+  "repeat_labels_changed_of_11": 0,
+  "usage": {
+    "http_requests": 48,
+    "inference_requests": 45,
+    "input_tokens": 25384,
+    "output_tokens": 2462,
+    "actual_cost_usd": "0.001066128",
+    "reserved_usd": "0.4995",
+    "retries": 0
+  },
+  "cases": [
+    {
+      "case_id": "conflicting-01",
+      "condition": "C0Q0",
+      "gold": "conflicting",
+      "original_label": "conflicting",
+      "label": "conflicting",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": true,
+      "alarm": true,
+      "target_helper": false
+    },
+    {
+      "case_id": "conflicting-01",
+      "condition": "C0Q1",
+      "gold": "conflicting",
+      "original_label": "conflicting",
+      "label": "explicitly_prohibited",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": true,
+      "alarm": true,
+      "target_helper": false
+    },
+    {
+      "case_id": "conflicting-01",
+      "condition": "C1Q0",
+      "gold": "conflicting",
+      "original_label": "conflicting",
+      "label": "conflicting",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": true,
+      "alarm": true,
+      "target_helper": false
+    },
+    {
+      "case_id": "conflicting-01",
+      "condition": "C1Q1",
+      "gold": "conflicting",
+      "original_label": "conflicting",
+      "label": "explicitly_prohibited",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": true,
+      "alarm": true,
+      "target_helper": false
+    },
+    {
+      "case_id": "conflicting-05",
+      "condition": "C0Q0",
+      "gold": "conflicting",
+      "original_label": "conflicting",
+      "label": "conflicting",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": true,
+      "alarm": true,
+      "target_helper": false
+    },
+    {
+      "case_id": "conflicting-05",
+      "condition": "C0Q1",
+      "gold": "conflicting",
+      "original_label": "conflicting",
+      "label": "permitted_alignment_unproven",
+      "meaning": "permitted_alignment_unproven",
+      "exact_semantic_agreement": false,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "conflicting-05",
+      "condition": "C1Q0",
+      "gold": "conflicting",
+      "original_label": "conflicting",
+      "label": "conflicting",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": true,
+      "alarm": true,
+      "target_helper": false
+    },
+    {
+      "case_id": "conflicting-05",
+      "condition": "C1Q1",
+      "gold": "conflicting",
+      "original_label": "conflicting",
+      "label": "explicitly_prohibited",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": true,
+      "alarm": true,
+      "target_helper": false
+    },
+    {
+      "case_id": "conflicting-09",
+      "condition": "C0Q0",
+      "gold": "conflicting",
+      "original_label": "conflicting",
+      "label": "conflicting",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": true,
+      "alarm": true,
+      "target_helper": false
+    },
+    {
+      "case_id": "conflicting-09",
+      "condition": "C0Q1",
+      "gold": "conflicting",
+      "original_label": "conflicting",
+      "label": "explicitly_prohibited",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": true,
+      "alarm": true,
+      "target_helper": false
+    },
+    {
+      "case_id": "conflicting-09",
+      "condition": "C1Q0",
+      "gold": "conflicting",
+      "original_label": "conflicting",
+      "label": "conflicting",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": true,
+      "alarm": true,
+      "target_helper": false
+    },
+    {
+      "case_id": "conflicting-09",
+      "condition": "C1Q1",
+      "gold": "conflicting",
+      "original_label": "conflicting",
+      "label": "explicitly_prohibited",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": true,
+      "alarm": true,
+      "target_helper": false
+    },
+    {
+      "case_id": "supporting-01",
+      "condition": "C0Q0",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "conflicting",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": false,
+      "alarm": true,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-01",
+      "condition": "C0Q1",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "permitted_alignment_unproven",
+      "meaning": "permitted_alignment_unproven",
+      "exact_semantic_agreement": false,
+      "alarm": false,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-01",
+      "condition": "C1Q0",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "supporting",
+      "meaning": "supported",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-01",
+      "condition": "C1Q1",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "permitted_and_supported",
+      "meaning": "supported",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-02",
+      "condition": "C0Q0",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "conflicting",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": false,
+      "alarm": true,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-02",
+      "condition": "C0Q1",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "permitted_alignment_unproven",
+      "meaning": "permitted_alignment_unproven",
+      "exact_semantic_agreement": false,
+      "alarm": false,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-02",
+      "condition": "C1Q0",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "supporting",
+      "meaning": "supported",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-02",
+      "condition": "C1Q1",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "permitted_alignment_unproven",
+      "meaning": "permitted_alignment_unproven",
+      "exact_semantic_agreement": false,
+      "alarm": false,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-03",
+      "condition": "C0Q0",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "conflicting",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": false,
+      "alarm": true,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-03",
+      "condition": "C0Q1",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "permitted_alignment_unproven",
+      "meaning": "permitted_alignment_unproven",
+      "exact_semantic_agreement": false,
+      "alarm": false,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-03",
+      "condition": "C1Q0",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "supporting",
+      "meaning": "supported",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-03",
+      "condition": "C1Q1",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "permitted_and_supported",
+      "meaning": "supported",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-04",
+      "condition": "C0Q0",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "conflicting",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": false,
+      "alarm": true,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-04",
+      "condition": "C0Q1",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "permitted_alignment_unproven",
+      "meaning": "permitted_alignment_unproven",
+      "exact_semantic_agreement": false,
+      "alarm": false,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-04",
+      "condition": "C1Q0",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "supporting",
+      "meaning": "supported",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-04",
+      "condition": "C1Q1",
+      "gold": "supporting",
+      "original_label": "conflicting",
+      "label": "permitted_and_supported",
+      "meaning": "supported",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": true
+    },
+    {
+      "case_id": "supporting-05",
+      "condition": "C0Q0",
+      "gold": "supporting",
+      "original_label": "supporting",
+      "label": "supporting",
+      "meaning": "supported",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "supporting-05",
+      "condition": "C0Q1",
+      "gold": "supporting",
+      "original_label": "supporting",
+      "label": "permitted_and_supported",
+      "meaning": "supported",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "supporting-05",
+      "condition": "C1Q0",
+      "gold": "supporting",
+      "original_label": "supporting",
+      "label": "conflicting",
+      "meaning": "prohibited",
+      "exact_semantic_agreement": false,
+      "alarm": true,
+      "target_helper": false
+    },
+    {
+      "case_id": "supporting-05",
+      "condition": "C1Q1",
+      "gold": "supporting",
+      "original_label": "supporting",
+      "label": "permitted_and_supported",
+      "meaning": "supported",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "supporting-10",
+      "condition": "C0Q0",
+      "gold": "supporting",
+      "original_label": "supporting",
+      "label": "supporting",
+      "meaning": "supported",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "supporting-10",
+      "condition": "C0Q1",
+      "gold": "supporting",
+      "original_label": "supporting",
+      "label": "permitted_and_supported",
+      "meaning": "supported",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "supporting-10",
+      "condition": "C1Q0",
+      "gold": "supporting",
+      "original_label": "supporting",
+      "label": "supporting",
+      "meaning": "supported",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "supporting-10",
+      "condition": "C1Q1",
+      "gold": "supporting",
+      "original_label": "supporting",
+      "label": "permitted_and_supported",
+      "meaning": "supported",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "uncertain-01",
+      "condition": "C0Q0",
+      "gold": "uncertain",
+      "original_label": "uncertain",
+      "label": "uncertain",
+      "meaning": "missing_information",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "uncertain-01",
+      "condition": "C0Q1",
+      "gold": "uncertain",
+      "original_label": "uncertain",
+      "label": "permission_information_missing",
+      "meaning": "missing_information",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "uncertain-01",
+      "condition": "C1Q0",
+      "gold": "uncertain",
+      "original_label": "uncertain",
+      "label": "uncertain",
+      "meaning": "missing_information",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "uncertain-01",
+      "condition": "C1Q1",
+      "gold": "uncertain",
+      "original_label": "uncertain",
+      "label": "permission_information_missing",
+      "meaning": "missing_information",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "uncertain-02",
+      "condition": "C0Q0",
+      "gold": "uncertain",
+      "original_label": "uncertain",
+      "label": "uncertain",
+      "meaning": "missing_information",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "uncertain-02",
+      "condition": "C0Q1",
+      "gold": "uncertain",
+      "original_label": "uncertain",
+      "label": "permission_information_missing",
+      "meaning": "missing_information",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "uncertain-02",
+      "condition": "C1Q0",
+      "gold": "uncertain",
+      "original_label": "uncertain",
+      "label": "uncertain",
+      "meaning": "missing_information",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    },
+    {
+      "case_id": "uncertain-02",
+      "condition": "C1Q1",
+      "gold": "uncertain",
+      "original_label": "uncertain",
+      "label": "permission_information_missing",
+      "meaning": "missing_information",
+      "exact_semantic_agreement": true,
+      "alarm": false,
+      "target_helper": false
+    }
+  ]
+}

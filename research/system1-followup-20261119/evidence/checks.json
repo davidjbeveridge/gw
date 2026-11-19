@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "date": "2026-11-19",
+  "original_tracked_files_unchanged": 36,
+  "freeze_hashes": "all match",
+  "design_and_request_generation": "exact replay match",
+  "analysis": "exact JSON match",
+  "planned_completed_conditions": 4,
+  "measured_requests": 44,
+  "model_provider_and_typed_answers": "all confirmed",
+  "outbound_payloads": "exact match to pre-inference frozen plan; synthetic fields only",
+  "api_cost_and_rate": "exact decimal match",
+  "request_and_spend_caps": "passed; 48 HTTP requests and US$0.4995 reserved",
+  "retries": 0,
+  "documentation_tests_passed": 8,
+  "runtime_changes": false,
+  "worker_or_proposed_action_execution": false,
+  "site_operations": 0,
+  "publication_scope": "only this follow-up whitelist over the previous public snapshot"
+}
