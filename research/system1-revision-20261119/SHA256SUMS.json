@@ -1,0 +1,20 @@
+{
+  "HANDOFF.md": "6eb51877b71541c547729e601a96f96f18ac2bf543ae3f937f4a6776efd9075d",
+  "PROTOCOL.md": "131d5d98ff5bf7d473c59026a8e1da5309a6bd9e9b40065c4f280c933cb7f0b4",
+  "README.md": "50a938a03a1171b247a710969327d3fcbc1ba82cfe9ef5af7769b4e2f191c70b",
+  "REPORT.md": "9386768ccfee2fe585bac54795752964d1479c959e346a41f169ecf407953eeb",
+  "REPRODUCE.md": "ba53b16591a1753909fc46a140668c0d4be6c21b635298bb06d7cd20e31c9088",
+  "allocation.json": "1c0deec9636c311b160046745a2ed8804594f084d0a6c3e2b60c48331e145ec6",
+  "design.json": "5ccc46dbd590023625eeae261a9fa2138f169032375c48e19fafd3cfca251370",
+  "diagnostic-cases.json": "6db334cd7b09811c730667bcd6f40ef4ef07cea0d19b678901bac2575cf42e98",
+  "evidence/checks.json": "5b7b5c9ca1c3c64e489b7e033fda0bb223176409176608d43437192321897215",
+  "evidence/live-results.json": "0721817f19e3c3742c69dd73e3a0808fe13d53d0b1892082dbefa4155135d655",
+  "evidence/summary.json": "719e45452c92900bd42a81fe2a72ddc83f7aa17de7cbc259940b438443768b69",
+  "freeze.json": "01948d65bd571b3d945ac3dbede3250bfc9f90ee5960e37fac64ea7ed4eadf53",
+  "heldout-cases.json": "0e13be4ffcffc79205efe160b15d7629b64501e27b3571b21d35797df68a2f9a",
+  "requests.json": "e96ddaab17c6e7dcede9d4abde8d85d404e719e904df59af37fdbcdd703a60ea",
+  "scripts/analyze.py": "bed35b080cde366ebc5292dc5e1c28ebb18fbb33855cca1d7b88e1d4a101820a",
+  "scripts/export_bundle.py": "632b28da58c1f0e91f4d8fdc4321367769d2dbde91c37b104d11ef73f295ea9e",
+  "scripts/prepare.py": "4d1d1f476d7702ca6b50af62aa61866671560b6e160e222d70ff6aa6cd04f9dc",
+  "scripts/run.py": "8f87bd4ba752d398951bc6c653b0c838c0d8f99134bdb145033c62169cee054e"
+}
