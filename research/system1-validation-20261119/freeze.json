@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-19",
+  "calls_before_freeze": 0,
+  "earlier_local_checkpoint": "47f5b90",
+  "previous_public_commit": "28dd5aaeadd5aa0cbedbbdf0197b98271167034b",
+  "sha256": {
+    "PROTOCOL.md": "38ca1f1955a8783b4e41245c12562a756b582d746333601924e1a45bdf06d18a",
+    "allocation.json": "4ef8fab81482895c6a792efaa8b6fbd655914ee652cc8482cd4145d94e9a99f3",
+    "fresh-cases.json": "79283eb08e7e3da1faaa3543ea377902601b92f4d1992519d4fc579153855bb0",
+    "requests.json": "7aed7b12b412d6416a8a6cce72aeaf4df4b932b7ca52962868b1baa6a591f9e3",
+    "scripts/prepare.py": "33e932a3630bfad82cb197f7276a9db7e4bd3cb3c9ee83db329c5783e14d51e1",
+    "scripts/run.py": "63f78048d78f349c2d14328316faa486945deb7635c3f46df5bdc807907cbc4f",
+    "scripts/analyze.py": "7ca369e2797a83e09419c7f7b121d0ef60e9342a8416101e0599b4263888dfdb",
+    "../system1-20261119/cases.json": "9dca4010b4faa58bb7c0b4d084044940708f872481f9a33dfe0ae21fb9446b4b",
+    "../system1-20261119/scripts/live.py": "57790d44676e6c600aa44187a644b933461e497208590390032e7fd68a94b91e",
+    "../system1-followup-20261119/design.json": "5d7290ae65a898186f5021a47ecd3d1cef5897e23af3ea2a086a055101a49c43"
+  }
+}

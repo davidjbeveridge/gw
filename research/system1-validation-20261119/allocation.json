@@ -1,0 +1,13 @@
+{
+  "authorized": true,
+  "authorization": "Owner approved: Allow up to 400 requests; keep US$0.50 cap",
+  "request_cap": 400,
+  "incremental_inference_usd_cap": "0.50",
+  "input_token_cap": null,
+  "planned_http_requests": 388,
+  "planned_inference_requests": 385,
+  "includes_smoke_and_failures": true,
+  "automatic_retries": 0,
+  "fallback_models": false,
+  "top_ups": false
+}
