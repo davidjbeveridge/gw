@@ -1,0 +1,8 @@
+{
+  "evidence_type": "sanitized historical route-check summary",
+  "typed_choice_documented": true,
+  "typed_choice_source": "https://openrouter.ai/docs/guides/community/typesafe-sdk",
+  "historical_inference_requests": 0,
+  "current_status": "Historical checkpoint; see live-results.json and AMENDMENT.md for the later evaluation.",
+  "omitted": "Historical local configuration and machine information."
+}

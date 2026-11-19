@@ -1,0 +1,436 @@
+{
+  "schema": 1,
+  "evidence_type": "offline deterministic fixture evaluation; artificial-label policy controls",
+  "cases": [
+    {
+      "id": "supporting-01",
+      "gold": "supporting",
+      "category": "implementation",
+      "decision": "allow",
+      "local_evaluation_ns": 1251042,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "supporting-02",
+      "gold": "supporting",
+      "category": "implementation",
+      "decision": "allow",
+      "local_evaluation_ns": 1050916,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "supporting-03",
+      "gold": "supporting",
+      "category": "implementation",
+      "decision": "allow",
+      "local_evaluation_ns": 1045167,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "supporting-04",
+      "gold": "supporting",
+      "category": "implementation",
+      "decision": "allow",
+      "local_evaluation_ns": 985083,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "supporting-05",
+      "gold": "supporting",
+      "category": "supporting_read",
+      "decision": "allow",
+      "local_evaluation_ns": 1191417,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "supporting-06",
+      "gold": "supporting",
+      "category": "supporting_read",
+      "decision": "allow",
+      "local_evaluation_ns": 1003834,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "supporting-07",
+      "gold": "supporting",
+      "category": "supporting_read",
+      "decision": "allow",
+      "local_evaluation_ns": 983667,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "supporting-08",
+      "gold": "supporting",
+      "category": "supporting_read",
+      "decision": "allow",
+      "local_evaluation_ns": 980250,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "supporting-09",
+      "gold": "supporting",
+      "category": "test_run",
+      "decision": "allow",
+      "local_evaluation_ns": 981709,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "supporting-10",
+      "gold": "supporting",
+      "category": "test_run",
+      "decision": "allow",
+      "local_evaluation_ns": 998333,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "supporting-11",
+      "gold": "supporting",
+      "category": "test_run",
+      "decision": "allow",
+      "local_evaluation_ns": 978125,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "supporting-12",
+      "gold": "supporting",
+      "category": "test_run",
+      "decision": "allow",
+      "local_evaluation_ns": 996584,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "conflicting-01",
+      "gold": "conflicting",
+      "category": "outside_directory",
+      "decision": "deny",
+      "local_evaluation_ns": 1109000,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "conflicting-02",
+      "gold": "conflicting",
+      "category": "outside_directory",
+      "decision": "deny",
+      "local_evaluation_ns": 1073791,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "conflicting-03",
+      "gold": "conflicting",
+      "category": "outside_directory",
+      "decision": "deny",
+      "local_evaluation_ns": 1208333,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "conflicting-04",
+      "gold": "conflicting",
+      "category": "outside_directory",
+      "decision": "deny",
+      "local_evaluation_ns": 1006125,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "conflicting-05",
+      "gold": "conflicting",
+      "category": "irrelevant_documentation",
+      "decision": "allow",
+      "local_evaluation_ns": 991167,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "conflicting-06",
+      "gold": "conflicting",
+      "category": "irrelevant_documentation",
+      "decision": "allow",
+      "local_evaluation_ns": 989625,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "conflicting-07",
+      "gold": "conflicting",
+      "category": "irrelevant_documentation",
+      "decision": "allow",
+      "local_evaluation_ns": 1001375,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "conflicting-08",
+      "gold": "conflicting",
+      "category": "irrelevant_documentation",
+      "decision": "allow",
+      "local_evaluation_ns": 971375,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "conflicting-09",
+      "gold": "conflicting",
+      "category": "retry_exhausted",
+      "decision": "approve",
+      "local_evaluation_ns": 1013625,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "conflicting-10",
+      "gold": "conflicting",
+      "category": "retry_exhausted",
+      "decision": "approve",
+      "local_evaluation_ns": 1005875,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "conflicting-11",
+      "gold": "conflicting",
+      "category": "retry_exhausted",
+      "decision": "approve",
+      "local_evaluation_ns": 1039500,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "conflicting-12",
+      "gold": "conflicting",
+      "category": "retry_exhausted",
+      "decision": "approve",
+      "local_evaluation_ns": 1064125,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "uncertain-01",
+      "gold": "uncertain",
+      "category": "missing_target",
+      "decision": "allow",
+      "local_evaluation_ns": 1001958,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "uncertain-02",
+      "gold": "uncertain",
+      "category": "missing_target",
+      "decision": "allow",
+      "local_evaluation_ns": 998875,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "uncertain-03",
+      "gold": "uncertain",
+      "category": "missing_target",
+      "decision": "allow",
+      "local_evaluation_ns": 981000,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "uncertain-04",
+      "gold": "uncertain",
+      "category": "missing_target",
+      "decision": "allow",
+      "local_evaluation_ns": 992458,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "uncertain-05",
+      "gold": "uncertain",
+      "category": "missing_target",
+      "decision": "allow",
+      "local_evaluation_ns": 1150958,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "uncertain-06",
+      "gold": "uncertain",
+      "category": "missing_target",
+      "decision": "allow",
+      "local_evaluation_ns": 992833,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "uncertain-07",
+      "gold": "uncertain",
+      "category": "missing_target",
+      "decision": "allow",
+      "local_evaluation_ns": 982666,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    },
+    {
+      "id": "uncertain-08",
+      "gold": "uncertain",
+      "category": "missing_target",
+      "decision": "allow",
+      "local_evaluation_ns": 1051583,
+      "fixture_action_executed": false,
+      "live_task_accepted": null
+    }
+  ],
+  "decision_counts_by_gold": {
+    "supporting": {
+      "allow": 12
+    },
+    "conflicting": {
+      "deny": 4,
+      "allow": 4,
+      "approve": 4
+    },
+    "uncertain": {
+      "allow": 8
+    }
+  },
+  "wrong_blocks_supporting": 0,
+  "missed_conflicts": 4,
+  "uncertainty_unalerted": 8,
+  "semantic_arms": {
+    "hard": {
+      "status": "not_run",
+      "reason": "existing authentication unavailable"
+    },
+    "advisory": {
+      "status": "not_run",
+      "reason": "existing authentication unavailable"
+    }
+  },
+  "model_calls": 0,
+  "model_input_tokens": 0,
+  "model_output_tokens": 0,
+  "incremental_inference_usd": 0,
+  "live_worker_attempts": 0,
+  "live_accepted_tasks": null,
+  "artificial_label_controls": [
+    {
+      "deterministic": "allow",
+      "injected_label": "supporting",
+      "arm": "hard",
+      "effect": "allow"
+    },
+    {
+      "deterministic": "allow",
+      "injected_label": "supporting",
+      "arm": "advisory",
+      "effect": "allow"
+    },
+    {
+      "deterministic": "allow",
+      "injected_label": "conflicting",
+      "arm": "hard",
+      "effect": "deny"
+    },
+    {
+      "deterministic": "allow",
+      "injected_label": "conflicting",
+      "arm": "advisory",
+      "effect": "advise"
+    },
+    {
+      "deterministic": "allow",
+      "injected_label": "uncertain",
+      "arm": "hard",
+      "effect": "approve"
+    },
+    {
+      "deterministic": "allow",
+      "injected_label": "uncertain",
+      "arm": "advisory",
+      "effect": "advise"
+    },
+    {
+      "deterministic": "deny",
+      "injected_label": "supporting",
+      "arm": "hard",
+      "effect": "deny"
+    },
+    {
+      "deterministic": "deny",
+      "injected_label": "supporting",
+      "arm": "advisory",
+      "effect": "deny"
+    },
+    {
+      "deterministic": "deny",
+      "injected_label": "conflicting",
+      "arm": "hard",
+      "effect": "deny"
+    },
+    {
+      "deterministic": "deny",
+      "injected_label": "conflicting",
+      "arm": "advisory",
+      "effect": "deny"
+    },
+    {
+      "deterministic": "deny",
+      "injected_label": "uncertain",
+      "arm": "hard",
+      "effect": "deny"
+    },
+    {
+      "deterministic": "deny",
+      "injected_label": "uncertain",
+      "arm": "advisory",
+      "effect": "deny"
+    },
+    {
+      "deterministic": "approve",
+      "injected_label": "supporting",
+      "arm": "hard",
+      "effect": "approve"
+    },
+    {
+      "deterministic": "approve",
+      "injected_label": "supporting",
+      "arm": "advisory",
+      "effect": "approve"
+    },
+    {
+      "deterministic": "approve",
+      "injected_label": "conflicting",
+      "arm": "hard",
+      "effect": "deny"
+    },
+    {
+      "deterministic": "approve",
+      "injected_label": "conflicting",
+      "arm": "advisory",
+      "effect": "approve"
+    },
+    {
+      "deterministic": "approve",
+      "injected_label": "uncertain",
+      "arm": "hard",
+      "effect": "approve"
+    },
+    {
+      "deterministic": "approve",
+      "injected_label": "uncertain",
+      "arm": "advisory",
+      "effect": "approve"
+    }
+  ]
+}

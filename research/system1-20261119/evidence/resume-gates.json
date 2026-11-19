@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "date": "2026-11-19",
+  "status": "stopped_before_smoke",
+  "verification_channel": "Official endpoint JSON and OpenAPI Markdown observed using web tool. Direct shell documentation retrieval returned HTTP 403; no raw document hash claimed.",
+  "sources": [
+    "https://openrouter.ai/api/v1/models/typesafe/jev-1.14/endpoints",
+    "https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request.md"
+  ],
+  "advertised_model": "typesafe/jev-1.14",
+  "advertised_served_model": "typesafe/jev-1.14-20261014",
+  "provider": "TypeSafe",
+  "prompt_usd_per_token": "0.000000042",
+  "completion_usd_per_token": "0",
+  "tokenizer": "Other",
+  "max_prompt_tokens": 262144,
+  "max_completion_tokens": 235929,
+  "supported_parameters": [],
+  "typed_route": "https://openrouter.ai/api/alpha/decisions",
+  "request_schema_properties": [
+    "assets",
+    "model",
+    "provider",
+    "questions",
+    "session_id",
+    "state",
+    "trace",
+    "user"
+  ],
+  "credential_lookup": {
+    "official_cli_succeeded": true,
+    "explicitly_personal_item_identified": true,
+    "secret_retrieved": false,
+    "account_identifiers_published": false
+  },
+  "authentication_and_balance": "not_tested; independent dispatch gate failed before secret retrieval",
+  "bounds": {
+    "requests": 64,
+    "input_tokens": 75000,
+    "incremental_usd": "0.50",
+    "includes_smoke_and_retries": true
+  },
+  "blocker": "No verified pre-dispatch bound for billed input tokens, including provider framing. Published endpoint maximum exceeds total study input-token allowance. No input-token cap appears in the Decisions request schema; no verified byte/token conversion bound was found. Output/billing bound validation also remains incomplete.",
+  "inference_requests": 0,
+  "smoke_requests": 0,
+  "retry_requests": 0,
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "actual_incremental_inference_usd": "0",
+  "served_identity": null,
+  "classifier_results": null,
+  "runtime_authorization_changed": false,
+  "publication_status": "withheld; live result condition not met"
+}

@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "date": "2026-11-19",
+  "frozen_replay": "passed; all stable fields identical to retained baseline; local timings excluded",
+  "cases": 32,
+  "authority_controls": 18,
+  "documentation_tests": {
+    "passed": 8,
+    "failed": 0
+  },
+  "supervision_demo": "passed: denial, duplicate, retry approval",
+  "knowledge_demo": "passed: cache invalidation and retained source",
+  "runtime_source_changes": false,
+  "live_model_requests": 0,
+  "site_operations": 0,
+  "publication": "not attempted; live-result condition failed"
+}

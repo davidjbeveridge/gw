@@ -1,0 +1,22 @@
+{
+  "private_original_cases": 32,
+  "gold_counts": {
+    "permissible": 12,
+    "conflicting": 12,
+    "uncertain": 8
+  },
+  "frozen_at": "2026-10-16T04:29:40Z",
+  "freeze_matches_cases": true,
+  "original_cases_dispatched_this_study": 0,
+  "original_cases_published": 0,
+  "original_cases_excluded": 32,
+  "exclusion": "All original task/action payloads withheld because they derive from private task context. External-effect and opaque-command cases are outside this new benign local execution cohort. No opaque action, exploit, intrusion, or evasion task was executed or developed. Not a claim that all historical cases are unsafe.",
+  "independent_public_safe_cases": 32,
+  "historical_qualified_environments": 2,
+  "historical_interactive_slots": 10,
+  "historical_canary_slots": 2,
+  "historical_measured_slots": 8,
+  "historical_slots_dispatched_this_study": 0,
+  "capture_safety_review": "Original classifier outbound selects public_state but that field name is not a publication or privacy approval. Old interactive runner captures provider requests, native events, diffs and Git metadata, and uses local bearer tokens. No raw capture was exported, executed, or sent to a provider. Public-source mirrors establish task-source provenance only; they do not sanitize surrounding private captures.",
+  "qualification_is_not_completion": true
+}

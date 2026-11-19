@@ -1,0 +1,244 @@
+{
+  "provenance": "Selected aggregate fields from prior private analysis, recomputed without model calls. Not a raw-capture regrade. Separate cohorts must not be pooled.",
+  "screening": [
+    {
+      "model": "openai/gpt-6-astra",
+      "arm": "A",
+      "n": 3,
+      "success": 3,
+      "total_cost_usd": 0.3041715,
+      "total_seconds": 92.8845142503269,
+      "cost_per_success_usd": 0.1013905,
+      "tool_calls": 28,
+      "api_requests": 19
+    },
+    {
+      "model": "openai/gpt-6-astra",
+      "arm": "B",
+      "n": 3,
+      "success": 3,
+      "total_cost_usd": 0.259552,
+      "total_seconds": 72.86210345849395,
+      "cost_per_success_usd": 0.08651733333333333,
+      "tool_calls": 18,
+      "api_requests": 17
+    },
+    {
+      "model": "openai/gpt-6-astra",
+      "arm": "C-Jev",
+      "n": 3,
+      "success": 2,
+      "total_cost_usd": 0.31865709200000003,
+      "total_seconds": 110.57838762458414,
+      "cost_per_success_usd": 0.15932854600000002,
+      "tool_calls": 29,
+      "api_requests": 49
+    },
+    {
+      "model": "openai/gpt-6-astra",
+      "arm": "D-Jev",
+      "n": 3,
+      "success": 2,
+      "total_cost_usd": 0.27531733199999997,
+      "total_seconds": 91.29476962424815,
+      "cost_per_success_usd": 0.13765866599999999,
+      "tool_calls": 19,
+      "api_requests": 37
+    },
+    {
+      "model": "openai/gpt-6.1-sol",
+      "arm": "A",
+      "n": 3,
+      "success": 3,
+      "total_cost_usd": 0.0572989,
+      "total_seconds": 84.74714420735836,
+      "cost_per_success_usd": 0.019099633333333334,
+      "tool_calls": 28,
+      "api_requests": 19
+    },
+    {
+      "model": "openai/gpt-6.1-sol",
+      "arm": "B",
+      "n": 3,
+      "success": 3,
+      "total_cost_usd": 0.0480108,
+      "total_seconds": 72.52228608354926,
+      "cost_per_success_usd": 0.0160036,
+      "tool_calls": 18,
+      "api_requests": 17
+    },
+    {
+      "model": "openai/gpt-6.1-sol",
+      "arm": "C-Jev",
+      "n": 3,
+      "success": 2,
+      "total_cost_usd": 0.055948774,
+      "total_seconds": 92.38885037507862,
+      "cost_per_success_usd": 0.027974387,
+      "tool_calls": 26,
+      "api_requests": 44
+    },
+    {
+      "model": "openai/gpt-6.1-sol",
+      "arm": "D-Jev",
+      "n": 3,
+      "success": 2,
+      "total_cost_usd": 0.052797856,
+      "total_seconds": 84.94183908263221,
+      "cost_per_success_usd": 0.026398928,
+      "tool_calls": 20,
+      "api_requests": 39
+    }
+  ],
+  "extension": [
+    {
+      "model": "openai/gpt-6-astra",
+      "arm": "A",
+      "n": 3,
+      "success": 3,
+      "total_cost_usd": 0.292955,
+      "total_seconds": 91.1823899182491,
+      "cost_per_success_usd": 0.09765166666666668,
+      "tool_calls": 27,
+      "worker_calls": 19,
+      "supervisor_calls": 0
+    },
+    {
+      "model": "openai/gpt-6-astra",
+      "arm": "B",
+      "n": 3,
+      "success": 3,
+      "total_cost_usd": 0.275113,
+      "total_seconds": 81.89941479125991,
+      "cost_per_success_usd": 0.09170433333333333,
+      "tool_calls": 19,
+      "worker_calls": 18,
+      "supervisor_calls": 0
+    },
+    {
+      "model": "openai/gpt-6-astra",
+      "arm": "C-Jev",
+      "n": 3,
+      "success": 2,
+      "total_cost_usd": 0.316225198,
+      "total_seconds": 104.50561587465927,
+      "cost_per_success_usd": 0.158112599,
+      "tool_calls": 29,
+      "worker_calls": 20,
+      "supervisor_calls": 29
+    },
+    {
+      "model": "openai/gpt-6-astra",
+      "arm": "D-Jev",
+      "n": 3,
+      "success": 2,
+      "total_cost_usd": 0.271221374,
+      "total_seconds": 91.64994391752407,
+      "cost_per_success_usd": 0.135610687,
+      "tool_calls": 18,
+      "worker_calls": 17,
+      "supervisor_calls": 18
+    },
+    {
+      "model": "openai/gpt-6-astra",
+      "arm": "C-Clef",
+      "n": 3,
+      "success": 3,
+      "total_cost_usd": 0.303665228,
+      "total_seconds": 123.3400679579936,
+      "cost_per_success_usd": 0.10122174266666667,
+      "tool_calls": 28,
+      "worker_calls": 19,
+      "supervisor_calls": 28
+    },
+    {
+      "model": "openai/gpt-6-astra",
+      "arm": "D-Clef",
+      "n": 3,
+      "success": 3,
+      "total_cost_usd": 0.281002648,
+      "total_seconds": 98.78845504298806,
+      "cost_per_success_usd": 0.09366754933333334,
+      "tool_calls": 20,
+      "worker_calls": 19,
+      "supervisor_calls": 20
+    },
+    {
+      "model": "openai/gpt-6.1-sol",
+      "arm": "A",
+      "n": 3,
+      "success": 3,
+      "total_cost_usd": 0.0517012,
+      "total_seconds": 76.02889933390543,
+      "cost_per_success_usd": 0.017233733333333334,
+      "tool_calls": 25,
+      "worker_calls": 17,
+      "supervisor_calls": 0
+    },
+    {
+      "model": "openai/gpt-6.1-sol",
+      "arm": "B",
+      "n": 3,
+      "success": 3,
+      "total_cost_usd": 0.0495702,
+      "total_seconds": 77.92031595809385,
+      "cost_per_success_usd": 0.0165234,
+      "tool_calls": 20,
+      "worker_calls": 17,
+      "supervisor_calls": 0
+    },
+    {
+      "model": "openai/gpt-6.1-sol",
+      "arm": "C-Jev",
+      "n": 3,
+      "success": 2,
+      "total_cost_usd": 0.055907232,
+      "total_seconds": 92.96528079174459,
+      "cost_per_success_usd": 0.027953616,
+      "tool_calls": 26,
+      "worker_calls": 18,
+      "supervisor_calls": 26
+    },
+    {
+      "model": "openai/gpt-6.1-sol",
+      "arm": "D-Jev",
+      "n": 3,
+      "success": 2,
+      "total_cost_usd": 0.055059284,
+      "total_seconds": 88.32980837486684,
+      "cost_per_success_usd": 0.027529642,
+      "tool_calls": 19,
+      "worker_calls": 18,
+      "supervisor_calls": 19
+    },
+    {
+      "model": "openai/gpt-6.1-sol",
+      "arm": "C-Clef",
+      "n": 3,
+      "success": 3,
+      "total_cost_usd": 0.053268978,
+      "total_seconds": 102.91857345867902,
+      "cost_per_success_usd": 0.017756326,
+      "tool_calls": 25,
+      "worker_calls": 17,
+      "supervisor_calls": 25
+    },
+    {
+      "model": "openai/gpt-6.1-sol",
+      "arm": "D-Clef",
+      "n": 3,
+      "success": 3,
+      "total_cost_usd": 0.049537964000000004,
+      "total_seconds": 95.57722995849326,
+      "cost_per_success_usd": 0.016512654666666668,
+      "tool_calls": 17,
+      "worker_calls": 16,
+      "supervisor_calls": 17
+    }
+  ],
+  "blocked_patch_audit": {
+    "n": 4,
+    "offline_grader_passes": 4,
+    "live_successes_added": 0
+  }
+}

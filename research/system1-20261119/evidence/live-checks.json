@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "date": "2026-11-19",
+  "baseline_replay": "all stable fields match retained freeze",
+  "analysis_replay": "exact JSON match",
+  "documentation_tests_passed": 8,
+  "request_and_spend_caps": "passed",
+  "outbound_synthetic_field_whitelist": "passed",
+  "served_model_and_provider_all_calls": "passed",
+  "api_cost_sum_and_listed_rate": "exact decimal match",
+  "no_retries_or_fallbacks": true,
+  "runtime_source_changes": false,
+  "policy_discrepancy": "documented: frozen H max-severity reducer can upgrade approval to deny",
+  "site_operations": 0,
+  "publication_scope": "whitelist-only snapshot over public default-branch commit"
+}

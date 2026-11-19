@@ -1,0 +1,6 @@
+{
+  "protocol_commit": "2bb65de",
+  "deviation": "Global ignore excluded scripts/replay.py from initial freeze commit, despite freeze hash. One offline fixture preflight completed before the runner was committed. No model or worker call occurred. Runner bytes remain identical to initial freeze; commit before retained replay.",
+  "model_calls": 0,
+  "worker_calls": 0
+}

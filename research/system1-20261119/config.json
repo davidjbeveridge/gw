@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "decision": {
+    "provider": "off"
+  },
+  "rules": {
+    "outside_fixture": {
+      "when": {
+        "input.operation": "edit",
+        "input.path": "other/*"
+      },
+      "effect": "deny",
+      "reason": "Synthetic fixture: edits outside fixture/ prohibited"
+    }
+  },
+  "goals": {
+    "task_alignment": {
+      "enabled": false
+    },
+    "research_first": {
+      "enabled": false
+    },
+    "tool_efficiency": {
+      "enabled": false
+    },
+    "cumulative_drift": {
+      "enabled": false
+    },
+    "repeat_work": {
+      "enabled": false
+    },
+    "inbound_redirect": {
+      "enabled": false
+    },
+    "retry_limit": {
+      "enabled": true,
+      "threshold": 2
+    }
+  }
+}

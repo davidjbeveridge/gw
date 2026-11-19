@@ -1,0 +1,748 @@
+{
+  "scope": "Curated observations from distinct finite cohorts. No raw traces, account metadata, or credentials. Not a claim of independent replication or developer productivity.",
+  "continuity": {
+    "scaffold_arm": "B",
+    "quality_difference": 21.6796875,
+    "task_bootstrap_interval": [
+      15.078125,
+      28.516601562499915
+    ],
+    "resources": {
+      "A": {
+        "observed_token_episodes": 32,
+        "reported_token_total": 679350,
+        "active_seconds": 1982.191465958953,
+        "useful_episodes": 0
+      },
+      "B": {
+        "observed_token_episodes": 32,
+        "reported_token_total": 642666,
+        "active_seconds": 1832.5868369173259,
+        "useful_episodes": 9
+      }
+    },
+    "ratings": [
+      {
+        "task_id": "L1",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 1,
+        "score": 66.25
+      },
+      {
+        "task_id": "L1",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 1,
+        "score": 31.25
+      },
+      {
+        "task_id": "L1",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 1,
+        "score": 31.25
+      },
+      {
+        "task_id": "L1",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 1,
+        "score": 37.5
+      },
+      {
+        "task_id": "L1",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 2,
+        "score": 27.5
+      },
+      {
+        "task_id": "L1",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 2,
+        "score": 37.5
+      },
+      {
+        "task_id": "L1",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 2,
+        "score": 33.75
+      },
+      {
+        "task_id": "L1",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 2,
+        "score": 37.5
+      },
+      {
+        "task_id": "L2",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 1,
+        "score": 43.75
+      },
+      {
+        "task_id": "L2",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 1,
+        "score": 22.5
+      },
+      {
+        "task_id": "L2",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 1,
+        "score": 37.5
+      },
+      {
+        "task_id": "L2",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 1,
+        "score": 43.75
+      },
+      {
+        "task_id": "L2",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 2,
+        "score": 81.25
+      },
+      {
+        "task_id": "L2",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 2,
+        "score": 43.75
+      },
+      {
+        "task_id": "L2",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 2,
+        "score": 33.75
+      },
+      {
+        "task_id": "L2",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 2,
+        "score": 40.0
+      },
+      {
+        "task_id": "M1",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 1,
+        "score": 16.25
+      },
+      {
+        "task_id": "M1",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 1,
+        "score": 66.25
+      },
+      {
+        "task_id": "M1",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 1,
+        "score": 6.25
+      },
+      {
+        "task_id": "M1",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 1,
+        "score": 6.25
+      },
+      {
+        "task_id": "M1",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 2,
+        "score": 16.25
+      },
+      {
+        "task_id": "M1",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 2,
+        "score": 6.25
+      },
+      {
+        "task_id": "M1",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 2,
+        "score": 71.25
+      },
+      {
+        "task_id": "M1",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 2,
+        "score": 31.25
+      },
+      {
+        "task_id": "S1",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 1,
+        "score": 41.25
+      },
+      {
+        "task_id": "S1",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 1,
+        "score": 60.0
+      },
+      {
+        "task_id": "S1",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 1,
+        "score": 60.0
+      },
+      {
+        "task_id": "S1",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 1,
+        "score": 47.5
+      },
+      {
+        "task_id": "S1",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 2,
+        "score": 0.0
+      },
+      {
+        "task_id": "S1",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 2,
+        "score": 63.75
+      },
+      {
+        "task_id": "S1",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 2,
+        "score": 63.75
+      },
+      {
+        "task_id": "S1",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 2,
+        "score": 15.0
+      },
+      {
+        "task_id": "M2",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 1,
+        "score": 66.25
+      },
+      {
+        "task_id": "M2",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 1,
+        "score": 21.25
+      },
+      {
+        "task_id": "M2",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 1,
+        "score": 11.25
+      },
+      {
+        "task_id": "M2",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 1,
+        "score": 66.25
+      },
+      {
+        "task_id": "M2",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 2,
+        "score": 55.0
+      },
+      {
+        "task_id": "M2",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 2,
+        "score": 27.5
+      },
+      {
+        "task_id": "M2",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 2,
+        "score": 17.5
+      },
+      {
+        "task_id": "M2",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 2,
+        "score": 27.5
+      },
+      {
+        "task_id": "T2",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 1,
+        "score": 0.0
+      },
+      {
+        "task_id": "T2",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 1,
+        "score": 0.0
+      },
+      {
+        "task_id": "T2",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 1,
+        "score": 51.25
+      },
+      {
+        "task_id": "T2",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 1,
+        "score": 28.75
+      },
+      {
+        "task_id": "T2",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 2,
+        "score": 22.5
+      },
+      {
+        "task_id": "T2",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 2,
+        "score": 56.25
+      },
+      {
+        "task_id": "T2",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 2,
+        "score": 60.0
+      },
+      {
+        "task_id": "T2",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 2,
+        "score": 0.0
+      },
+      {
+        "task_id": "T1",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 1,
+        "score": 66.25
+      },
+      {
+        "task_id": "T1",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 1,
+        "score": 52.5
+      },
+      {
+        "task_id": "T1",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 1,
+        "score": 52.5
+      },
+      {
+        "task_id": "T1",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 1,
+        "score": 60.0
+      },
+      {
+        "task_id": "T1",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 2,
+        "score": 66.25
+      },
+      {
+        "task_id": "T1",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 2,
+        "score": 52.5
+      },
+      {
+        "task_id": "T1",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 2,
+        "score": 27.5
+      },
+      {
+        "task_id": "T1",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 2,
+        "score": 60.0
+      },
+      {
+        "task_id": "S2",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 1,
+        "score": 16.25
+      },
+      {
+        "task_id": "S2",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 1,
+        "score": 35.0
+      },
+      {
+        "task_id": "S2",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 1,
+        "score": 70.0
+      },
+      {
+        "task_id": "S2",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 1,
+        "score": 56.25
+      },
+      {
+        "task_id": "S2",
+        "model": "gpt-6-astra",
+        "arm": "A",
+        "repeat": 2,
+        "score": 56.25
+      },
+      {
+        "task_id": "S2",
+        "model": "gpt-6-astra",
+        "arm": "B",
+        "repeat": 2,
+        "score": 66.25
+      },
+      {
+        "task_id": "S2",
+        "model": "gpt-6.1-sol",
+        "arm": "B",
+        "repeat": 2,
+        "score": 10.0
+      },
+      {
+        "task_id": "S2",
+        "model": "gpt-6.1-sol",
+        "arm": "A",
+        "repeat": 2,
+        "score": 10.0
+      }
+    ]
+  },
+  "configured_nonsemantic": {
+    "treatment_arm": "B",
+    "registered_gate_passed": false,
+    "native_hook_events": 66,
+    "context_compile_calls": 0,
+    "uncached_input_plus_all_output": {
+      "A": 70393,
+      "B": 73763
+    },
+    "attempts": [
+      {
+        "task": "U1",
+        "arm": "A",
+        "repeat": 1,
+        "accepted_artifact": true,
+        "captured": true,
+        "tokens": 53085,
+        "native_seconds": 63.40128637524322
+      },
+      {
+        "task": "U1",
+        "arm": "B",
+        "repeat": 1,
+        "accepted_artifact": true,
+        "captured": true,
+        "tokens": 71257,
+        "native_seconds": 72.95150279114023
+      },
+      {
+        "task": "F1",
+        "arm": "B",
+        "repeat": 1,
+        "accepted_artifact": false,
+        "captured": true,
+        "tokens": 68040,
+        "native_seconds": 61.616748250089586
+      },
+      {
+        "task": "F1",
+        "arm": "A",
+        "repeat": 1,
+        "accepted_artifact": true,
+        "captured": true,
+        "tokens": 76295,
+        "native_seconds": 75.89045716635883
+      },
+      {
+        "task": "U1",
+        "arm": "B",
+        "repeat": 2,
+        "accepted_artifact": true,
+        "captured": true,
+        "tokens": 72094,
+        "native_seconds": 85.56404712516814
+      },
+      {
+        "task": "U1",
+        "arm": "A",
+        "repeat": 2,
+        "accepted_artifact": true,
+        "captured": true,
+        "tokens": 64822,
+        "native_seconds": 60.49260266683996
+      },
+      {
+        "task": "F1",
+        "arm": "A",
+        "repeat": 2,
+        "accepted_artifact": true,
+        "captured": true,
+        "tokens": 76639,
+        "native_seconds": 76.47974104108289
+      },
+      {
+        "task": "F1",
+        "arm": "B",
+        "repeat": 2,
+        "accepted_artifact": null,
+        "captured": false,
+        "tokens": 43236,
+        "native_seconds": 68.83906170818955
+      }
+    ]
+  },
+  "context_repair": {
+    "candidate_arm": "C",
+    "calibration": {
+      "assigned": 4,
+      "accepted": 3,
+      "tokens": 3495
+    },
+    "gates": {
+      "complete": true,
+      "repair_adequacy": true,
+      "C_accepted": 10,
+      "A_only_losses": 0,
+      "net_gains": 2,
+      "jointly_accepted": 8,
+      "aggregate_token_saving": -0.26077874331550804,
+      "comparative_benefit": true
+    },
+    "pairs": [
+      {
+        "case": "E1",
+        "A": {
+          "accepted": false,
+          "tokens": 1288,
+          "elapsed_seconds": 7.550565291661769
+        },
+        "C": {
+          "accepted": false,
+          "tokens": 1212,
+          "elapsed_seconds": 7.910084499977529
+        }
+      },
+      {
+        "case": "E10",
+        "A": {
+          "accepted": true,
+          "tokens": 769,
+          "elapsed_seconds": 7.641006791964173
+        },
+        "C": {
+          "accepted": true,
+          "tokens": 1427,
+          "elapsed_seconds": 10.576905666850507
+        }
+      },
+      {
+        "case": "E11",
+        "A": {
+          "accepted": true,
+          "tokens": 715,
+          "elapsed_seconds": 7.536603332962841
+        },
+        "C": {
+          "accepted": true,
+          "tokens": 1190,
+          "elapsed_seconds": 6.927252708002925
+        }
+      },
+      {
+        "case": "E12",
+        "A": {
+          "accepted": true,
+          "tokens": 1135,
+          "elapsed_seconds": 7.832132583018392
+        },
+        "C": {
+          "accepted": true,
+          "tokens": 1211,
+          "elapsed_seconds": 7.491771874949336
+        }
+      },
+      {
+        "case": "E2",
+        "A": {
+          "accepted": true,
+          "tokens": 1162,
+          "elapsed_seconds": 9.583233417011797
+        },
+        "C": {
+          "accepted": true,
+          "tokens": 1451,
+          "elapsed_seconds": 13.301077583804727
+        }
+      },
+      {
+        "case": "E3",
+        "A": {
+          "accepted": true,
+          "tokens": 1107,
+          "elapsed_seconds": 7.757154416758567
+        },
+        "C": {
+          "accepted": true,
+          "tokens": 1117,
+          "elapsed_seconds": 7.263562582898885
+        }
+      },
+      {
+        "case": "E4",
+        "A": {
+          "accepted": true,
+          "tokens": 784,
+          "elapsed_seconds": 11.488815083634108
+        },
+        "C": {
+          "accepted": true,
+          "tokens": 1248,
+          "elapsed_seconds": 7.421000082977116
+        }
+      },
+      {
+        "case": "E5",
+        "A": {
+          "accepted": false,
+          "tokens": 1525,
+          "elapsed_seconds": 10.056592333130538
+        },
+        "C": {
+          "accepted": false,
+          "tokens": 1418,
+          "elapsed_seconds": 10.09406308317557
+        }
+      },
+      {
+        "case": "E6",
+        "A": {
+          "accepted": false,
+          "tokens": 661,
+          "elapsed_seconds": 9.842440249864012
+        },
+        "C": {
+          "accepted": true,
+          "tokens": 1179,
+          "elapsed_seconds": 7.475119082722813
+        }
+      },
+      {
+        "case": "E7",
+        "A": {
+          "accepted": true,
+          "tokens": 801,
+          "elapsed_seconds": 7.805870958138257
+        },
+        "C": {
+          "accepted": true,
+          "tokens": 1095,
+          "elapsed_seconds": 7.458434499800205
+        }
+      },
+      {
+        "case": "E8",
+        "A": {
+          "accepted": true,
+          "tokens": 753,
+          "elapsed_seconds": 7.39333758270368
+        },
+        "C": {
+          "accepted": true,
+          "tokens": 1251,
+          "elapsed_seconds": 7.610909583978355
+        }
+      },
+      {
+        "case": "E9",
+        "A": {
+          "accepted": false,
+          "tokens": 1268,
+          "elapsed_seconds": 7.259822833351791
+        },
+        "C": {
+          "accepted": true,
+          "tokens": 1290,
+          "elapsed_seconds": 9.372563750017434
+        }
+      }
+    ]
+  },
+  "reproduction": {
+    "verdicts": 28,
+    "disagreements": 0,
+    "control_tests": 101,
+    "interactive_files_verified": 144,
+    "network_or_model_dispatches": 0
+  },
+  "historical_accounting": {
+    "attempts": 152,
+    "unique_parts": 682,
+    "unique_sessions": 216,
+    "model_review_or_orchestration_role_records": 0
+  }
+}

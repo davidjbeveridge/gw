@@ -1,0 +1,8 @@
+{
+  "date": "2026-11-19",
+  "model_calls_before_dispatch_freeze": 0,
+  "sha256": {
+    "AMENDMENT.md": "1dafd55da5ce8beb30a728a4d8d1f692c24371bd92501ac422284cd40f835759",
+    "scripts/live.py": "57790d44676e6c600aa44187a644b933461e497208590390032e7fd68a94b91e"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "frozen_at_utc": "2026-11-19T05:09:04.428845+00:00",
+  "source_commit": "1aa0a149a0a785a3845d71f09d0ead92f4c552ab",
+  "model_calls_before_freeze": 0,
+  "sha256": {
+    "PROTOCOL.md": "c1aa9dd3a15333e0b1d7784386d50d4465b5e038753eb6bcb8579cab6503638c",
+    "cases.json": "9dca4010b4faa58bb7c0b4d084044940708f872481f9a33dfe0ae21fb9446b4b",
+    "config.json": "dc4647ca5d5557e33700facb92bc7c370e444d2540d20a1d36254b0663c89b20",
+    "scripts/replay.py": "b57f248d3714544cfc1fdefb94fe04e14c214bb9531a7fc8677ac250d9b97c5d"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "source": "https://openrouter.ai/api/v1/models/typesafe/jev-1.14/endpoints",
+  "status": "URLError",
+  "inference_dispatched": false,
+  "verification_channel": "web tool public API open, 19 November 2026; direct shell retrieval failed",
+  "public_api_observation": {
+    "model_listing": "typesafe/jev-1.14",
+    "served_identifier_advertised": "typesafe/jev-1.14-20261014",
+    "provider": "TypeSafe",
+    "prompt_usd_per_token": "0.000000042",
+    "completion_usd_per_token": "0"
+  },
+  "account_access": "not_verified; no configured OpenRouter key in process or standard gW home",
+  "served_model_observed_in_inference": null,
+  "dispatch_bound_enforcement": "not_validated; no inference permitted",
+  "actual_inference_calls": 0
+}
