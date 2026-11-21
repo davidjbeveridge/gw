@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-21",
+  "calls_before_freeze": 0,
+  "pre_study_local_checkpoint": "798873e",
+  "previous_public_commit": "3b085edab72daf30ce2bb2d3a2e557ba6d37ac32",
+  "pair_unchanged": true,
+  "sha256": {
+    "PROTOCOL.md": "313dca9eaf7fc0eb1f0d19ed34d64bf1f1406b39171afd1cb70bf38919edb629",
+    "allocation.json": "d98901f1367c2fe9d1f84bb98b7b892b936cbb8d8ed5e9e5fd9e1aecfbdc906a",
+    "heldout-cases.json": "724a6fc9332436c71b3bcaaa84cc03a9ea922d470181e1f188a9c177ed4c43bd",
+    "requests.json": "a886f2473160c4462efab7911f06338e0eb86e7dd3eea7b9ff09929fe6181a74",
+    "scripts/prepare.py": "21dbbec44a63978ebfda3c3e802b4098d3d96e2ddbe0a852cfd78f845a2347a3",
+    "scripts/run.py": "b8f8e67b7acdf5a7f6d17583abe269f5f251fedd3befa796b5d9a2afb4909d40",
+    "scripts/analyze.py": "fa78e8150a1dc3adee3f30d70e9021eed459ecf055207f30f5ac382fe73109ad",
+    "../system1-20261119/scripts/live.py": "57790d44676e6c600aa44187a644b933461e497208590390032e7fd68a94b91e",
+    "../system1-scope-20261121/design.json": "f0fd779c3481f117461549da29f70d90addfac8775e766417af6fade06eb24b8",
+    "../system1-scope-20261121/scripts/transport.py": "8ae0092e99543550a76adbe731145b1c45c032c5e75f685e0d91d9da20f5a313",
+    "../system1-scope-20261121/scripts/analyze.py": "7bd1c49d85a1447a7c4664958dfa151a1918cd6f4c1c4e45ce72ca8a5248fe15",
+    "../system1-scope-20261121/requests.json": "2d6b7bcbb540410ccfd9ece0d635fb6c27e20c5c09bc0b597337f9c1d68506dc"
+  }
+}
