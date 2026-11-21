@@ -1,0 +1,14 @@
+{
+  "request_cap": 400,
+  "incremental_inference_usd_cap": "0.50",
+  "input_token_cap": null,
+  "planned_http_requests": 388,
+  "planned_inference_requests": 385,
+  "diagnostic_requests": 24,
+  "heldout_requests": 360,
+  "smoke_requests": 1,
+  "automatic_retries": 0,
+  "fallback_models": false,
+  "top_ups": false,
+  "authorization": "Requested investigation and fresh held-out separate scope-check study under retained 400-request and US$0.50 ceilings."
+}

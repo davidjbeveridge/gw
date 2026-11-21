@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-21",
+  "calls_before_freeze": 0,
+  "pre_study_local_checkpoint": "1aaf091",
+  "previous_public_commit": "c0df0d93c5884436605da035ee459b2dcc3a86fb",
+  "candidate_selected_before_all_inference": true,
+  "sha256": {
+    "PROTOCOL.md": "ba090c07d61cfeddbd41289eb8d6756ff28888ecf12c866e402c9d614f2cfc75",
+    "allocation.json": "661c7a09e8318f04296656b1e79d8b9e87ad24b9005a7608ae00fdb91b55a3c1",
+    "design.json": "f0fd779c3481f117461549da29f70d90addfac8775e766417af6fade06eb24b8",
+    "diagnostic-cases.json": "e2600eec6e655328c908e0812c05d1b2aad14fbead743184fccb54713e121527",
+    "heldout-cases.json": "81d2e254b927aa5e106c3a8747d9a858ae18b09c931f28c622938a7277aa2d2d",
+    "requests.json": "2d6b7bcbb540410ccfd9ece0d635fb6c27e20c5c09bc0b597337f9c1d68506dc",
+    "scripts/prepare.py": "68deec672329803be54d3625e4f76230b86d607d935d3495852a1b2f9942eb34",
+    "scripts/run.py": "8738361ad7941e90e84c335966995cd5f560329b694dfc60cbd6cddac0680c82",
+    "scripts/transport.py": "8ae0092e99543550a76adbe731145b1c45c032c5e75f685e0d91d9da20f5a313",
+    "scripts/analyze.py": "7bd1c49d85a1447a7c4664958dfa151a1918cd6f4c1c4e45ce72ca8a5248fe15",
+    "../system1-20261119/scripts/live.py": "57790d44676e6c600aa44187a644b933461e497208590390032e7fd68a94b91e",
+    "../system1-20261119/cases.json": "9dca4010b4faa58bb7c0b4d084044940708f872481f9a33dfe0ae21fb9446b4b",
+    "../system1-revision-20261119/design.json": "5ccc46dbd590023625eeae261a9fa2138f169032375c48e19fafd3cfca251370",
+    "../system1-revision-20261119/heldout-cases.json": "0e13be4ffcffc79205efe160b15d7629b64501e27b3571b21d35797df68a2f9a",
+    "../system1-revision-20261119/evidence/live-results.json": "0721817f19e3c3742c69dd73e3a0808fe13d53d0b1892082dbefa4155135d655",
+    "../system1-validation-20261119/scripts/run.py": "63f78048d78f349c2d14328316faa486945deb7635c3f46df5bdc807907cbc4f"
+  },
+  "pre_inference_formatting_correction": "Removed trailing blank lines only; zero calls before corrected freeze."
+}
