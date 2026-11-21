@@ -1,0 +1,22 @@
+{
+  "date": "2026-11-21",
+  "calls_before_freeze": 0,
+  "pre_study_local_checkpoint": "7fe760f",
+  "previous_public_commit": "d20fb611acd91c981291d9ca0061ad6a319ba20b",
+  "candidate_preselected": "component question with examples, before all inference",
+  "sha256": {
+    "PROTOCOL.md": "a76dbe287e4a23ef35db14c7a8b22cd86fcb98f8a47f71df210b39777d1d7e2b",
+    "allocation.json": "864014247eb8f0ee8452887afd4b290a029eb749b494a876034232e5be8a1811",
+    "design.json": "b1aff864a2cf895aa66ee6d32c68301077423538330d34a84d50e2943eb5a798",
+    "diagnostic-cases.json": "b43951260c946fe415cb723ad3730dae104b42716766de4135a074d837ae1213",
+    "heldout-cases.json": "2bbbc1700c4929f5bcbc8022f3f85be0093775cb04c5df14e9b85dc33b2b547d",
+    "requests.json": "0db7ea5546b030178bf2b5ef156d23b99b4f835c70b80996d90ec2edc4d387f1",
+    "scripts/prepare.py": "61cd4a5de59f2a6a70bd465c7f9cfe370dea6dd87ddaa6c4111b000d5f3987c4",
+    "scripts/run.py": "a1d8994b7542fe291bb7ab39063a6d52702c5fb08b937b7f2fcac4ff9a0d14f5",
+    "scripts/analyze.py": "571036dfcc44ed526f8e6d2fcc036617c584a5c5c00a01a9d16050b6a334098b",
+    "../system1-20261119/scripts/live.py": "57790d44676e6c600aa44187a644b933461e497208590390032e7fd68a94b91e",
+    "../system1-scope-20261121/design.json": "f0fd779c3481f117461549da29f70d90addfac8775e766417af6fade06eb24b8",
+    "../system1-scope-20261121/scripts/transport.py": "8ae0092e99543550a76adbe731145b1c45c032c5e75f685e0d91d9da20f5a313",
+    "../system1-scope-20261121/scripts/analyze.py": "7bd1c49d85a1447a7c4664958dfa151a1918cd6f4c1c4e45ce72ca8a5248fe15"
+  }
+}
