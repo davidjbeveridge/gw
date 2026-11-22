@@ -1,0 +1,19 @@
+{
+  "HANDOFF.md": "1c2c74ea581405b747aa59d961e79b3ac68d0abb47af3666eccecf22e6ffb259",
+  "PROTOCOL.md": "e62c7c1876d228fb275ba73172e546370b4806fcf35ebb64ff8622f1b0352b01",
+  "README.md": "9c039106e7bbd4bfcc751551370a9cf73d352afbc3a283fe1fe8570cb54363d1",
+  "REPORT.md": "72816ea3d78fb7e206f44aa2c49bca29d2b347dcbb94ae6d7b1a321e8667e61d",
+  "REPRODUCE.md": "15100faef938ced650de49a12f6b4911fe80712cc0ea15ed99435974df37a217",
+  "allocation.json": "ba3152ae3b0513acd44cd84194264b4372c787d3e75bf90f49d5ed7bbdd900e0",
+  "design.json": "9921d61944b8041ce93cb1358036645804e44f43790db4f5f897f344c686476a",
+  "evidence/checks.json": "2279beee880b41cb3f122633e8a50b5c4d75507c4b7a3c007f5a67ec8bb8b707",
+  "evidence/live-results.json": "9b8bdd20bcaae941c9df8b7ab5dd9255a827fea0f907e3544d0ac64885b43d1b",
+  "evidence/summary.json": "4ac287c07e0f3eda6dc32653f3dc48a4945b59446e233a99ba609e44d88cb622",
+  "freeze.json": "d596d5a2b73a839c7ee3e3d05caf55501bae146f2909345c426a030d6aca86a6",
+  "heldout-cases.json": "696715d4f58c2aaa0c171c311a3e07b3ed3c306659278aa13685e0ee26232c7a",
+  "requests.json": "08526d625d57c0d91ad463a622c35ee24423a5744c958aec234631d368bf2946",
+  "scripts/analyze.py": "17b13e3816f40636cc529b2d58be153f042e1b8137c9c2d844a5ec1022f96304",
+  "scripts/export_bundle.py": "fc9e413d94016d8555f7bfbe48d9b5213d1c9f8f662880945ab0115ed7ce05c2",
+  "scripts/prepare.py": "fe317410630b758c5dcd2f2de3ef5b42931064fd9aa4704c7c1123f47befb32b",
+  "scripts/run.py": "a4312b85dffd228dedb70af0922e438977d0440c14751d1c253780b2b5dda0fc"
+}

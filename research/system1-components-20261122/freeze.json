@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-22",
+  "calls_before_freeze": 0,
+  "pre_study_local_checkpoint": "9712f3e",
+  "previous_public_commit": "ef1e9ba9541fd4d79c249a66b3ac1101d28211bd",
+  "question_unchanged_between_conditions": true,
+  "only_added_data": "literal component lists, no computed comparison",
+  "sha256": {
+    "PROTOCOL.md": "e62c7c1876d228fb275ba73172e546370b4806fcf35ebb64ff8622f1b0352b01",
+    "allocation.json": "ba3152ae3b0513acd44cd84194264b4372c787d3e75bf90f49d5ed7bbdd900e0",
+    "design.json": "9921d61944b8041ce93cb1358036645804e44f43790db4f5f897f344c686476a",
+    "heldout-cases.json": "696715d4f58c2aaa0c171c311a3e07b3ed3c306659278aa13685e0ee26232c7a",
+    "requests.json": "08526d625d57c0d91ad463a622c35ee24423a5744c958aec234631d368bf2946",
+    "scripts/prepare.py": "fe317410630b758c5dcd2f2de3ef5b42931064fd9aa4704c7c1123f47befb32b",
+    "scripts/run.py": "a4312b85dffd228dedb70af0922e438977d0440c14751d1c253780b2b5dda0fc",
+    "scripts/analyze.py": "17b13e3816f40636cc529b2d58be153f042e1b8137c9c2d844a5ec1022f96304",
+    "../system1-20261119/scripts/live.py": "57790d44676e6c600aa44187a644b933461e497208590390032e7fd68a94b91e",
+    "../system1-scope-20261121/scripts/transport.py": "8ae0092e99543550a76adbe731145b1c45c032c5e75f685e0d91d9da20f5a313",
+    "../system1-root-revision-20261121/design.json": "b1aff864a2cf895aa66ee6d32c68301077423538330d34a84d50e2943eb5a798"
+  }
+}

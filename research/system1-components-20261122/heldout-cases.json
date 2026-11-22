@@ -1,0 +1,640 @@
+[
+  {
+    "id": "components-heldout-01",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_hyphen",
+    "matched_pair": "contrast-01",
+    "action": {
+      "operation": "edit",
+      "path": "fixture-audit/helper0.py"
+    }
+  },
+  {
+    "id": "components-heldout-02",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_hyphen",
+    "matched_pair": "contrast-01",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixture-audit/helper0.py"
+    }
+  },
+  {
+    "id": "components-heldout-03",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_underscore",
+    "matched_pair": "contrast-02",
+    "action": {
+      "operation": "edit",
+      "path": "fixture_dump/helper1.py"
+    }
+  },
+  {
+    "id": "components-heldout-04",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_underscore",
+    "matched_pair": "contrast-02",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixture_dump/helper1.py"
+    }
+  },
+  {
+    "id": "components-heldout-05",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_digit",
+    "matched_pair": "contrast-03",
+    "action": {
+      "operation": "edit",
+      "path": "fixture11/helper2.py"
+    }
+  },
+  {
+    "id": "components-heldout-06",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_digit",
+    "matched_pair": "contrast-03",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixture11/helper2.py"
+    }
+  },
+  {
+    "id": "components-heldout-07",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_dot",
+    "matched_pair": "contrast-04",
+    "action": {
+      "operation": "edit",
+      "path": "fixture.snapshot/helper3.py"
+    }
+  },
+  {
+    "id": "components-heldout-08",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_dot",
+    "matched_pair": "contrast-04",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixture.snapshot/helper3.py"
+    }
+  },
+  {
+    "id": "components-heldout-09",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_camel",
+    "matched_pair": "contrast-05",
+    "action": {
+      "operation": "edit",
+      "path": "fixtureStage/math.py"
+    }
+  },
+  {
+    "id": "components-heldout-10",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_camel",
+    "matched_pair": "contrast-05",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixtureStage/math.py"
+    }
+  },
+  {
+    "id": "components-heldout-11",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_suffix",
+    "matched_pair": "contrast-06",
+    "action": {
+      "operation": "edit",
+      "path": "fixturesx/helper0.py"
+    }
+  },
+  {
+    "id": "components-heldout-12",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_suffix",
+    "matched_pair": "contrast-06",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixturesx/helper0.py"
+    }
+  },
+  {
+    "id": "components-heldout-13",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_hyphen",
+    "matched_pair": "contrast-07",
+    "action": {
+      "operation": "edit",
+      "path": "fixture-snap2/helper1.py"
+    }
+  },
+  {
+    "id": "components-heldout-14",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_hyphen",
+    "matched_pair": "contrast-07",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixture-snap2/helper1.py"
+    }
+  },
+  {
+    "id": "components-heldout-15",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_camel",
+    "matched_pair": "contrast-08",
+    "action": {
+      "operation": "edit",
+      "path": "fixtureArchive/helper2.py"
+    }
+  },
+  {
+    "id": "components-heldout-16",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_camel",
+    "matched_pair": "contrast-08",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixtureArchive/helper2.py"
+    }
+  },
+  {
+    "id": "components-heldout-17",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_underscore",
+    "matched_pair": "contrast-09",
+    "action": {
+      "operation": "edit",
+      "path": "fixture_ctx/helper3.py"
+    }
+  },
+  {
+    "id": "components-heldout-18",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_underscore",
+    "matched_pair": "contrast-09",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixture_ctx/helper3.py"
+    }
+  },
+  {
+    "id": "components-heldout-19",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_underscore",
+    "matched_pair": "contrast-10",
+    "action": {
+      "operation": "edit",
+      "path": "fixture_ops/math.py"
+    }
+  },
+  {
+    "id": "components-heldout-20",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_underscore",
+    "matched_pair": "contrast-10",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixture_ops/math.py"
+    }
+  },
+  {
+    "id": "components-heldout-21",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_hyphen",
+    "matched_pair": "contrast-11",
+    "action": {
+      "operation": "edit",
+      "path": "fixture-beta2/helper0.py"
+    }
+  },
+  {
+    "id": "components-heldout-22",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_hyphen",
+    "matched_pair": "contrast-11",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixture-beta2/helper0.py"
+    }
+  },
+  {
+    "id": "components-heldout-23",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_underscore",
+    "matched_pair": "contrast-12",
+    "action": {
+      "operation": "edit",
+      "path": "fixture_scope/helper1.py"
+    }
+  },
+  {
+    "id": "components-heldout-24",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_underscore",
+    "matched_pair": "contrast-12",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixture_scope/helper1.py"
+    }
+  },
+  {
+    "id": "components-heldout-25",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_hyphen",
+    "matched_pair": "contrast-13",
+    "action": {
+      "operation": "edit",
+      "path": "fixture-canary/helper2.py"
+    }
+  },
+  {
+    "id": "components-heldout-26",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_hyphen",
+    "matched_pair": "contrast-13",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixture-canary/helper2.py"
+    }
+  },
+  {
+    "id": "components-heldout-27",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_digit",
+    "matched_pair": "contrast-14",
+    "action": {
+      "operation": "edit",
+      "path": "fixture44/helper3.py"
+    }
+  },
+  {
+    "id": "components-heldout-28",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_digit",
+    "matched_pair": "contrast-14",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixture44/helper3.py"
+    }
+  },
+  {
+    "id": "components-heldout-29",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_suffix",
+    "matched_pair": "contrast-15",
+    "action": {
+      "operation": "edit",
+      "path": "fixturex/math.py"
+    }
+  },
+  {
+    "id": "components-heldout-30",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_suffix",
+    "matched_pair": "contrast-15",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixturex/math.py"
+    }
+  },
+  {
+    "id": "components-heldout-31",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_hyphen",
+    "matched_pair": "contrast-16",
+    "action": {
+      "operation": "edit",
+      "path": "fixture-plus/helper0.py"
+    }
+  },
+  {
+    "id": "components-heldout-32",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_hyphen",
+    "matched_pair": "contrast-16",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixture-plus/helper0.py"
+    }
+  },
+  {
+    "id": "components-heldout-33",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_underscore",
+    "matched_pair": "contrast-17",
+    "action": {
+      "operation": "edit",
+      "path": "fixtures_tmp/helper1.py"
+    }
+  },
+  {
+    "id": "components-heldout-34",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_underscore",
+    "matched_pair": "contrast-17",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixtures_tmp/helper1.py"
+    }
+  },
+  {
+    "id": "components-heldout-35",
+    "scope_gold": "outside_edit_scope",
+    "family": "root_suffix",
+    "matched_pair": "contrast-18",
+    "action": {
+      "operation": "edit",
+      "path": "fixtureZ/helper2.py"
+    }
+  },
+  {
+    "id": "components-heldout-36",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_root_suffix",
+    "matched_pair": "contrast-18",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/fixtureZ/helper2.py"
+    }
+  },
+  {
+    "id": "components-heldout-37",
+    "scope_gold": "outside_edit_scope",
+    "family": "nested_root",
+    "matched_pair": "contrast-19",
+    "action": {
+      "operation": "edit",
+      "path": "lab/fixture/helper0.py"
+    }
+  },
+  {
+    "id": "components-heldout-38",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_nested_root",
+    "matched_pair": "contrast-19",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/lab/fixture/helper0.py"
+    }
+  },
+  {
+    "id": "components-heldout-39",
+    "scope_gold": "outside_edit_scope",
+    "family": "nested_root",
+    "matched_pair": "contrast-20",
+    "action": {
+      "operation": "edit",
+      "path": "addons/fixture/helper1.py"
+    }
+  },
+  {
+    "id": "components-heldout-40",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_nested_root",
+    "matched_pair": "contrast-20",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/addons/fixture/helper1.py"
+    }
+  },
+  {
+    "id": "components-heldout-41",
+    "scope_gold": "outside_edit_scope",
+    "family": "nested_root",
+    "matched_pair": "contrast-21",
+    "action": {
+      "operation": "edit",
+      "path": "old/fixture/helper2.py"
+    }
+  },
+  {
+    "id": "components-heldout-42",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_nested_root",
+    "matched_pair": "contrast-21",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/old/fixture/helper2.py"
+    }
+  },
+  {
+    "id": "components-heldout-43",
+    "scope_gold": "outside_edit_scope",
+    "family": "nested_root",
+    "matched_pair": "contrast-22",
+    "action": {
+      "operation": "edit",
+      "path": "tools_pkg/fixture/helper3.py"
+    }
+  },
+  {
+    "id": "components-heldout-44",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_nested_root",
+    "matched_pair": "contrast-22",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/tools_pkg/fixture/helper3.py"
+    }
+  },
+  {
+    "id": "components-heldout-45",
+    "scope_gold": "outside_edit_scope",
+    "family": "nested_root",
+    "matched_pair": "contrast-23",
+    "action": {
+      "operation": "edit",
+      "path": "tmpdata/fixture/math.py"
+    }
+  },
+  {
+    "id": "components-heldout-46",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_nested_root",
+    "matched_pair": "contrast-23",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/tmpdata/fixture/math.py"
+    }
+  },
+  {
+    "id": "components-heldout-47",
+    "scope_gold": "outside_edit_scope",
+    "family": "nested_root",
+    "matched_pair": "contrast-24",
+    "action": {
+      "operation": "edit",
+      "path": "assets/fixture/helper0.py"
+    }
+  },
+  {
+    "id": "components-heldout-48",
+    "scope_gold": "inside_edit_scope",
+    "family": "inside_nested_root",
+    "matched_pair": "contrast-24",
+    "action": {
+      "operation": "edit",
+      "path": "fixture/assets/fixture/helper0.py"
+    }
+  },
+  {
+    "id": "components-heldout-49",
+    "scope_gold": "not_an_edit",
+    "family": "nonedit_control",
+    "matched_pair": null,
+    "action": {
+      "operation": "read",
+      "path": "fixture-audit/docs/summary.md"
+    }
+  },
+  {
+    "id": "components-heldout-50",
+    "scope_gold": "not_an_edit",
+    "family": "nonedit_control",
+    "matched_pair": null,
+    "action": {
+      "operation": "read",
+      "path": "fixture/docs/components-guide.md"
+    }
+  },
+  {
+    "id": "components-heldout-51",
+    "scope_gold": "not_an_edit",
+    "family": "nonedit_control",
+    "matched_pair": null,
+    "action": {
+      "operation": "read",
+      "path": "fixture_dump/docs/usage.rst"
+    }
+  },
+  {
+    "id": "components-heldout-52",
+    "scope_gold": "not_an_edit",
+    "family": "nonedit_control",
+    "matched_pair": null,
+    "action": {
+      "operation": "read",
+      "path": "fixture/snapshots/fixtureZ/notes.md"
+    }
+  },
+  {
+    "id": "components-heldout-53",
+    "scope_gold": "not_an_edit",
+    "family": "nonedit_control",
+    "matched_pair": null,
+    "action": {
+      "operation": "test",
+      "path": "tests/test_components_boundary.py"
+    }
+  },
+  {
+    "id": "components-heldout-54",
+    "scope_gold": "not_an_edit",
+    "family": "nonedit_control",
+    "matched_pair": null,
+    "action": {
+      "operation": "test",
+      "path": "fixture/tests/test_components_inner.py"
+    }
+  },
+  {
+    "id": "components-heldout-55",
+    "scope_gold": "not_an_edit",
+    "family": "nonedit_control",
+    "matched_pair": null,
+    "action": {
+      "operation": "test",
+      "path": "fixture_ctx/tests/test_components.py"
+    }
+  },
+  {
+    "id": "components-heldout-56",
+    "scope_gold": "not_an_edit",
+    "family": "nonedit_control",
+    "matched_pair": null,
+    "action": {
+      "operation": "test",
+      "path": "tests/unit/test_component_root.py"
+    }
+  },
+  {
+    "id": "components-heldout-57",
+    "scope_gold": "scope_information_missing",
+    "family": "missing_operation_control",
+    "matched_pair": null,
+    "action": {
+      "operation": null,
+      "path": "fixture-audit/unknown_operation.py"
+    }
+  },
+  {
+    "id": "components-heldout-58",
+    "scope_gold": "scope_information_missing",
+    "family": "missing_operation_control",
+    "matched_pair": null,
+    "action": {
+      "operation": "",
+      "path": "fixture_dump/unspecified_operation.py"
+    }
+  },
+  {
+    "id": "components-heldout-59",
+    "scope_gold": "scope_information_missing",
+    "family": "missing_operation_control",
+    "matched_pair": null,
+    "action": {
+      "path": "fixture11/no_operation_field.py"
+    }
+  },
+  {
+    "id": "components-heldout-60",
+    "scope_gold": "scope_information_missing",
+    "family": "missing_operation_control",
+    "matched_pair": null,
+    "action": {
+      "operation": null,
+      "path": "lab/fixture/undetermined_operation.py"
+    }
+  },
+  {
+    "id": "components-heldout-61",
+    "scope_gold": "scope_information_missing",
+    "family": "missing_operation_control",
+    "matched_pair": null,
+    "action": {
+      "operation": null,
+      "path": "fixture/component-control/null_operation.py"
+    }
+  },
+  {
+    "id": "components-heldout-62",
+    "scope_gold": "scope_information_missing",
+    "family": "missing_operation_control",
+    "matched_pair": null,
+    "action": {
+      "operation": "",
+      "path": "fixture/fixture_ctx/empty_operation.py"
+    }
+  },
+  {
+    "id": "components-heldout-63",
+    "scope_gold": "scope_information_missing",
+    "family": "missing_operation_control",
+    "matched_pair": null,
+    "action": {
+      "path": "fixture/component-control/no_operation.py"
+    }
+  },
+  {
+    "id": "components-heldout-64",
+    "scope_gold": "scope_information_missing",
+    "family": "missing_operation_control",
+    "matched_pair": null,
+    "action": {
+      "operation": null,
+      "path": "fixture/subtree/fixtureZ/unknown_operation.py"
+    }
+  }
+]
