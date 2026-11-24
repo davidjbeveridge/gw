@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-24",
+  "calls_before_freeze": 0,
+  "pre_study_local_checkpoint": "188daf0",
+  "previous_public_commit": "4b6392162aa19a5a8291a21cd7ffbb293b3e2e0e",
+  "pair_unchanged": true,
+  "component_function_unchanged": true,
+  "sha256": {
+    "PROTOCOL.md": "7d379d7b6e91fb91f50cb6b134ae0c86c62091484b573e1545985e6f3af2d941",
+    "allocation.json": "b26fc9a0aef45756b802a2096a076de84077f1a4252a0a3dce84e478739cc6ea",
+    "design.json": "b4fadd871f610449a774294414bbf20c96d7b62823990f2b54619dc57f130f3f",
+    "heldout-cases.json": "09b9266ab4bd0818ac76a2ef99f506df0c32c0d30a0e5665258876d1b81c18c4",
+    "requests.json": "f5bfc1a39b0764bad70466a52880ee33964616ce6cdd43e35830b110b9377b0e",
+    "scripts/prepare.py": "9501093d9b19fc11d7fdb98c33ce4e2ef2ee6bc543af5e89570fc4ff214d2aff",
+    "scripts/run.py": "8efd5de0d5c89a8a79851efbb1f9c0399dd772bc7c4d434aeaccd31046845815",
+    "scripts/analyze.py": "bd61b4cff0108701fb55a3cf457ef7e3b0b85a9c17b9f630f939cba3130a7cce",
+    "../system1-20261119/scripts/live.py": "57790d44676e6c600aa44187a644b933461e497208590390032e7fd68a94b91e",
+    "../system1-scope-20261121/design.json": "f0fd779c3481f117461549da29f70d90addfac8775e766417af6fade06eb24b8",
+    "../system1-scope-20261121/scripts/transport.py": "8ae0092e99543550a76adbe731145b1c45c032c5e75f685e0d91d9da20f5a313",
+    "../system1-scope-20261121/scripts/analyze.py": "7bd1c49d85a1447a7c4664958dfa151a1918cd6f4c1c4e45ce72ca8a5248fe15",
+    "../system1-components-20261122/design.json": "9921d61944b8041ce93cb1358036645804e44f43790db4f5f897f344c686476a",
+    "../system1-components-20261122/scripts/prepare.py": "fe317410630b758c5dcd2f2de3ef5b42931064fd9aa4704c7c1123f47befb32b"
+  },
+  "pre_dispatch_metadata_update": "Validate both current standard/ZDR TypeSafe listing entries with identical pinned model/rates/bounds; no inference before this update."
+}
